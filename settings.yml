@@ -1,0 +1,7 @@
+dci_topic: "OSP10"
+dci_login: "{{ lookup('env', 'DCI_LOGIN') }}"
+dci_password: "{{ lookup('env', 'DCI_PASSWORD') }}"
+dci_remoteci: "test-ovb-0"
+undercloud_ip: "fooo"
+dci_mirror_location: "/var/www/html"
+dci_config_dir: "/etc/dci-ansible-agent"
