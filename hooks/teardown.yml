@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Drop the dci_repo repository
+      file:
+        path: '{{ dci_mirror_location }}/dci_repo'
+        state: absent

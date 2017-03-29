@@ -41,22 +41,42 @@
           state: 'started'
       - name: Ensure proper directories are created
         file:
-          path: '{{ dci_mirror_location }}/{{ job_id }}'
+          path: '{{ item }}'
           state: directory
-        with_items: "{{ components }}"
-
+        with_items:
+          - '{{ dci_cache_dir }}'
+          - '{{ dci_mirror_location }}/dci_repo'
+      - name: Identify outdated files from the cache
+        find:
+          path: '{{ dci_cache_dir }}'
+          age: '4w'
+        register: old_files_found
+      - name: Purge old files from the local cache
+        file:
+          path: '{{ item.path }}'
+          state: absent
+        with_items: '{{ old_files_found.files }}'
       - name: Retrieve component
         dci_component:
-          dest: '{{ dci_mirror_location }}/{{ item["id"] }}.tar'
+          dest: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
           id: '{{ item["id"] }}'
         with_items: "{{ components }}"
 
       - name: Unarchive component
         unarchive:
-          src: '{{ dci_mirror_location }}/{{ item["id"] }}.tar'
-          dest: '{{ dci_mirror_location }}/{{ job_id }}'
+          src: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
+          dest: '{{ dci_mirror_location }}/dci_repo'
           remote_src: True
         with_items: "{{ components }}"
+
+      - name: Prepare the YUM repo file
+        yum_repository:
+          name: '{{ item["canonical_project_name"] }}'
+          description: '{{ item["canonical_project_name"] }}'
+          baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
+          gpgcheck: no
+          file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
+        with_items: '{{ job_informations["components"] }}'
 
       rescue:
       - name: Fail properly
