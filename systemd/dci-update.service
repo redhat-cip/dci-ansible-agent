@@ -3,7 +3,7 @@ Description=Update the DCI packages
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/yum install -y dci-ansible python-dciclient
+ExecStart=/usr/bin/yum install -y dci-ansible python-dciclient python-tripleo-helper
 SuccessExitStatus=0
 
 [Install]

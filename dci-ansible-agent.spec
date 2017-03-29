@@ -12,6 +12,7 @@ BuildRequires:  ansible
 BuildRequires:  systemd
 BuildRequires:  systemd-units
 Requires:       dci-ansible
+Requires:       python-tripleo-helper
 Requires:       ansible
 
 Requires(pre): shadow-utils
