@@ -19,7 +19,7 @@ You will also need the EPEL and DCI repositories:
     # yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     # yum install -y https://packages.distributed-ci.io/dci-release.el7.noarch.rpm
 
-You can know install the ``dci-ansible-agent`` package:
+You can now install the ``dci-ansible-agent`` package:
 
     # yum install -y dci-ansible-agent
 
@@ -40,6 +40,14 @@ configuration files. The first one is `/etc/dci-ansible-agent/dcirc.sh`::
 
 * DCI_LOGIN: replace `my_login` with your DCI login.
 * DCI_PASSWORD: replace `my_password` with your DCI password.
+
+If you need to go through a HTTP proxy, you will need to set the http_proxy environment variables::
+
+    http_proxy="http://somewhere:3128"
+    https_proxy="http://somewhere:3128"
+    export http_proxy
+    export https_proxy
+
 
 ------------
 
