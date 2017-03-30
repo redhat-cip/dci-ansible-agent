@@ -5,3 +5,13 @@
       file:
         path: '{{ dci_mirror_location }}/dci_repo'
         state: absent
+
+- hosts: '{{ undercloud_ip }}'
+  user: stack
+  become: true
+  tasks:
+    - name: Unregister the node from the RHSM
+      redhat_subscription:
+        state: absent
+    - name: Shut down the undercloud
+      shell: halt
