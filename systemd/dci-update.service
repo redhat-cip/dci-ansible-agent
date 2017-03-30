@@ -3,6 +3,8 @@ Description=Update the DCI packages
 
 [Service]
 Type=oneshot
+# We source the dcirc to load potential proxy environment variables
+EnvironmentFile=/etc/dci-ansible-agent/dcirc.sh
 ExecStart=/usr/bin/yum install -y dci-ansible python-dciclient python-tripleo-helper
 SuccessExitStatus=0
 
