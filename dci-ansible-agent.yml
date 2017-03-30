@@ -24,6 +24,7 @@
 # Usually this is used to sync the components the job is relying on.
 #
 - hosts: localhost
+  become: true
   vars:
     dci_status: 'new'
     dci_comment: 'Creating the local mirrors and synchronizing them'
