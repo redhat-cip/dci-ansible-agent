@@ -12,7 +12,7 @@ activate some extra repositories.
 
 If you are running RHEL7, you need to enable a couple of extra channels:
 
-    # subscription-manager repos '--disable=*' --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms
+    # subscription-manager repos '--disable=*' --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-openstack-10-rpms
 
 You will also need the EPEL and DCI repositories:
 
