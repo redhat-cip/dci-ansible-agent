@@ -24,7 +24,6 @@
 # Usually this is used to sync the components the job is relying on.
 #
 - hosts: localhost
-  become: true
   vars:
     dci_status: 'new'
     dci_comment: 'Creating the local mirrors and synchronizing them'
@@ -36,17 +35,22 @@
         package:
           name: 'httpd'
           state: 'latest'
+        become: true
       - name: Ensure Apache is running
         systemd:
           name: 'httpd'
           state: 'started'
+        become: true
       - name: Ensure proper directories are created
         file:
           path: '{{ item }}'
           state: directory
+          owner: dci-ansible-agent
+          group: dci-ansible-agent
         with_items:
           - '{{ dci_cache_dir }}'
           - '{{ dci_mirror_location }}/dci_repo'
+        become: true
       - name: Identify outdated files from the cache
         find:
           path: '{{ dci_cache_dir }}'
