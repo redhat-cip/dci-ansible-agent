@@ -146,7 +146,7 @@
          dci_run_tests:
            undercloud_ip: '{{ undercloud_ip }}'
            remoteci: '{{ dci_remoteci }}'
-           key_filename: '/root/.ssh/id_rsa'
+           key_filename: '/var/lib/dci-ansible-agent/.ssh/id_rsa'
            job_id: '{{ job_id }}'
            dci_login: '{{ dci_login }}'
            dci_password: '{{ dci_password }}'
