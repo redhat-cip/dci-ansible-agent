@@ -1,1 +1,1 @@
-dci-ansible-agent ALL=(ALL) ALL
+dci-ansible-agent ALL=(ALL) NOPASSWD:ALL
