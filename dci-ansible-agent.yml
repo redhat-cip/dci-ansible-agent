@@ -41,6 +41,18 @@
           name: 'httpd'
           state: 'started'
         become: true
+      - name: Ensure python-firewall is installed
+        package:
+          name: 'python-firewall'
+          state: 'latest'
+        become: true
+      - name: Open port 80 on the firewall
+        firewalld:
+          zone: public
+          service: http
+          permanent: true
+          state: enabled
+        become: true
       - name: Ensure proper directories are created
         file:
           path: '{{ item }}'
