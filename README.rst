@@ -107,3 +107,6 @@ will refresh the dci packages automatically. To enable them, just run::
 
     # systemctl enable dci-ansible-agent.timer
     # systemctl enable dci-update.timer
+
+.. note:: If you are using a HTTP proxy, you should also edit /etc/yum.conf and configure the `proxy`
+   paranmeter to be sure the `dci-update` timer will be able to refresh DCI packages.
