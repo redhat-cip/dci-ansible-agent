@@ -34,7 +34,7 @@
       - name: Ensure Apache is installed
         package:
           name: 'httpd'
-          state: 'latest'
+          state: 'present'
         become: true
       - name: Ensure Apache is running
         systemd:
@@ -44,7 +44,7 @@
       - name: Ensure python-firewall is installed
         package:
           name: 'python-firewall'
-          state: 'latest'
+          state: 'present'
         become: true
       - name: Open port 80 on the firewall
         firewalld:
