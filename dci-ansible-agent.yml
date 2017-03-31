@@ -126,9 +126,7 @@
 # User is free to do whaterver she needs before entering running state.
 # Usually this is used to provision both undercloud and the overcloud.
 #
-- hosts: '{{ undercloud_ip }}'
-  user: stack
-  become: true
+- hosts: localhost
   vars:
     dci_status: 'running'
     dci_comment: 'Provision the undercloud and the overcloud'
