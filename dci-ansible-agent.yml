@@ -52,6 +52,8 @@
           service: http
           permanent: true
           state: enabled
+        register: result
+        failed_when: '( result.failed and result.msg != "firewalld service must be running" )'
         become: true
       - name: Ensure proper directories are created
         file:
