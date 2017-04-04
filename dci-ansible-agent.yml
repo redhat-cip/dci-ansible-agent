@@ -10,7 +10,7 @@
     dci_login: '{{ dci_login }}'
     dci_password: '{{ dci_password }}'
   tasks:
-    - include: "{{ dci_config_dir }}/teardown.yml"
+    - include: "{{ dci_config_dir }}/hooks/teardown.yml"
     - name: Schedule a new job
       dci_job:
         topic: '{{ dci_topic }}'
@@ -201,4 +201,4 @@
   vars:
     dci_status: 'success'
   tasks:
-    - include: "{{ dci_config_dir }}/teardown.yml"
+    - include: "{{ dci_config_dir }}/hooks/teardown.yml"
