@@ -53,6 +53,7 @@
           permanent: true
           state: enabled
         become: true
+        failed_when: '( result.failed and not result.msg == "firewalld service must be running" )'
       - name: Ensure proper directories are created
         file:
           path: '{{ item }}'
