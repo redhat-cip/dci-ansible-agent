@@ -164,15 +164,6 @@
            job_id: '{{ job_id }}'
            dci_login: '{{ dci_login }}'
            dci_password: '{{ dci_password }}'
-       - name: Upload junit results
-         dci_file:
-           path: '{{ item.path }}'
-           name: '{{ item.name }}'
-           mime: 'application/junit'
-           job_id: '{{ job_id }}'
-         with_items:
-           - {'name': 'Rally', 'path': 'rally.xml' }
-           - {'name': 'Tempest', 'path': 'tempest.xml' }
 
       rescue:
       - name: Fail properly
