@@ -146,44 +146,156 @@
           msg: 'Something went wrong with the installation'
 
 
+- hosts: localhost
+  vars:
+    dci_status: 'post-run'
+    dci_comment: 'add the undercloud node to host list'
+    job_id: "{{ job_informations['job_id'] }}"
+  tasks:
+    - name: Add undercloud
+      add_host:
+        name: "undercloud"
+        groups: "undercloud"
+        ansible_fqdn: "{{ undercloud_ip }}"
+        ansible_user: "stack"
+        ansible_host: "{{ undercloud_ip }}"
+        ansible_password: "{{ undercloud_password }}"
+    - name: Set authorized key of stack@undercloud (1/2)
+      authorized_key:
+        user: stack
+        state: present
+        key: "{{ lookup('file', '/var/lib/dci-ansible-agent/.ssh/id_rsa.pub') }}"
+      delegate_to: undercloud
+    - slurp:
+        src: /home/stack/.ssh/id_rsa.pub
+      register: id_rsa_pub
+      delegate_to: undercloud
+    - name: Set authorized key of stack@undercloud (2/2)
+      authorized_key:
+        user: stack
+        state: present
+        key: "{{ id_rsa_pub.content | b64decode }}"
+      delegate_to: undercloud
+
+    - name: Add the jumpbox in the virthost group
+      add_host:
+        name: "localhost"
+        groups: "virthost"
+
+    - name: Ensure ~/.quickstart is a thing to please tripleo-inventory
+      file:
+        name: ~/.quickstart
+        state: directory
+    - name: Add undercloud in the /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^\d+.*\sundercloud'
+        line: '{{ undercloud_ip }} undercloud'
+        owner: root
+        group: root
+        mode: 0644
+      become: True
+
+
 # Post-run state
 #
 # User is free to do whaterver she needs before entering post-run state.
 # Usually this is used to run tests, certifications, etc...
 #
-- hosts: localhost
+- name: 'Running tests'
+  hosts: 'undercloud'
   vars:
     dci_status: 'post-run'
-    dci_comment: 'Running tests'
-    job_id: "{{ job_informations['job_id'] }}"
+    rhos: '{{ hostvars.hypervisor.job_informations["jobdefinition"]["name"].replace("OSP ", "") }}'
+  pre_tasks:
+    - name: Set Newton release name
+      set_fact:
+        release: "newton"
+      when: rhos is defined and rhos == "10"
+
+    - name: Set Ocata release name
+      set_fact:
+        release: "ocata"
+      when: rhos is defined and rhos == "11"
+
+    - name: Copy tempest config overrides
+      copy:
+        src: tempest-overrides.conf
+        dest: ~/tempest-deployer-input.conf
+
+    - name: Install tempest dependencies # review 442558
+      become: true
+      yum:
+        name: python-junitxml
+
+    - name: Get stack dump script
+      copy:
+        src: tripleo-stack-dump
+        dest: ~/tripleo-stack-dump
+        mode: 0755
+
+    - name: Execure tripleo-stack-dump
+      shell: source ~/stackrc && ./tripleo-stack-dump overcloud
+
+    - name: Fetch dump result
+      fetch:
+        src: tripleo-stack-dump.json
+        dest: ~/tripleo-stack-dump.json
+        flat: yes
+  roles:
+    - tripleo-inventory
+    - { role: validate-tempest, tempest_exit_on_failure: False }
+
+- name: Collect logs
+  hosts: 'undercloud'
+  vars:
+    dci_status: 'post-run'
+  roles:
+    - collect-logs
+
+- name: 'Upload files'
+  hosts: localhost
+  vars:
+    dci_status: 'post-run'
   tasks:
-    - block:
-       - name: Run tests
-         dci_run_tests:
-           undercloud_ip: '{{ undercloud_ip }}'
-           remoteci: '{{ dci_remoteci }}'
-           key_filename: '/var/lib/dci-ansible-agent/.ssh/id_rsa'
-           job_id: '{{ job_id }}'
-           dci_login: '{{ dci_login }}'
-           dci_password: '{{ dci_password }}'
+    - name: Upload stack details
+      dci_job:
+        id: "{{ job_informations['job_id'] }}"
+        configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
 
-      rescue:
-      - name: Fail properly
-        fail:
-          msg: 'Something went wrong with the installation'
+    # NOTE(dsavinea) : We need to ignore the errors because cert.txt
+    # is only present for OSP10 for the moment.
+    - name: Upload results
+      dci_file:
+        path: '{{ item.path }}'
+        name: '{{ item.name }}'
+        job_id: "{{ job_informations['job_id'] }}"
+        mime: '{{ item.mime }}'
+      with_items:
+        - {'name': 'Tempest', 'path': '~/nosetests.xml', 'mime': 'application/junit'}
+      ignore_errors: yes
 
-# Ideally the above could be replaced with a more generic play like the following
-#
-#- hosts: UNDERCLOUD.IP
-#  become: true
-#  user: centos
-#  vars:
-#    dci_status: 'post-run'
-#    dci_comment: 'Running tests'
-#    tests: "{{ job_informations['tests'] }}"
-#  roles:
-#    - { role: ansible-role-certification, when: 'certification' in tests }
-#    - { role: ansible-role-tempest, when: 'tempest' in tests }
+    - name: Upload logs
+      dci_file:
+        path: "/var/lib/dci-ansible-agent/.quickstart/{{ item }}.tar.gz"
+        name: "{{ item }}.tar.gz"
+        job_id: "{{ job_informations['job_id'] }}"
+        mime: "application/x-compressed"
+      with_items:
+        - "undercloud"
+#        - "{{ groups['overcloud'] }}"
+
+    - name: Clean result files
+      file:
+        name: '{{ item }}'
+        state: absent
+      with_items:
+        - "~/nosetests.xml"
+        - "~/results.subunit"
+        - "~/tempest.html"
+        - "~/tripleo-stack-dump.json"
+        - "~/cert.txt"
+
 
 # Success state
 #

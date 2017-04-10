@@ -1,0 +1,71 @@
+#!/bin/bash
+
+TMPDIR='/tmp/dci-tmp-dir'
+BASEDIR=$(pwd)
+
+
+get_repo() {
+    repo=$1
+    sha=$2
+    roles=${3}
+    cd ${TMPDIR}
+    git clone https://github.com/openstack/${repo}
+    cd ${repo}
+    git checkout ${sha}
+    mkdir -p ${BASEDIR}/roles
+    for i in ${roles}; do
+        cp -Rv roles/${i} ${BASEDIR}/roles/${i}
+    done
+    cd ${BASEDIR}
+}
+
+rm -Rf ${TMPDIR}
+get_repo tripleo-quickstart dac8d90aafa7c33dd0c6c9a45926dcc882596597 "common tripleo-inventory"
+get_repo tripleo-quickstart-extras 4060c61ed9a21a5b6adf5314fe2d28df7799286c "collect-logs extras-common validate-tempest"
+
+cd roles
+cat << EOF | patch -p1
+diff -ru roles2/validate-tempest/tasks/stackviz.yml roles/validate-tempest/tasks/stackviz.yml
+--- roles2/validate-tempest/tasks/stackviz.yml	2017-04-11 11:37:46.501719746 -0400
++++ roles/validate-tempest/tasks/stackviz.yml	2017-04-10 15:28:53.352639119 -0400
+@@ -9,7 +9,8 @@
+   synchronize:
+       src: stackviz/
+       dest: "{{ working_dir }}/stackviz_static"
+-      use_ssh_args: true
++      # TODO(Goneri): https://github.com/ansible/ansible/issues/21774
++      # use_ssh_args: true
+ 
+ - name: Install pip
+   easy_install:
+diff -ru roles2/validate-tempest/tasks/tempest-results.yml roles/validate-tempest/tasks/tempest-results.yml
+--- roles2/validate-tempest/tasks/tempest-results.yml	2017-04-11 11:37:46.501719746 -0400
++++ roles/validate-tempest/tasks/tempest-results.yml	2017-04-10 15:28:53.352639119 -0400
+@@ -2,7 +2,7 @@
+ - name: Fetch nosetests results
+   fetch:
+     src: "{{ working_dir }}/tempest/tempest.xml"
+-    dest: "{{ lookup('env', 'PWD') }}/nosetests.xml"
++    dest: "{{ local_working_dir }}/nosetests.xml"
+     flat: yes
+ 
+ - name: Generate subunit results file
+@@ -14,7 +14,7 @@
+ - name: Fetch subunit results
+   fetch:
+     src: "{{ working_dir }}/tempest/results.subunit"
+-    dest: "{{ lookup('env', 'PWD') }}/results.subunit"
++    dest: "{{ local_working_dir }}/results.subunit"
+     flat: yes
+ 
+ - ignore_errors: true
+@@ -36,7 +36,7 @@
+     - name: Fetch HTML results
+       fetch:
+         src: "{{ working_dir }}/tempest/tempest.html"
+-        dest: "{{ lookup('env', 'PWD') }}/tempest.html"
++        dest: "{{ local_working_dir}}/tempest.html"
+         flat: yes
+ 
+ - name: Exit with tempest result code if configured
+EOF
