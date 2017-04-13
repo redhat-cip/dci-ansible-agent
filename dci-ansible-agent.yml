@@ -247,13 +247,13 @@
     - { role: validate-tempest, tempest_exit_on_failure: False }
 
 - name: Collect logs
- hosts: 'undercloud'
- vars:
-   dci_status: 'post-run'
-   artcl_tar_gz: true
-   artcl_gzip_only: false
- roles:
-   - collect-logs
+  hosts: 'undercloud'
+  vars:
+    dci_status: 'post-run'
+    artcl_tar_gz: true
+    artcl_gzip_only: false
+  roles:
+    - collect-logs
 
 - name: 'Upload files'
   hosts: localhost
