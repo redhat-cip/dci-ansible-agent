@@ -57,6 +57,11 @@
           - result.failed is defined
           - result.msg != 'firewalld service must be running'
         become: true
+      - name: Drop existing repo dir
+        file:
+          path: '{{ dci_mirror_location }}/dci_repo'
+          state: absent
+        become: true
       - name: Ensure proper directories are created
         file:
           path: '{{ item }}'
