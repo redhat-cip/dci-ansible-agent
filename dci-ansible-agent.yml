@@ -90,6 +90,11 @@
           remote_src: True
         with_items: "{{ components }}"
 
+      - name: Drop existing repo file
+        file:
+          path: '{{ dci_mirror_location }}/dci_repo/dci_repo.repo'
+          state: absent
+
       - name: Prepare the YUM repo file
         yum_repository:
           name: '{{ item["canonical_project_name"] }}'
