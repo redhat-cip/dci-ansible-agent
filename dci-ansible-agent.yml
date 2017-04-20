@@ -248,6 +248,7 @@
         dest: ~/tripleo-stack-dump.json
         flat: yes
   roles:
+    - certification
     - tripleo-inventory
     - { role: validate-tempest, tempest_exit_on_failure: False }
 
@@ -280,6 +281,7 @@
         mime: '{{ item.mime }}'
       with_items:
         - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
+        - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.txt', 'mime': 'text/plain'}
       ignore_errors: yes
 
     - name: Upload logs
