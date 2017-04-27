@@ -1,1 +1,4 @@
 dci-ansible-agent ALL=(ALL) NOPASSWD:ALL
+
+Defaults:dci-ansible-agent !requiretty
+
