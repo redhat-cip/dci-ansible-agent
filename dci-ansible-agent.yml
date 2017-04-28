@@ -62,10 +62,7 @@
           permanent: true
           state: enabled
         register: result
-        failed_when:
-          - result.failed is defined
-          - "'firewalld service must be running' not in result.msg"
-          - "\"No such file or directory: '/etc/firewalld/firewalld.conf'\" not in result.msg"
+        failed_when: false
         become: true
       - name: Drop existing repo dir
         file:
