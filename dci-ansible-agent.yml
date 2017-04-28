@@ -117,7 +117,7 @@
       rescue:
       - name: Fail properly
         fail:
-          msg: 'Something went wrong with the installation'
+          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
 
 
 # Pre-run state
@@ -137,7 +137,7 @@
       rescue:
       - name: Fail properly
         fail:
-          msg: 'Something went wrong with the installation'
+          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
 
 
 # Run state
@@ -160,7 +160,7 @@
 
       - name: Fail properly
         fail:
-          msg: 'Something went wrong with the installation'
+          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
 
 
 - hosts: localhost
