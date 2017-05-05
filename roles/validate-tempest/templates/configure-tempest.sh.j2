@@ -3,7 +3,7 @@
 ## Configure tempest
 ## -----------------
 
-{% if tempest_overcloud %}
+{% if tempest_overcloud|bool %}
 ## ::
 source {{ working_dir }}/overcloudrc
 
@@ -57,9 +57,11 @@ source {{ working_dir }}/stackrc
 public_net_id=$(neutron net-show {{ undercloud_public_net_name }} -f value -c id)
 {% endif %}
 
-## * Ensure heat_stack_owner role is present
+## * Ensure required roles are present
 ## ::
-openstack role show heat_stack_owner > /dev/null || openstack role create heat_stack_owner
+for role in heat_stack_owner swiftoperator; do
+    openstack role show $role > /dev/null || openstack role create $role
+done
 
 ## * Generate a tempest configuration
 ## ::
