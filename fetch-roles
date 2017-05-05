@@ -27,7 +27,7 @@ get_repo() {
 rm -Rf ${TMPDIR} ${BASEDIR}/roles
 mkdir -p ${TMPDIR} ${BASEDIR}/roles
 get_repo openstack/tripleo-quickstart dac8d90aafa7c33dd0c6c9a45926dcc882596597 "common tripleo-inventory"
-get_repo openstack/tripleo-quickstart-extras 4060c61ed9a21a5b6adf5314fe2d28df7799286c "collect-logs extras-common validate-tempest"
+get_repo openstack/tripleo-quickstart-extras 6eeef321a0aedf610ac8dabb2d3c99f674d28b67 "collect-logs extras-common validate-tempest"
 get_repo redhat-cip/ansible-role-openstack-certification 9af8bba9d7e3610a3e4bf2c8bffeae744fe18e3d "certification"
 
 cd ${BASEDIR}/roles
@@ -75,19 +75,6 @@ diff -ru roles2/validate-tempest/tasks/tempest-results.yml roles/validate-tempes
          flat: yes
  
  - name: Exit with tempest result code if configured
---- roles.save/validate-tempest/defaults/main.yml	2017-04-11 13:32:18.846670606 -0400
-+++ roles/validate-tempest/defaults/main.yml	2017-04-11 15:29:27.000000000 -0400
-@@ -31,6 +31,6 @@
- tempest_exit_on_failure: true
- # Set tempest_version for different release
- # For forked-tempest, we have branched name in synced with releases.
--tempest_version_dict: { 'mitaka': 'mitaka', 'newton': 'newton',
-+tempest_version_dict: { 'liberty': 'liberty', 'mitaka': 'mitaka', 'newton': 'newton',
-                          'ocata': '15.0.0', 'master': 'master'}
- tempest_version: "{{ tempest_version_dict[release] }}"
-Only in roles/validate-tempest/tasks: post-tempest.retry
-Only in roles/validate-tempest/tasks: .pre-tempest.yml.swp
-Only in roles/validate-tempest/tasks: .tempest-results.yml.swp
 diff -ur roles.save/validate-tempest/templates/configure-tempest.sh.j2 roles/validate-tempest/templates/configure-tempest.sh.j2
 --- roles.save/validate-tempest/templates/configure-tempest.sh.j2	2017-04-11 13:32:18.847670607 -0400
 +++ roles/validate-tempest/templates/configure-tempest.sh.j2	2017-04-11 15:19:09.000000000 -0400
@@ -138,3 +125,22 @@ diff -ru roles2/certification/tasks/main.yml roles/certification/tasks/main.yml
 +    dest: "{{ local_working_dir }}/cert.txt"
      flat: yes
 EOF
+
+cd ${BASEDIR}/roles
+cat << EOF | patch -p2
+diff --git a/roles/validate-tempest/defaults/main.yml b/roles/validate-tempest/defaults/main.yml
+index ca7d4ab..8d88236 100644
+--- a/roles/validate-tempest/defaults/main.yml
++++ b/roles/validate-tempest/defaults/main.yml
+@@ -31,6 +31,6 @@ tempest_failing: false
+ tempest_exit_on_failure: true
+ # Set tempest_version for different release
+ # For forked-tempest, we have branched name in synced with releases.
+-tempest_version_dict: { 'mitaka': 'mitaka', 'newton': 'newton',
+-                         'ocata': '16.0.0', 'master': 'master'}
++tempest_version_dict: { 'liberty': 'liberty', 'mitaka': 'mitaka', 'newton': 'newton',
++                         'ocata': '15.0.0', 'master': 'master'}
+ tempest_version: "{{ tempest_version_dict[release] }}"
+EOF
+
+curl -q 'https://review.openstack.org/changes/463058/revisions/ee5ffdccd048df13242f48fd5aed8f7e073a2289/patch?download'|base64 -d|patch -p2
