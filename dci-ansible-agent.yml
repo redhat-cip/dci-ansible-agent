@@ -11,11 +11,18 @@
     dci_password: '{{ dci_password }}'
   tasks:
     - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+    - set_fact:
+        metadata:
+          experimental: '{{ dci_experimental is defined and dci_experimental }}'
     - name: Schedule a new job
       dci_job:
         topic: '{{ dci_topic }}'
         remoteci: '{{ dci_remoteci }}'
       register: job_informations
+    - name: Set the metadata
+      dci_job:
+        id: "{{ job_informations['job_id'] }}"
+        metadata: '{{ metadata }}'
 
 
 # New state
