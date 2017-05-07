@@ -1,0 +1,8 @@
+Code-Review+2: Dimitri Savineau <dsavinea@redhat.com>
+Workflow+1: Gonéri Le Bouder <goneri@lebouder.net>
+Verified+2: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-by: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-at: Sun, 07 May 2017 19:48:01 +0000
+Reviewed-on: https://softwarefactory-project.io/r/7786
+Project: dci-ansible-agent
+Branch: refs/heads/master
