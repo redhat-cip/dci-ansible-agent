@@ -37,6 +37,7 @@ install -p -D -m 644 ansible.cfg %{buildroot}%{_datadir}/dci-ansible-agent/ansib
 cp -r files %{buildroot}/%{_datadir}/dci-ansible-agent
 cp -r roles %{buildroot}/%{_datadir}/dci-ansible-agent
 install -p -D -m 644 dci-ansible-agent.yml %{buildroot}%{_datadir}/dci-ansible-agent/dci-ansible-agent.yml
+install -p -D -m 644 failure.yml %{buildroot}%{_datadir}/dci-ansible-agent/failure.yml
 install -p -D -m 644 dcirc.sh %{buildroot}%{_sysconfdir}/dci-ansible-agent/dcirc.sh
 install -p -D -m 644 hooks/pre-run.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/pre-run.yml
 install -p -D -m 644 hooks/running.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/running.yml

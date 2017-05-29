@@ -115,9 +115,7 @@
           generate_ssh_key: 'yes'
 
       rescue:
-      - name: Fail properly
-        fail:
-          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
+      - include: failure.yml
 
 
 # Pre-run state
@@ -135,9 +133,7 @@
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
 
       rescue:
-      - name: Fail properly
-        fail:
-          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
+      - include: failure.yml
 
 
 # Run state
@@ -155,12 +151,7 @@
       - include: '{{ dci_config_dir }}/hooks/running.yml'
 
       rescue:
-      - name: Tear me down
-        shell: echo 'Tear me down'
-
-      - name: Fail properly
-        fail:
-          msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
+      - include: failure.yml
 
 
 - hosts: localhost
