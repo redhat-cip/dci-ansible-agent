@@ -1,0 +1,7 @@
+---
+- dci_job:
+    id: "{{ job_id }}"
+    status: 'failure'
+  ignore_errors: True
+- fail:
+    msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'
