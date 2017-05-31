@@ -134,6 +134,42 @@
 
       rescue:
       - include: failure.yml
+    - name: Add undercloud
+      add_host:
+        name: "undercloud"
+        groups: "undercloud"
+        ansible_fqdn: "{{ undercloud_ip }}"
+        ansible_user: "stack"
+        ansible_host: "{{ undercloud_ip }}"
+        ansible_password: "{{ undercloud_password }}"
+    - name: Set authorized key of stack@undercloud (1/2)
+      authorized_key:
+        user: stack
+        state: present
+        key: "{{ lookup('file', '/var/lib/dci-ansible-agent/.ssh/id_rsa.pub') }}"
+      delegate_to: undercloud
+    - slurp:
+        src: /home/stack/.ssh/id_rsa.pub
+      register: id_rsa_pub
+      delegate_to: undercloud
+    - name: Set authorized key of stack@undercloud (2/2)
+      authorized_key:
+        user: stack
+        state: present
+        key: "{{ id_rsa_pub.content | b64decode }}"
+      delegate_to: undercloud
+    - name: check the privilege of the ~stack/.ssh/config file
+      file:
+        path: /home/stack/.ssh/config
+        owner: stack
+        group: stack
+        mode: 0600
+      delegate_to: undercloud
+    - name: Add the jumpbox in the virthost group
+      add_host:
+        name: "localhost"
+        groups: "virthost"
+
 
 
 # Run state
@@ -160,36 +196,6 @@
     dci_comment: 'add the undercloud node to host list'
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
-    - name: Add undercloud
-      add_host:
-        name: "undercloud"
-        groups: "undercloud"
-        ansible_fqdn: "{{ undercloud_ip }}"
-        ansible_user: "stack"
-        ansible_host: "{{ undercloud_ip }}"
-        ansible_password: "{{ undercloud_password }}"
-    - name: Set authorized key of stack@undercloud (1/2)
-      authorized_key:
-        user: stack
-        state: present
-        key: "{{ lookup('file', '/var/lib/dci-ansible-agent/.ssh/id_rsa.pub') }}"
-      delegate_to: undercloud
-    - slurp:
-        src: /home/stack/.ssh/id_rsa.pub
-      register: id_rsa_pub
-      delegate_to: undercloud
-    - name: Set authorized key of stack@undercloud (2/2)
-      authorized_key:
-        user: stack
-        state: present
-        key: "{{ id_rsa_pub.content | b64decode }}"
-      delegate_to: undercloud
-
-    - name: Add the jumpbox in the virthost group
-      add_host:
-        name: "localhost"
-        groups: "virthost"
-
     - name: Ensure ~/.quickstart is a thing to please tripleo-inventory
       file:
         name: ~/.quickstart
