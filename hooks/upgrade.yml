@@ -1,0 +1,6 @@
+---
+- name: Schedule an upgrade job
+  dci_job:
+    id: '{{ job_informations["job_id"] }}'
+    upgrade: true
+  register: job_informations
