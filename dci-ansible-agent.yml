@@ -10,15 +10,36 @@
     dci_login: '{{ dci_login }}'
     dci_password: '{{ dci_password }}'
   tasks:
-    - include: "{{ dci_config_dir }}/hooks/teardown.yml"
     - set_fact:
         metadata:
           experimental: '{{ dci_experimental is defined and dci_experimental }}'
-    - name: Schedule a new job
-      dci_job:
-        topic: '{{ dci_topic }}'
-        remoteci: '{{ dci_remoteci }}'
-      register: job_informations
+
+    - block:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+
+      - name: Schedule a new job
+        dci_job:
+          topic: '{{ dci_topic }}'
+          remoteci: '{{ dci_remoteci }}'
+        register: job_schedule
+      when: not dci_upgrade
+
+    - block:
+      - name: Fail if previous_job_id is not set
+        fail:
+          msg: 'previous_job_id is not defined'
+        when: previous_job_id is not defined
+
+      - name: Schedule an upgrade job
+        dci_job:
+          id: '{{ previous_job_id }}'
+          upgrade: true
+        register: job_upgrade
+      when: dci_upgrade
+
+    - set_fact:
+        job_informations: '{{ job_upgrade if dci_upgrade else job_schedule }}'
+
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations['job_id'] }}"
