@@ -106,7 +106,9 @@ ensure the agent will be call automatically severial time a day. `dci-update.tim
 will refresh the dci packages automatically. To enable them, just run::
 
     # systemctl enable dci-ansible-agent.timer
+    # systemctl start dci-ansible-agent.timer
     # systemctl enable dci-update.timer
+    # systemctl start dci-update.timer
 
 .. note:: If you are using a HTTP proxy, you should also edit /etc/yum.conf and configure the `proxy`
    parameter to be sure the `dci-update` timer will be able to refresh DCI packages.
