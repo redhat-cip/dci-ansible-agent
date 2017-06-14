@@ -235,6 +235,8 @@
       OSP9: 'mitaka'
       OSP10: 'newton'
       OSP11: 'ocata'
+    openstack_certification_output_format: junit
+    openstack_certification_output_filename: cert.junit
   pre_tasks:
     - name: Set the OpenStack release name
       set_fact:
@@ -298,7 +300,7 @@
         mime: '{{ item.mime }}'
       with_items:
         - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
-        - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.txt', 'mime': 'text/plain'}
+        - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.junit', 'mime': 'application/junit'}
       ignore_errors: yes
 
     - name: Upload logs

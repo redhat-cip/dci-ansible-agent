@@ -28,7 +28,7 @@ rm -Rf ${TMPDIR} ${BASEDIR}/roles
 mkdir -p ${TMPDIR} ${BASEDIR}/roles
 get_repo openstack/tripleo-quickstart dac8d90aafa7c33dd0c6c9a45926dcc882596597 "common tripleo-inventory"
 get_repo openstack/tripleo-quickstart-extras 6eeef321a0aedf610ac8dabb2d3c99f674d28b67 "collect-logs extras-common validate-tempest"
-get_repo redhat-cip/ansible-role-openstack-certification 9af8bba9d7e3610a3e4bf2c8bffeae744fe18e3d "certification"
+get_repo redhat-cip/ansible-role-openstack-certification d7047c9b0ec313484b34875231bc8e94e6fc7ba8 "certification"
 
 cd ${BASEDIR}/roles
 cat << EOF | patch -p1
@@ -115,14 +115,14 @@ diff -ur roles.save/validate-tempest/templates/configure-tempest.sh.j2 roles/val
  {% else %}
  {% if tempest_format == "venv" %}
 diff -ru roles2/certification/tasks/main.yml roles/certification/tasks/main.yml
---- roles2/certification/tasks/main.yml 2017-04-26 11:02:27.200596104 -0400
-+++ roles/certification/tasks/main.yml  2017-04-26 11:03:49.225062744 -0400
+--- roles2/certification/tasks/main.yml	2017-06-14 11:17:18.104173377 -0400
++++ roles/certification/tasks/main.yml	2017-06-14 11:20:48.848402952 -0400
 @@ -48,5 +48,5 @@
    become: True
    fetch:
-     src: cert.txt
--    dest: "{{ lookup('env', 'PWD') }}/cert.txt"
-+    dest: "{{ local_working_dir }}/cert.txt"
+     src: '{{ openstack_certification_output_filename }}'
+-    dest: "{{ lookup('env', 'PWD') }}/{{ openstack_certification_output_filename }}"
++    dest: "{{ local_working_dir }}/{{ openstack_certification_output_filename }}"
      flat: yes
 EOF
 

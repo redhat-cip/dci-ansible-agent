@@ -37,16 +37,16 @@
   become: True
   shell: >
     rhcert-ci clean all &&
-    rhcert-ci run {{ '--test %s' % " --test ".join(certification_tests) }}
+    rhcert-ci run {{ "--%s " % openstack_certification_test_type }}{% if openstack_certification_test_type == "tag" %}{{" --tag ".join(openstack_certification_tags)}}{% elif openstack_certification_test_type == "platform" %}{{" --tag ".join(openstack_certification_platform)}}{% else %}{{" --test ".join(openstack_certification_tests)}}{% endif %}
   ignore_errors: True
 
 - name: Retrieve certification test resulsts
   become: True
-  shell: rhcert-ci print | tee cert.txt
+  shell: rhcert-ci print --format {{ openstack_certification_output_format }} | tail -n +2 | tee {{ openstack_certification_output_filename }}
 
 - name: Download result file
   become: True
   fetch:
-    src: cert.txt
-    dest: "{{ local_working_dir }}/cert.txt"
+    src: '{{ openstack_certification_output_filename }}'
+    dest: "{{ local_working_dir }}/{{ openstack_certification_output_filename }}"
     flat: yes
