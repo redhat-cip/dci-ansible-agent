@@ -4,6 +4,7 @@ dci_password: "{{ lookup('env', 'DCI_PASSWORD') }}"
 dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
 dci_remoteci: "test-ovb-0"
 undercloud_ip: "fooo"
+undercloud_password: null
 dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
 dci_cache_dir: "/var/lib/dci-ansible-agent"
