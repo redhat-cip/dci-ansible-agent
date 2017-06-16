@@ -138,7 +138,8 @@
           ansible_fqdn: "{{ undercloud_ip }}"
           ansible_user: "stack"
           ansible_host: "{{ undercloud_ip }}"
-          ansible_password: "{{ undercloud_password }}"
+          ansible_password: "{{ undercloud_password| default(None) }}"
+        when: undercloud_ip is defined and undercloud_ip
 
       rescue:
       - include: failure.yml
@@ -156,7 +157,13 @@
   tasks:
     - block:
       - include: '{{ dci_config_dir }}/hooks/running.yml'
-
+      - name: ensure undercloud host is in Ansible inventory
+        fail:
+          msg: >
+            undercloud should be in the Ansible inventory. If you don`t
+            use the undercloud_ip in your settings.yml, you can register it by
+            yourself at the end of the running.yml hook
+        when: "'undercloud' not in hostvars"
       rescue:
       - include: failure.yml
 

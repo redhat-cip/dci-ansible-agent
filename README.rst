@@ -77,6 +77,9 @@ want to provision your OpenStack. These playbook are located in the
     * etc
 
 * `running.yml`: this playbook will be trigger to deploy the undercloud and the overcloud. It should also add http://$jumpbox_ip/dci_repo/dci_repo.repo to the repository list (`/etc/yum/yum.repo.d/dci_repo.repo`).
+
+    At the end of the this hook run, an `undercloud` host should be available in Ansible inventory. It will be used later to run the test. The operation is done automatically for you if the `undercloud_ip` variable has been set in the configuration. If this is not the case, you have to call `add_host` by yourself at the end of the hook execution.
+
 * `teardown.yml`: this playbook clean the full playform.
 
 Start the service
