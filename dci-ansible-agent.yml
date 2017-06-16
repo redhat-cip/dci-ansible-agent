@@ -139,6 +139,7 @@
           ansible_user: "stack"
           ansible_host: "{{ undercloud_ip }}"
           ansible_password: "{{ undercloud_password }}"
+        when: undercloud_ip is defined
 
       rescue:
       - include: failure.yml
