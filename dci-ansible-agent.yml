@@ -255,11 +255,6 @@
         src: tempest-overrides.conf
         dest: ~/tempest-deployer-input.conf
 
-    - name: Install tempest dependencies # review 442558
-      become: true
-      yum:
-        name: python-junitxml
-
     - name: Get stack dump script
       copy:
         src: tripleo-stack-dump
