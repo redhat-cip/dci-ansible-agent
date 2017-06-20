@@ -190,6 +190,8 @@
             owner: stack
             group: stack
             mode: 0600
+          register: ssh_config
+          failed_when: ssh_config.failed == True and ssh_config.state != "absent"
           delegate_to: undercloud
         - name: Add the jumpbox in the virthost group
           add_host:
