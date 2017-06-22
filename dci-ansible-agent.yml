@@ -257,22 +257,8 @@
       copy:
         src: tempest-overrides.conf
         dest: ~/tempest-deployer-input.conf
-
-    - name: Get stack dump script
-      copy:
-        src: tripleo-stack-dump
-        dest: ~/tripleo-stack-dump
-        mode: 0755
-
-    - name: Execure tripleo-stack-dump
-      shell: source ~/stackrc && ./tripleo-stack-dump overcloud
-
-    - name: Fetch dump result
-      fetch:
-        src: tripleo-stack-dump.json
-        dest: ~/tripleo-stack-dump.json
-        flat: yes
   roles:
+    - stackdump
     - certification
     - tripleo-inventory
     - { role: validate-tempest, tempest_exit_on_failure: False }

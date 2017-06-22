@@ -29,6 +29,7 @@ mkdir -p ${TMPDIR} ${BASEDIR}/roles
 get_repo openstack/tripleo-quickstart dac8d90aafa7c33dd0c6c9a45926dcc882596597 "common tripleo-inventory"
 get_repo openstack/tripleo-quickstart-extras 6eeef321a0aedf610ac8dabb2d3c99f674d28b67 "collect-logs extras-common validate-tempest"
 get_repo redhat-cip/ansible-role-openstack-certification 4bbd9e609fc7a2dfffb8b72063ad465c5a3830a0 "certification"
+get_repo redhat-cip/ansible-role-openstack-stackdump e434b3e216c9d22d5c4123f4d902a9e24f393c72 "stackdump"
 
 cd ${BASEDIR}/roles
 cat << EOF | patch -p1
@@ -134,6 +135,16 @@ diff -ru roles2/certification/tasks/main.yml roles/certification/tasks/main.yml
 +      dest: "{{ local_working_dir }}/results.xml.gz"
        flat: yes
    when: openstack_certification_results_download|bool
+diff -ru roles2/stackdump/tasks/main.yml roles/stackdump/tasks/main.yml
+--- roles2/stackdump/tasks/main.yml	2017-06-16 14:39:30.014293903 -0400
++++ roles/stackdump/tasks/main.yml	2017-06-16 14:41:14.794403455 -0400
+@@ -23,5 +23,5 @@
+ - name: Fetch dump result
+   fetch:
+     src: ~/tripleo-stack-dump.json
+-    dest: "{{ lookup('env', 'PWD') }}/{{ stackdump_result_filename }}"
++    dest: "{{ local_working_dir }}/{{ stackdump_result_filename }}"
+     flat: yes
 EOF
 
 cd ${BASEDIR}/roles
