@@ -3,5 +3,9 @@
     id: "{{ job_id }}"
     status: 'failure'
   ignore_errors: True
+- include: set_undercloud_authorized_keys.yml
+- include_role:
+    name: collect-logs
+  delegate_to: undercloud
 - fail:
     msg: 'Something went wrong during the {{ dci_status }}. Review the log at: https://www.distributed-ci.io/#!/jobs/{{ job_id }}/results'

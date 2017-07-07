@@ -178,56 +178,7 @@
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
-        - name: Set authorized key of stack@undercloud (1/2)
-          authorized_key:
-            user: stack
-            state: present
-            key: "{{ lookup('file', '/var/lib/dci-ansible-agent/.ssh/id_rsa.pub') }}"
-          delegate_to: undercloud
-        - slurp:
-            src: /home/stack/.ssh/id_rsa.pub
-          register: id_rsa_pub
-          delegate_to: undercloud
-        - name: Set authorized key of stack@undercloud (2/2)
-          authorized_key:
-            user: stack
-            state: present
-            key: "{{ id_rsa_pub.content | b64decode }}"
-          delegate_to: undercloud
-        - name: check the privilege of the ~stack/.ssh/config file
-          file:
-            path: /home/stack/.ssh/config
-            owner: stack
-            group: stack
-            mode: '0600'
-            state: touch
-          delegate_to: undercloud
-        - name: Add the jumpbox in the virthost group
-          add_host:
-            name: "localhost"
-            groups: "virthost"
-
-        - name: Ensure ~/.quickstart is a thing to please tripleo-inventory
-          file:
-            name: ~/.quickstart
-            state: directory
-
-        - name: Reuse the user ssh key
-          copy:
-            remote_src: True
-            src: '/var/lib/dci-ansible-agent/.ssh/id_rsa'
-            dest: '/var/lib/dci-ansible-agent/.quickstart/id_rsa_undercloud'
-            mode: '0600'
-
-        - name: Add undercloud in the /etc/hosts
-          lineinfile:
-            dest: /etc/hosts
-            regexp: '^\d+.*\sundercloud'
-            line: '{{ undercloud_ip }} undercloud'
-            owner: root
-            group: root
-            mode: 0644
-          become: True
+      - include: set_undercloud_authorized_keys.yml
       rescue:
       - include: failure.yml
 
@@ -258,7 +209,6 @@
         src: tempest-overrides.conf
         dest: ~/tempest-deployer-input.conf
   roles:
-    - stackdump
     - certification
     - tripleo-inventory
     - { role: validate-tempest, tempest_exit_on_failure: False }
