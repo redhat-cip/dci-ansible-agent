@@ -118,7 +118,7 @@
           generate_ssh_key: 'yes'
 
       rescue:
-      - include: failure.yml
+      - include: plays/failure.yml
 
 
 # Pre-run state
@@ -145,7 +145,7 @@
         when: undercloud_ip is defined and undercloud_ip
 
       rescue:
-      - include: failure.yml
+      - include: plays/failure.yml
 
 # Run state
 #
@@ -168,11 +168,11 @@
             yourself at the end of the running.yml hook
         when: "'undercloud' not in hostvars"
       rescue:
-      - include: set_undercloud_authorized_keys.yml
+      - include: plays/set_undercloud_authorized_keys.yml
       - include_role:
           name: collect-logs
         delegate_to: undercloud
-      - include: failure.yml
+      - include: plays/failure.yml
 
 
 - hosts: localhost
@@ -182,9 +182,9 @@
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
-      - include: set_undercloud_authorized_keys.yml
+      - include: plays/set_undercloud_authorized_keys.yml
       rescue:
-      - include: failure.yml
+      - include: plays/failure.yml
 
 
 # Post-run state
