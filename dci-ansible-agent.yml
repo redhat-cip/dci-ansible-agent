@@ -214,9 +214,9 @@
         dest: ~/tempest-deployer-input.conf
   roles:
     - stackdump
-    - certification
     - tripleo-inventory
     - { role: validate-tempest, tempest_exit_on_failure: False }
+    - { role: certification, when: "dci_topic in ['OSP9', 'OSP10', 'OSP11']" }
 
 - name: Collect logs
   hosts: 'undercloud'
