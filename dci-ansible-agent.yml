@@ -198,14 +198,40 @@
       OSP9: 'mitaka'
       OSP10: 'newton'
       OSP11: 'ocata'
+    remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: "{{ local_working_dir }}"
+    openstack_certification_results_download: true
+    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+    openstack_certification_tempest_conf_path_is_remote: Yes
+    openstack_certification_tests: "{{ remoteci_data['rhcert']['tests']|default(['self_check', 'supportable', 'director']) }}"
+    openstack_stackdump_dest_dir: "{{ local_working_dir }}"
   pre_tasks:
+    - block:
+      - name: default-overrides.conf is in python-tempestconf wince OSP11
+        package:
+          name: python-tempestconf
+          state: present
+        become: true
+        when: "dci_topic in ['OSP11']"
+      - name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
+        package:
+          name: openstack-tempest
+          state: present
+        become: true
+        when: "dci_topic in ['OSP9', 'OSP10']"
+      - ini_file:
+          path: /etc/tempest/default-overrides.conf
+          section: '{{ item.section }}'
+          option: '{{ item.option }}'
+          value: '{{ item.value }}'
+        with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
+        become: true
+        when: "dci_topic in ['OSP9', 'OSP10']"
     - name: Set the OpenStack release name
       set_fact:
         release: "{{ rhos_release[dci_topic] }}"
-
     - name: Copy tempest config overrides
       copy:
         src: tempest-overrides.conf
