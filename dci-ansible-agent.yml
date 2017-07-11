@@ -203,9 +203,13 @@
       OSP11: 'ocata'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
+    openstack_certification_results_download: true
     job_id: "{{ job_informations['job_id'] }}"
     remoteci_data: "{{ job_informations['remoteci']['data']|default({}) }}"
     remoteci_tempest_data: "{{ remoteci_data['tempest']|default({}) }}"
+    openstack_certification_tests: "{{ remoteci_rhcert_data['tests']|default(['self_check', 'supportable', 'director']) }}"
+    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+    openstack_certification_tempest_conf_path_is_remote: Yes
   pre_tasks:
     - block:
       - name: default-overrides.conf is in python-tempestconf wince OSP11
@@ -228,7 +232,6 @@
         become: true
       rescue:
       - include: plays/failure.yml
-
     - name: Set the OpenStack release name
       set_fact:
         release: "{{ rhos_release[dci_topic] }}"
