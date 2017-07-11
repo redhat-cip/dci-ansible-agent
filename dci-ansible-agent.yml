@@ -179,7 +179,6 @@
   vars:
     dci_status: 'post-run'
     dci_comment: 'add the undercloud node to host list'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: plays/set_undercloud_authorized_keys.yml
@@ -204,11 +203,37 @@
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: "{{ local_working_dir }}"
+    openstack_certification_results_download: true
+    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+    openstack_certification_tempest_conf_path_is_remote: Yes
+    job_id: "{{ hostvars['localhost'].job_informations['job_id'] }}"
+    remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
+    remoteci_tempest_data: "{{ remoteci_data['tempest']|default({}) }}"
+    remoteci_rhcert_data: "{{ remoteci_data['rhcert']|default({}) }}"
+    openstack_certification_tests: "{{ remoteci_rhcert_data['tests']|default(['self_check', 'supportable', 'director']) }}"
   pre_tasks:
+    - block:
+      - name: default-overrides.conf is in python-tempestconf wince OSP11
+        yum:
+          name: python-tempestconf
+          state: present
+        become: true
+        when: "dci_topic in ['OSP11']"
+      - name: default-overrides.conf is in openstack-temppest on OSP9 and OSP10
+        yum:
+          name: openstack-tempest
+          state: present
+        become: true
+      - ini_file:
+          path: /etc/tempest/default-overrides.conf
+          section: '{{ item.section }}'
+          option: '{{ item.option }}'
+          value: '{{ item.value }}'
+        with_items: "{{ remoteci_tempest_data['default_overrides']|default([]) }}"
+        become: true
     - name: Set the OpenStack release name
       set_fact:
         release: "{{ rhos_release[dci_topic] }}"
-
     - name: Copy tempest config overrides
       copy:
         src: tempest-overrides.conf
