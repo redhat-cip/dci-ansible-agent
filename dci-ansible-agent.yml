@@ -228,6 +228,13 @@
       OSP11: 'ocata'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
+    openstack_certification_results_download: true
+    openstack_certification_tests: ['self_check', 'supportable', 'director', 'cinder_volumes']
+    openstack_certification_supported_apis_and_extensions: ['volumes']
+    # depends on Ifcd26fe6330b7ec626bef6a52b994bd75bf23558
+    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+    openstack_certification_tempest_conf_path_is_remote: Yes
+
   pre_tasks:
     - name: Set the OpenStack release name
       set_fact:
