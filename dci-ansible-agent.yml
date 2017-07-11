@@ -187,6 +187,38 @@
       - include: plays/failure.yml
 
 
+- hosts: localhost
+  vars:
+    dci_status: 'post-run'
+    dci_comment: 'Applying remoteci specific settings for Tempest'
+    job_id: "{{ job_informations['job_id'] }}"
+    tempest_data: "{{ job_informations['remoteci']['data']|default({}) }}"
+  tasks:
+    - block:
+      - name: default-overrides.conf is in python-tempestconf wince OSP11
+        yum:
+          name: python-tempestconf
+          state: present
+        become: true
+        delegate_to: undercloud
+        when: "dci_topic in ['OSP11']"
+      - name: default-overrides.conf is in openstack-temppest on OSP9 and OSP10
+        yum:
+          name: openstack-tempest
+          state: present
+        become: true
+        delegate_to: undercloud
+      - ini_file:
+          dest: /etc/tempest/default-overrides.conf
+          section: '{{ item.section }}'
+          option: '{{ item.option }}'
+          value: '{{ item.value }}'
+        with_items: '{{ tempest_data|default([]) }}'
+        become: true
+        delegate_to: undercloud
+      rescue:
+      - include: plays/failure.yml
+
 # Post-run state
 #
 # User is free to do whaterver she needs before entering post-run state.
