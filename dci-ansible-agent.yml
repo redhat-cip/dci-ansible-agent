@@ -187,6 +187,31 @@
       - include: plays/failure.yml
 
 
+- hosts: localhost
+  vars:
+    dci_status: 'post-run'
+    dci_comment: 'patch Tempest default override'
+    job_id: "{{ job_informations['job_id'] }}"
+    data: "{{ job_informations['remoteci']['data'] }}"
+  tasks:
+    - block:
+      - name: python-tempestconf is used by rhcert and validate-tempest
+        package:
+          name: python-tempestconf
+          state: present
+        become: true
+        delegate_to: undercloud
+      - ini_file:
+          dest: /etc/tempest/default-overrides.conf
+          section: '{{ item.section }}'
+          option: '{{ item.option }}'
+          value: '{{ item.value }}'
+        with_items: '{{ data["tempest"]["default_overrides"]|default([]) }}'
+        become: true
+        delegate_to: undercloud
+      rescue:
+      - include: plays/failure.yml
+
 # Post-run state
 #
 # User is free to do whaterver she needs before entering post-run state.
