@@ -1,0 +1,9 @@
+Code-Review+2: Dimitri Savineau <dsavinea@redhat.com>
+Code-Review+2: François Charlier <francois.charlier@redhat.com>
+Workflow+1: François Charlier <francois.charlier@redhat.com>
+Verified+2: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-by: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-at: Wed, 12 Jul 2017 13:42:17 +0000
+Reviewed-on: https://softwarefactory-project.io/r/8886
+Project: dci-ansible-agent
+Branch: refs/heads/master
