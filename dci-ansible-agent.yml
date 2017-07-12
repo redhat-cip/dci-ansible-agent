@@ -236,6 +236,7 @@
       dci_job:
         id: "{{ job_informations['job_id'] }}"
         configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
+      ignore_errors: True
 
     # NOTE(dsavinea) : We need to ignore the errors because cert.txt
     # is only present for OSP10 for the moment.
