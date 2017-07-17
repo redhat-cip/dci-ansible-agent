@@ -212,6 +212,14 @@
     openstack_certification_tempest_conf_path_is_remote: Yes
   pre_tasks:
     - block:
+      - name: manually install rhcert openstack to be able to patch it
+        package:
+          name: redhat-certification-openstack
+          state: present
+      - name: inject the fix for BZ1471200
+        copy:
+          src: rhcert/tempest_tests.json
+          dest: /usr/lib/python2.7/site-packages/rhcert/suites/openstack_cert/data/tempest_tests.json
       - name: default-overrides.conf is in python-tempestconf wince OSP11
         package:
           name: python-tempestconf
