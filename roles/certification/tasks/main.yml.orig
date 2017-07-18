@@ -79,7 +79,7 @@
   become: True
   fetch:
     src: '{{ openstack_certification_output_filename }}'
-    dest: "{{ local_working_dir }}/{{ openstack_certification_output_filename }}"
+    dest: "{{ lookup('env', 'PWD') }}/{{ openstack_certification_output_filename }}"
     flat: yes
 
 - block:

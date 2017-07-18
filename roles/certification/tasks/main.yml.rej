@@ -1,0 +1,10 @@
+--- certification/tasks/main.yml	2017-06-20 12:17:58.181159565 -0400
++++ certification/tasks/main.yml	2017-06-20 12:16:45.189112953 -0400
+@@ -64,6 +64,6 @@
+     become: True
+     fetch:
+       src: 'results.xml.gz'
+-      dest: "{{ lookup('env', 'PWD') }}/results.xml.gz"
++      dest: "{{ local_working_dir }}/results.xml.gz"
+       flat: yes
+   when: openstack_certification_results_download|bool
