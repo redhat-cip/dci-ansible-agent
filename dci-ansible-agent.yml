@@ -203,6 +203,7 @@
       OSP11: 'ocata'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
+    openstack_certification_dest_dir: "{{ local_working_dir }}"
   pre_tasks:
     - name: Set the OpenStack release name
       set_fact:
