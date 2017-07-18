@@ -11,5 +11,6 @@
 # limitations under the License.
 
 ---
-stackdump_result_filename: tripleo-stack-dump.json
-stackdump_stackname: overcloud
+openstack_stackdump_result_filename: tripleo-stack-dump.json
+openstack_stackdump_stackname: overcloud
+openstack_stackdump_dest_dir: "{{ lookup('env', 'PWD') }}"
