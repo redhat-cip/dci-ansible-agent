@@ -11,6 +11,18 @@
     - redhat-certification
     - redhat-certification-openstack
 
+- name: Test if rhosp-release is available (OSP10 and above)
+  package:
+    list: rhosp-release
+  register: rhosp_status
+
+- name: Install rhosp-release
+  become: True
+  package:
+    name: rhosp-release
+    state: latest
+  when: rhosp_status.results|length >= 1
+
 - name: Register keystone_auth_url
   shell: "source /home/stack/overcloudrc && echo \"$OS_AUTH_URL\""
   register: keystone_auth_url
@@ -37,6 +49,14 @@
     src: test_config.json
     dest: /etc/redhat-certification-openstack/test_config.json
 
+- name: copy the tempest configuration file
+  become: True
+  copy:
+    src: '{{ openstack_certification_tempest_conf_path }}'
+    dest: /etc/redhat-certification-openstack
+    remote_src: '{{ openstack_certification_tempest_conf_path_is_remote|bool }}'
+  when: openstack_certification_tempest_conf_path is defined
+
 - name: Run certification test suite
   become: True
   shell: >
@@ -52,18 +72,28 @@
   become: True
   fetch:
     src: '{{ openstack_certification_output_filename }}'
-    dest: "{{ local_working_dir }}/{{ openstack_certification_output_filename }}"
+    dest: "{{ openstack_certification_dest_dir }}/{{ openstack_certification_output_filename }}"
     flat: yes
 
 - block:
   - name: Compress results file
     become: True
-    shell: 'gzip -c /var/rhcert/results.xml > results.xml.gz'
+    archive:
+      path: /var/rhcert/results.xml
+      dest: /home/stack/certification.xml.gz
+      format: gz
 
   - name: Download results file
     become: True
     fetch:
-      src: 'results.xml.gz'
-      dest: "{{ local_working_dir }}/results.xml.gz"
+      src: 'certification.xml.gz'
+      dest: "{{ openstack_certification_dest_dir }}/certification.xml.gz"
       flat: yes
   when: openstack_certification_results_download|bool
+
+- name: Tempest cleanup
+  become: True
+  file:
+    path: /tmp/tempest-lock
+    state: absent
+  when: "'tempest_config' in openstack_certification_tests"

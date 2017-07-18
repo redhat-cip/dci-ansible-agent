@@ -18,10 +18,10 @@
     mode: 0755
 
 - name: Execute tripleo-stack-dump
-  shell: 'source ~/stackrc && ./tripleo-stack-dump {{ stackdump_stackname }}'
+  shell: 'source ~/stackrc && ./tripleo-stack-dump {{ openstack_stackdump_stackname }}'
 
 - name: Fetch dump result
   fetch:
     src: ~/tripleo-stack-dump.json
-    dest: "{{ local_working_dir }}/{{ stackdump_result_filename }}"
+    dest: "{{ openstack_stackdump_dest_dir }}/{{ openstack_stackdump_result_filename }}"
     flat: yes
