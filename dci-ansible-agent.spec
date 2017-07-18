@@ -15,6 +15,8 @@ BuildRequires:  git
 Requires:       dci-ansible
 Requires:       ansible
 Requires:       python-netaddr
+Requires:       ansible-role-openstack-stackdump
+Requires:       ansible-role-openstack-certification
 
 Requires(pre): shadow-utils
 Requires(post): systemd

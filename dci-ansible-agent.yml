@@ -200,6 +200,7 @@
       OSP11: 'ocata'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
+    openstack_certification_dest_dir: "{{ local_working_dir }}"
   pre_tasks:
     - name: Set the OpenStack release name
       set_fact:
@@ -210,10 +211,10 @@
         src: tempest-overrides.conf
         dest: ~/tempest-deployer-input.conf
   roles:
-    - stackdump
+    - openstack-stackdump
     - tripleo-inventory
     - { role: validate-tempest, tempest_exit_on_failure: False }
-    - { role: certification, when: "dci_topic in ['OSP9', 'OSP10', 'OSP11']" }
+    - { role: openstack-certification, when: "dci_topic in ['OSP9', 'OSP10', 'OSP11']" }
 
 - name: Collect logs
   hosts: 'undercloud'
