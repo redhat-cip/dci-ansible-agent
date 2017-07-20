@@ -206,6 +206,7 @@
     openstack_certification_results_download: true
     openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
     openstack_certification_tempest_conf_path_is_remote: Yes
+    openstack_certification_dest_dir: "{{ local_working_dir }}"
     job_id: "{{ hostvars['localhost'].job_informations['job_id'] }}"
     remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     remoteci_tempest_data: "{{ remoteci_data['tempest']|default({}) }}"
@@ -261,7 +262,7 @@
     - name: Upload stack details
       dci_job:
         id: "{{ job_informations['job_id'] }}"
-        configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
+        configuration: "{{ lookup('file', '~/.quickstart/tripleo-stack-dump.json') }}"
       ignore_errors: True
 
     # NOTE(dsavinea) : We need to ignore the errors because cert.txt
@@ -287,6 +288,13 @@
         - "undercloud"
 #        - "{{ groups['overcloud'] }}"
 
+    - name: Upload certification.xml.gz
+      dci_file:
+        path: "/var/lib/dci-ansible-agent/.quickstart/certification.xml.gz"
+        name: "certification.xml.gz"
+        job_id: "{{ job_informations['job_id'] }}"
+      ignore_errors: yes
+
     - name: Clean result files
       file:
         name: '{{ item }}'
@@ -295,8 +303,10 @@
         - "~/nosetests.xml"
         - "~/results.subunit"
         - "~/tempest.html"
-        - "~/tripleo-stack-dump.json"
+        - "~/.quickstart/tripleo-stack-dump.json"
         - "~/cert.txt"
+        - "~/.quickstart/certification.xml.gz"
+      ignore_errors: yes
 
 
 # Success state
