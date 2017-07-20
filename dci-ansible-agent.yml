@@ -260,7 +260,7 @@
     - name: Upload stack details
       dci_job:
         id: "{{ job_informations['job_id'] }}"
-        configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
+        configuration: "{{ lookup('file', '~/.quickstart/tripleo-stack-dump.json') }}"
       ignore_errors: True
 
     # NOTE(dsavinea) : We need to ignore the errors because cert.txt
@@ -286,6 +286,13 @@
         - "undercloud"
 #        - "{{ groups['overcloud'] }}"
 
+    - name: Upload certification.xml.gz
+      dci_file:
+        path: "/var/lib/dci-ansible-agent/.quickstart/certification.xml.gz"
+        name: "~/.quickstart/certification.xml.gz"
+        job_id: "{{ job_informations['job_id'] }}"
+      ignore_errors: yes
+
     - name: Clean result files
       file:
         name: '{{ item }}'
@@ -294,8 +301,10 @@
         - "~/nosetests.xml"
         - "~/results.subunit"
         - "~/tempest.html"
-        - "~/tripleo-stack-dump.json"
+        - "~/.quickstart/tripleo-stack-dump.json"
         - "~/cert.txt"
+        - "~/.quickstart/certification.xml.gz"
+      ignore_errors: yes
 
 
 # Success state
