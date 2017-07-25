@@ -30,16 +30,18 @@ You start using the DCI Ansible Agent, you need to adjust a couple of
 configuration files. The first one is `/etc/dci-ansible-agent/dcirc.sh`::
 
     #!/bin/bash
-    
     DCI_CS_URL="https://api.distributed-ci.io/"
-    DCI_LOGIN="my_login"
-    DCI_PASSWORD="my_password"
+    DCI_CLIENT_ID=<remoteci_id>
+    DCI_API_SECRET=<api_secret>
+    # The file is used by systemd. This is the reason why we cannot
+    # use the common 'export FOO=bar' syntax.
     export DCI_CS_URL
-    export DCI_LOGIN
-    export DCI_PASSWORD
+    export DCI_CLIENT_ID
+    export DCI_API_SECRET
 
-* DCI_LOGIN: replace `my_login` with your DCI login.
-* DCI_PASSWORD: replace `my_password` with your DCI password.
+
+* DCI_CLIENT_ID: replace `remoteci_id` with the remoteci UUID.
+* DCI_API_SECRET: replace `api_secret` with the CI token.
 
 If you need to go through a HTTP proxy, you will need to set the http_proxy environment variables::
 
@@ -48,14 +50,26 @@ If you need to go through a HTTP proxy, you will need to set the http_proxy envi
     export http_proxy
     export https_proxy
 
+At this point, you can validate your `dcirc.sh` with the following commands::
+
+    # source /etc/dci-ansible-agent/dcirc.sh
+    # dcictl remoteci-list
+
+You should get an output similar to this one::
+
+    +--------------------------------------+-----------+--------+---------+-------+--------------+
+    |                  id                  |    name   | state  | country | email | notification |
+    +--------------------------------------+-----------+--------+---------+-------+--------------+
+    | a2780b4c-0cdc-4a4a-a9ed-44930562ecce | RACKSPACE | active |   None  |  None |     None     |
+    +--------------------------------------+-----------+--------+---------+-------+--------------+
 
 ------------
 
 Then, you need to edit the `/etc/dci-ansible-agent/settings.yml` file::
 
     dci_topic: "OSP10"
-    dci_login: "{{ lookup('env', 'DCI_LOGIN') }}"
-    dci_password: "{{ lookup('env', 'DCI_PASSWORD') }}"
+    dci_client_id: "{{ lookup('env', 'DCI_CLIENT_ID') }}"
+    dci_api_secret: "{{ lookup('env', 'DCI_API_SECRET') }}"
     dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
     dci_remoteci: "test-ovb-0"
     undercloud_ip: "fooo"

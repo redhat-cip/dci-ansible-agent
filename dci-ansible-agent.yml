@@ -6,9 +6,6 @@
 # we hence register those data for later consumptions
 #
 - hosts: localhost
-  vars:
-    dci_login: '{{ dci_login }}'
-    dci_password: '{{ dci_password }}'
   tasks:
     - include: "{{ dci_config_dir }}/hooks/teardown.yml"
     - set_fact:
