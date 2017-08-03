@@ -201,6 +201,8 @@
       OSP9: 'mitaka'
       OSP10: 'newton'
       OSP11: 'ocata'
+      OSP12: 'pike'
+      OSP13: 'queens'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
   pre_tasks:
