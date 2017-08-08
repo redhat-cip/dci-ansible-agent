@@ -15,6 +15,7 @@ BuildRequires:  git
 Requires:       dci-ansible
 Requires:       ansible
 Requires:       python-netaddr
+Requires:       sudo
 
 Requires(pre): shadow-utils
 Requires(post): systemd
