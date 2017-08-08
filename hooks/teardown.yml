@@ -1,9 +1,4 @@
 ---
-- name: Drop the dci_repo repository
-  file:
-    path: '{{ dci_mirror_location }}/dci_repo'
-    state: absent
-  become: True
 - name: Unregister the node from the RHSM
   redhat_subscription:
     state: absent
