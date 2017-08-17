@@ -7,7 +7,6 @@
 #
 - hosts: localhost
   tasks:
-    - include: "{{ dci_config_dir }}/hooks/teardown.yml"
     - set_fact:
         metadata:
           experimental: '{{ dci_experimental is defined and dci_experimental }}'
@@ -130,6 +129,7 @@
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
       - name: Add undercloud
         add_host:
