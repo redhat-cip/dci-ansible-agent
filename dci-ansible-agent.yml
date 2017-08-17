@@ -142,6 +142,9 @@
         when: undercloud_ip is defined and undercloud_ip
 
       rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
       - include: plays/failure.yml
 
 # Run state
@@ -169,6 +172,9 @@
       - include_role:
           name: collect-logs
         delegate_to: undercloud
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
       - include: plays/failure.yml
 
 
@@ -181,6 +187,9 @@
     - block:
       - include: plays/set_undercloud_authorized_keys.yml
       rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
       - include: plays/failure.yml
 
 
@@ -207,7 +216,7 @@
     openstack_certification_tempest_conf_path_is_remote: Yes
     openstack_certification_tests: "{{ remoteci_data['rhcert']['tests']|default(['self_check', 'supportable', 'director']) }}"
     openstack_stackdump_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
-  pre_tasks:
+  tasks:
     - block:
       - name: default-overrides.conf is in python-tempestconf wince OSP11
         package:
@@ -215,12 +224,14 @@
           state: present
         become: true
         when: "dci_topic in ['OSP11']"
+
       - name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
         package:
           name: openstack-tempest
           state: present
         become: true
         when: "dci_topic in ['OSP9', 'OSP10']"
+
       - ini_file:
           path: /etc/tempest/default-overrides.conf
           section: '{{ item.section }}'
@@ -229,18 +240,36 @@
         with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
         become: true
         when: "dci_topic in ['OSP9', 'OSP10']"
-    - name: Set the OpenStack release name
-      set_fact:
-        release: "{{ rhos_release[dci_topic] }}"
-    - name: Copy tempest config overrides
-      copy:
-        src: tempest-overrides.conf
-        dest: ~/tempest-deployer-input.conf
-  roles:
-    - openstack-stackdump
-    - tripleo-inventory
-    - { role: validate-tempest, tempest_exit_on_failure: False }
-    - { role: openstack-certification, when: "dci_topic in ['OSP9', 'OSP10', 'OSP11']" }
+
+      - name: Set the OpenStack release name
+        set_fact:
+          release: "{{ rhos_release[dci_topic] }}"
+
+      - name: Copy tempest config overrides
+        copy:
+          src: tempest-overrides.conf
+          dest: ~/tempest-deployer-input.conf
+
+      - include_role:
+          name: openstack-stackdump
+
+      - include_role:
+          name: tripleo-inventory
+
+      - include_role:
+          name: validate-tempest
+          args:
+            tempest_exit_on_failure: False
+
+     - include_role:
+         name: openstack-certification
+
+      rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+      - include: plays/failure.yml
+
 
 - name: Collect logs
   hosts: 'undercloud'
@@ -248,53 +277,68 @@
     dci_status: 'post-run'
     artcl_tar_gz: true
     artcl_gzip_only: false
-  roles:
-    - collect-logs
+  tasks:
+    - block:
+      - include_role:
+          name: collect-logs
+
+      rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+      - include: plays/failure.yml
 
 - name: 'Upload files'
   hosts: localhost
   vars:
     dci_status: 'post-run'
   tasks:
-    - name: Upload stack details
-      dci_job:
-        id: "{{ job_informations['job_id'] }}"
-        configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
-      ignore_errors: True
+    - block:
+      - name: Upload stack details
+        dci_job:
+          id: "{{ job_informations['job_id'] }}"
+          configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
+        ignore_errors: True
 
-    # NOTE(dsavinea) : We need to ignore the errors because cert.txt
-    # is only present for OSP10 for the moment.
-    - name: Upload results
-      dci_file:
-        path: '{{ item.path }}'
-        name: '{{ item.name }}'
-        job_id: "{{ job_informations['job_id'] }}"
-        mime: '{{ item.mime }}'
-      with_items:
-        - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
-        - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.junit', 'mime': 'application/junit'}
-      ignore_errors: yes
+      # NOTE(dsavinea) : We need to ignore the errors because cert.txt
+      # is only present for OSP10 for the moment.
+      - name: Upload results
+        dci_file:
+          path: '{{ item.path }}'
+          name: '{{ item.name }}'
+          job_id: "{{ job_informations['job_id'] }}"
+          mime: '{{ item.mime }}'
+        with_items:
+          - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
+          - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.junit', 'mime': 'application/junit'}
+        ignore_errors: yes
 
-    - name: Upload logs
-      dci_file:
-        path: "/var/lib/dci-ansible-agent/.quickstart/collected_files/{{ item }}.tar.gz"
-        name: "{{ item }}.tar.gz"
-        job_id: "{{ job_informations['job_id'] }}"
-        mime: "application/x-compressed"
-      with_items:
-        - "undercloud"
+      - name: Upload logs
+        dci_file:
+          path: "/var/lib/dci-ansible-agent/.quickstart/collected_files/{{ item }}.tar.gz"
+          name: "{{ item }}.tar.gz"
+          job_id: "{{ job_informations['job_id'] }}"
+          mime: "application/x-compressed"
+        with_items:
+          - "undercloud"
 #        - "{{ groups['overcloud'] }}"
 
-    - name: Clean result files
-      file:
-        name: '{{ item }}'
-        state: absent
-      with_items:
-        - "~/nosetests.xml"
-        - "~/results.subunit"
-        - "~/tempest.html"
-        - "~/tripleo-stack-dump.json"
-        - "~/cert.txt"
+      - name: Clean result files
+        file:
+          name: '{{ item }}'
+          state: absent
+        with_items:
+          - "~/nosetests.xml"
+          - "~/results.subunit"
+          - "~/tempest.html"
+          - "~/tripleo-stack-dump.json"
+          - "~/cert.txt"
+
+      rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+      - include: plays/failure.yml
 
 
 # Success state
