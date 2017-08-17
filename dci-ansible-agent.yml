@@ -23,6 +23,22 @@
         id: "{{ job_informations['job_id'] }}"
         metadata: '{{ metadata }}'
 
+- hosts: all
+  vars:
+    rhos_release:
+      OSP8: 'liberty'
+      OSP9: 'mitaka'
+      OSP10: 'newton'
+      OSP11: 'ocata'
+      OSP12: 'pike'
+      OSP13: 'queens'
+  tasks:
+    - name: Set  global variables
+      set_fact:
+        job_id: "{{ hostvars['localhost']['job_id'] }}"
+        components: "{{ hostvars['localhost']['components'] }}"
+        release: "{{ rhos_release[dci_topic] }}"
+
 
 # New state
 #
@@ -33,8 +49,6 @@
   hosts: localhost
   vars:
     dci_status: 'new'
-    components: "{{ job_informations['components'] }}"
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - name: Ensure Apache is installed
@@ -126,7 +140,6 @@
   hosts: localhost
   vars:
     dci_status: 'pre-run'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
@@ -155,7 +168,6 @@
   hosts: localhost
   vars:
     dci_status: 'running'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: '{{ dci_config_dir }}/hooks/running.yml'
@@ -180,7 +192,6 @@
   hosts: localhost
   vars:
     dci_status: 'post-run'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: plays/set_undercloud_authorized_keys.yml
@@ -199,11 +210,6 @@
   hosts: 'undercloud'
   vars:
     dci_status: 'post-run'
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
@@ -213,10 +219,6 @@
     openstack_stackdump_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
   tasks:
     - block:
-      - name: Set the OpenStack release name
-        set_fact:
-          release: "{{ rhos_release[dci_topic] }}"
-
       - name: Copy tempest config overrides
         copy:
           src: tempest-overrides.conf
@@ -266,7 +268,7 @@
     - block:
       - name: Upload stack details
         dci_job:
-          id: "{{ job_informations['job_id'] }}"
+          id: '{{ job_id }}'
           configuration: "{{ lookup('file', '~/tripleo-stack-dump.json') }}"
         ignore_errors: True
 
@@ -276,7 +278,7 @@
         dci_file:
           path: '{{ item.path }}'
           name: '{{ item.name }}'
-          job_id: "{{ job_informations['job_id'] }}"
+          job_id: '{{ job_id }}'
           mime: '{{ item.mime }}'
         with_items:
           - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
@@ -287,7 +289,7 @@
         dci_file:
           path: "/var/lib/dci-ansible-agent/.quickstart/collected_files/{{ item }}.tar.gz"
           name: "{{ item }}.tar.gz"
-          job_id: "{{ job_informations['job_id'] }}"
+          job_id: '{{ job_id }}'
           mime: "application/x-compressed"
         with_items:
           - "undercloud"
