@@ -46,6 +46,7 @@ install -p -D -m 644 dcirc.sh %{buildroot}%{_sysconfdir}/dci-ansible-agent/dcirc
 install -p -D -m 644 hooks/pre-run.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/pre-run.yml
 install -p -D -m 644 hooks/running.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/running.yml
 install -p -D -m 644 hooks/teardown.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/teardown.yml
+install -p -D -m 644 hooks/success.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/hooks/success.yml
 install -p -D -m 644 settings.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/settings.yml
 install -p -D -m 644 dci-ansible-agent.sudo %{buildroot}%{_sysconfdir}/sudoers.d/dci-ansible-agent
 install -p -d -m 755 %{buildroot}/%{_sharedstatedir}/dci-ansible-agent
@@ -81,6 +82,7 @@ exit 0
 %config(noreplace) %{_sysconfdir}/dci-ansible-agent/settings.yml
 %config(noreplace) %{_sysconfdir}/dci-ansible-agent/hooks/pre-run.yml
 %config(noreplace) %{_sysconfdir}/dci-ansible-agent/hooks/running.yml
+%config(noreplace) %{_sysconfdir}/dci-ansible-agent/hooks/success.yml
 %config(noreplace) %{_sysconfdir}/dci-ansible-agent/hooks/teardown.yml
 %dir %{_sharedstatedir}/dci-ansible-agent
 %attr(0755, %{name}, %{name}) %{_sharedstatedir}/dci-ansible-agent
