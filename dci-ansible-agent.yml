@@ -29,10 +29,10 @@
 # User is free to do whaterver she needs before entering pre-run state.
 # Usually this is used to sync the components the job is relying on.
 #
-- hosts: localhost
+- name: 'Creating the local mirrors and synchronizing them'
+  hosts: localhost
   vars:
     dci_status: 'new'
-    dci_comment: 'Creating the local mirrors and synchronizing them'
     components: "{{ job_informations['components'] }}"
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
@@ -122,10 +122,10 @@
 # User is free to do whaterver she needs before entering pre-run state.
 # Usually this is used to boot (not provision) the undercloud
 #
-- hosts: localhost
+- name: 'Spawning the undercloud'
+  hosts: localhost
   vars:
     dci_status: 'pre-run'
-    dci_comment: 'Spawning the undercloud'
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
@@ -151,10 +151,10 @@
 # User is free to do whaterver she needs before entering running state.
 # Usually this is used to provision both undercloud and the overcloud.
 #
-- hosts: localhost
+- name: 'Provision the undercloud and the overcloud'
+  hosts: localhost
   vars:
     dci_status: 'running'
-    dci_comment: 'Provision the undercloud and the overcloud'
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
@@ -176,10 +176,10 @@
       - include: plays/failure.yml
 
 
-- hosts: localhost
+- name: 'add the undercloud node to host list'
+  hosts: localhost
   vars:
     dci_status: 'post-run'
-    dci_comment: 'add the undercloud node to host list'
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
@@ -315,7 +315,8 @@
 # User is free to do whaterver she needs before entering pre-run state.
 # Usually this is used to teardown the plateform
 #
-- hosts: localhost
+- name: 'Successful installation'
+  hosts: localhost
   vars:
     dci_status: 'success'
   tasks:
