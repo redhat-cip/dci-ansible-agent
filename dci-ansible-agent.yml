@@ -106,7 +106,7 @@
           description: '{{ item["canonical_project_name"] }}'
           baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
           gpgcheck: no
-          file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
+          file: '{{ dci_mirror_location }}/dci_repo/dci.repo'
         with_items: '{{ job_informations["components"] }}'
 
       - name: Generating RSA key for stack
