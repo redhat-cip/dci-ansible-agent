@@ -322,4 +322,6 @@
   vars:
     dci_status: 'success'
   tasks:
+    - include: "{{ dci_config_dir }}/hooks/success.yml"
+
     - include: "{{ dci_config_dir }}/hooks/teardown.yml"
