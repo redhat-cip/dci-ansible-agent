@@ -212,11 +212,6 @@
   hosts: 'undercloud'
   vars:
     dci_status: 'post-run'
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
     remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
