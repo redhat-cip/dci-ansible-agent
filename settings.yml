@@ -1,8 +1,59 @@
-dci_topic: "OSP10"
-dci_client_id: "{{ lookup('env', 'DCI_CLIENT_ID') }}"
-dci_api_secret: "{{ lookup('env', 'DCI_API_SECRET') }}"
+#
+# This is the main dci-ansible-agent configuration file. It contains the
+# configuration options that give the dci-ansible-agent its instructions.
+# See <URL:https://github.com/redhat-cip/dci-ansible-agent> for detailed information.
+#
+
+#
+# dci_topic: Name of the topic to test. [optional]
+#
+# This informations can be found on the www.distributed-ci.io > Topics
+# interface, or with the use of the cli: dcictl topic-list.
+#
+# If not set, the server will randomly select a topic the CI is attached to.
+#
+# dci_topic: "OSP10"
+
+#
+# dci_baseurl: The URL at which the agent will make the yum packages available.
+#
+# During the run of the agent, the components to test will be made available via
+# HTTP. $dci_baseurl specifies at which address the packages will be available.
+#
 dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
-undercloud_ip: "fooo"
+
+#
+# dci_mirror_location: File path where the yum packages will be installed.
+#
+# Location where to store the yum packages so they can be accessible via
+# querying $dci_baseurl
+#
 dci_mirror_location: "/var/www/html"
+
+#
+# undercloud_ip: The IP of the undercloud node [optional]
+#
+# In order to be able to access the undercloud in an Ansible way, the agent needs
+# to have the undercloud_ip specified prior the run. This is the IP used to add
+# the 'undercloud' hosts in the Ansible inventory.
+#
+# undercloud_ip: "192.168.0.42"
+
+#
+# dci_config_dir: Path to where the configuration files (export, hooks, ...) are
+# located.
+#
+# The dci-ansible-agent package provides the configuration files under
+# /etc/dci-ansible-agent. If ones hooks, setting.yml and dcirc.sh are located
+# somewhere else, one can specify the path here.
+#
 dci_config_dir: "/etc/dci-ansible-agent"
+
+#
+# dci_cache_dir: Path to where the components are put in cache.
+#
+# Components can be made of several Gb of data. In order to not redownload them
+# all the time, if a job run detect them present in here, it won't try to
+# redownload them.
+#
 dci_cache_dir: "/var/lib/dci-ansible-agent"
