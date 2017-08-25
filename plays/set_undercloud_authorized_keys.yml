@@ -43,7 +43,7 @@
   lineinfile:
     dest: /etc/hosts
     regexp: '^\d+.*\sundercloud'
-    line: '{{ undercloud_ip }} undercloud'
+    line: "{{ hostvars['undercloud']['ansible_host'] }} undercloud"
     owner: root
     group: root
     mode: 0644
