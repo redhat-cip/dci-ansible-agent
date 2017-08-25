@@ -7,3 +7,4 @@ undercloud_ip: "fooo"
 dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
 dci_cache_dir: "/var/lib/dci-ansible-agent"
+dci_metadatas: {}

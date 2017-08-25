@@ -7,9 +7,6 @@
 #
 - hosts: localhost
   tasks:
-    - set_fact:
-        metadata:
-          experimental: '{{ dci_experimental is defined and dci_experimental }}'
     - name: Schedule a new job
       dci_job:
         topic: '{{ dci_topic }}'
@@ -18,10 +15,11 @@
         # jobdefinition
         jobdefinition_id: "{{ dci_jobdefinition_id|default(None) }}"
       register: job_informations
+
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations['job_id'] }}"
-        metadata: '{{ metadata }}'
+        metadata: '{{ dci_metadatas }}'
 
 
 # New state
