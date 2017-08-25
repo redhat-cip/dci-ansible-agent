@@ -1,0 +1,8 @@
+Code-Review+2: Gonéri Le Bouder <goneri@lebouder.net>
+Workflow+1: Yassine Lamgarchal <yassine.lamgarchal@redhat.com>
+Verified+2: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-by: Jenkins CI <jenkins@softwarefactory-project.io>
+Submitted-at: Fri, 25 Aug 2017 09:59:14 +0000
+Reviewed-on: https://softwarefactory-project.io/r/9273
+Project: dci-ansible-agent
+Branch: refs/heads/master
