@@ -20,7 +20,8 @@
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations['job_id'] }}"
-        metadata: '{{ metadata }}'
+        metadata: '{{ dci_metadatas }}'
+      when: dci_metadatas is defined and dci_metadatas
 
 
 # New state
