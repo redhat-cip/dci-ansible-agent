@@ -1,0 +1,9 @@
+# The following is needed for --syntax-check to work.
+# In production envionment the roles are installed as dependence
+# of dci-ansible-agent package but since --syntax-check is a
+# static analysis it needs to # be present
+- src: redhat-cip.openstack-stackdump
+  name: openstack-stackdump
+
+- src: redhat-cip.openstack-certification
+  name: openstack-certification
