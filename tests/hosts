@@ -1,0 +1,5 @@
+# The following is needed for --syntax-check to work.
+# In production environment we dynamically declare undercloud
+# but since --syntax-check is a static analysis it needs to 
+# be present
+undercloud
