@@ -13,9 +13,6 @@
     - name: Schedule a new job
       dci_job:
         topic: '{{ dci_topic }}'
-        # to have the ability to bypass the scheduler and use a specific
-        # jobdefinition
-        jobdefinition_id: "{{ dci_jobdefinition_id|default(None) }}"
       register: job_informations
     - name: Set the metadata
       dci_job:
