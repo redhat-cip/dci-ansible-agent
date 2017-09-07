@@ -128,7 +128,6 @@
     job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
       - name: Add undercloud
         add_host:
