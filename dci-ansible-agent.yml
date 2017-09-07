@@ -23,6 +23,21 @@
         metadata: '{{ metadata }}'
 
 
+- hosts: all:localhost
+  vars:
+    rhos_release:
+      OSP8: 'liberty'
+      OSP9: 'mitaka'
+      OSP10: 'newton'
+      OSP11: 'ocata'
+  tasks:
+    - name: Set  global variables
+      set_fact:
+        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
+        components: '{{ hostvars.localhost.job_informations.components }}'
+        release: '{{ rhos_release[dci_topic] }}'
+
+
 # New state
 #
 # User is free to do whaterver she needs before entering pre-run state.
@@ -32,8 +47,6 @@
   hosts: localhost
   vars:
     dci_status: 'new'
-    components: "{{ job_informations['components'] }}"
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - name: Ensure Apache is installed
@@ -125,7 +138,6 @@
   hosts: localhost
   vars:
     dci_status: 'pre-run'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
@@ -155,7 +167,6 @@
   hosts: localhost
   vars:
     dci_status: 'running'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: '{{ dci_config_dir }}/hooks/running.yml'
@@ -181,7 +192,6 @@
   hosts: localhost
   vars:
     dci_status: 'post-run'
-    job_id: "{{ job_informations['job_id'] }}"
   tasks:
     - block:
       - include: plays/set_undercloud_authorized_keys.yml
@@ -201,11 +211,6 @@
   hosts: 'undercloud'
   vars:
     dci_status: 'post-run'
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
     remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
     openstack_certification_output_format: junit
@@ -296,7 +301,7 @@
     - block:
       - name: Upload stack details
         dci_job:
-          id: "{{ job_informations['job_id'] }}"
+          id: '{{ job_id }}'
           configuration: "{{ lookup('file', '/var/lib/dci-ansible-agent/.quickstart/tripleo-stack-dump.json') }}"
         ignore_errors: True
 
@@ -306,7 +311,7 @@
         dci_file:
           path: '{{ item.path }}'
           name: '{{ item.name }}'
-          job_id: "{{ job_informations['job_id'] }}"
+          job_id: '{{ job_id }}'
           mime: '{{ item.mime }}'
         with_items:
           - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
