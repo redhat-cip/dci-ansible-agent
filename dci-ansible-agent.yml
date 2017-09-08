@@ -244,7 +244,7 @@
           value: '{{ item.value }}'
         with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
         become: true
-        when: "dci_topic in ['OSP9', 'OSP10']"
+        when: "dci_topic in ['OSP9', 'OSP10'] and 'tempest' in remoteci_data.keys()"
 
       - name: Set the OpenStack release name
         set_fact:
