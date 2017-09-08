@@ -140,7 +140,6 @@
     dci_status: 'pre-run'
   tasks:
     - block:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
       - name: Add undercloud
         add_host:
