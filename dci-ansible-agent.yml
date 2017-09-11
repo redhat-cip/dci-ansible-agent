@@ -7,9 +7,6 @@
 #
 - hosts: localhost
   tasks:
-    - set_fact:
-        metadata:
-          experimental: '{{ dci_experimental is defined and dci_experimental }}'
     - name: Schedule a new job
       dci_job:
         components: '{{ dci_components|default([]) }}'
@@ -19,6 +16,7 @@
       dci_job:
         id: "{{ job_informations['job_id'] }}"
         metadata: '{{ metadata }}'
+      when: metadata is defined and metadata
 
 
 - hosts: all:localhost
