@@ -19,7 +19,11 @@
       dci_job:
         id: "{{ job_informations['job_id'] }}"
         metadata: '{{ metadata }}'
-
+    - name: Read the full job with the rconfiguration
+      dci_job:
+        id: "{{ job_informations['job_id'] }}"
+        embed: 'rconfiguration'
+      register: r_data
 
 - hosts: all:localhost
   vars:
@@ -34,6 +38,8 @@
         job_id: '{{ hostvars.localhost.job_informations.job_id }}'
         components: '{{ hostvars.localhost.job_informations.components }}'
         release: '{{ rhos_release[dci_topic] }}'
+        rconfiguration_name: "{{ r_data['job']['rconfiguration']['name']|default('default') }}"
+
 
 
 # New state
