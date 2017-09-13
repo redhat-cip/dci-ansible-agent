@@ -67,8 +67,8 @@
         file:
           path: '{{ item }}'
           state: directory
-          owner: dci-ansible-agent
-          group: dci-ansible-agent
+          owner: '{{ ansible_user_id }}'
+          group: '{{ ansible_group_id }}'
         with_items:
           - '{{ dci_cache_dir }}'
           - '{{ dci_mirror_location }}/dci_repo'
@@ -107,7 +107,7 @@
 
       - name: Generating RSA key for stack
         user:
-          name: 'dci-ansible-agent'
+          name: '{{ ansible_user_id }}'
           generate_ssh_key: 'yes'
 
       rescue:
@@ -193,7 +193,7 @@
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
-    openstack_certification_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
+    openstack_certification_dest_dir: '{{ ansible_env.HOME }}/.quickstart'
     openstack_certification_results_download: true
     openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
     openstack_certification_tempest_conf_path_is_remote: Yes
@@ -226,7 +226,7 @@
       - name: Copy tempest config overrides
         copy:
           src: tempest-overrides.conf
-          dest: ~/tempest-deployer-input.conf
+          dest: {{ ansible_env.HOME }}/tempest-deployer-input.conf
 
       - include_role:
           name: tripleo-inventory
@@ -278,15 +278,15 @@
           job_id: '{{ job_id }}'
           mime: '{{ item.mime }}'
         with_items:
-          - {'name': 'Tempest', 'path': '/var/lib/dci-ansible-agent/.quickstart/nosetests.xml', 'mime': 'application/junit'}
-          - {'name': 'Certification', 'path': '/var/lib/dci-ansible-agent/.quickstart/cert.junit', 'mime': 'application/junit'}
-          - {'name': 'certification.xml.gz', 'path': '/var/lib/dci-ansible-agent/.quickstart/certification.xml.gz', 'mime': 'application/x-compressed'}
-          - {'name': 'undercloud.tar.gz', 'path': '/var/lib/dci-ansible-agent/.quickstart/collected_files/undercloud.tar.gz', 'mime': 'application/x-compressed'}
+          - {'name': 'Tempest', 'path': '{{ ansible_env.HOME }}/.quickstart/nosetests.xml', 'mime': 'application/junit'}
+          - {'name': 'Certification', 'path': '{{ ansible_env.HOME }}/.quickstart/cert.junit', 'mime': 'application/junit'}
+          - {'name': 'certification.xml.gz', 'path': '{{ ansible_env.HOME }}/.quickstart/certification.xml.gz', 'mime': 'application/x-compressed'}
+          - {'name': 'undercloud.tar.gz', 'path': '{{ ansible_env.HOME }}/.quickstart/collected_files/undercloud.tar.gz', 'mime': 'application/x-compressed'}
         ignore_errors: yes
 
       - name: Clean result files
         file:
-          name: '/var/lib/dci-ansible-agent/.quickstart'
+          name: '{{ ansible_env.HOME }}/.quickstart'
           state: absent
 
       rescue:
