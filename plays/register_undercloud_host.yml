@@ -12,7 +12,7 @@
   authorized_key:
     user: stack
     state: present
-    key: "{{ lookup('file', '/var/lib/dci-ansible-agent/.ssh/id_rsa.pub') }}"
+    key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
   delegate_to: undercloud
 
 - slurp:
@@ -27,7 +27,7 @@
     key: "{{ id_rsa_pub.content | b64decode }}"
   delegate_to: undercloud
 
-- name: check the privilege of the ~stack/.ssh/config file
+- name: check the privilege of the /home/stack/.ssh/config file
   file:
     path: /home/stack/.ssh/config
     owner: stack
@@ -43,14 +43,14 @@
 
 - name: Ensure ~/.quickstart is a thing to please tripleo-inventory
   file:
-    name: ~/.quickstart
+    name: "{{ lookup('env', 'HOME') }}/.quickstart"
     state: directory
 
 - name: Reuse the user ssh key
   copy:
     remote_src: True
-    src: '/var/lib/dci-ansible-agent/.ssh/id_rsa'
-    dest: '/var/lib/dci-ansible-agent/.quickstart/id_rsa_undercloud'
+    src: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+    dest: "{{ lookup('env', 'HOME') }}/.quickstart/id_rsa_undercloud"
     mode: '0600'
 
 - name: Add undercloud in the /etc/hosts
