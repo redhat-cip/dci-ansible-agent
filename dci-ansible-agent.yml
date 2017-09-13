@@ -67,8 +67,8 @@
         file:
           path: '{{ item }}'
           state: directory
-          owner: dci-ansible-agent
-          group: dci-ansible-agent
+          owner: '{{ ansible_user_id }}'
+          group: '{{ ansible_group_id }}'
         with_items:
           - '{{ dci_cache_dir }}'
           - '{{ dci_mirror_location }}/dci_repo'
@@ -107,7 +107,7 @@
 
       - name: Generating RSA key for stack
         user:
-          name: 'dci-ansible-agent'
+          name: '{{ ansible_user_id }}'
           generate_ssh_key: 'yes'
 
       rescue:
