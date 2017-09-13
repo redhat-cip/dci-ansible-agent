@@ -7,33 +7,20 @@
 #
 - hosts: localhost
   tasks:
-    - set_fact:
-        metadata:
-          experimental: '{{ dci_experimental is defined and dci_experimental }}'
     - name: Schedule a new job
       dci_job:
         components: '{{ dci_components|default([]) }}'
         topic: '{{ dci_topic }}'
       register: job_informations
+    - set_fact:
+        metadata:
+          experimental: '{{ dci_experimental is defined and dci_experimental }}'
+        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
+        components: '{{ hostvars.localhost.job_informations.components }}'
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations['job_id'] }}"
         metadata: '{{ metadata }}'
-
-
-- hosts: all:localhost
-  vars:
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
-  tasks:
-    - name: Set  global variables
-      set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
-        components: '{{ hostvars.localhost.job_informations.components }}'
-        release: '{{ rhos_release[dci_topic] }}'
 
 
 # New state
@@ -139,21 +126,13 @@
   tasks:
     - block:
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
-      - name: Add undercloud
-        add_host:
-          name: "undercloud"
-          groups: "undercloud"
-          ansible_fqdn: "{{ undercloud_ip }}"
-          ansible_user: "stack"
-          ansible_host: "{{ undercloud_ip }}"
-          ansible_password: "{{ undercloud_password| default(None) }}"
-        when: undercloud_ip is defined and undercloud_ip
 
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
       - include: plays/failure.yml
+
 
 # Run state
 #
@@ -167,36 +146,38 @@
   tasks:
     - block:
       - include: '{{ dci_config_dir }}/hooks/running.yml'
-      - name: ensure undercloud host is in Ansible inventory
-        fail:
-          msg: >
-            undercloud should be in the Ansible inventory. If you don`t
-            use the undercloud_ip in your settings.yml, you can register it by
-            yourself at the end of the running.yml hook
-        when: "'undercloud' not in hostvars"
+
+      - include: plays/register_undercloud_host.yml
+
       rescue:
-      - include: plays/set_undercloud_authorized_keys.yml
+      # Included a second time in case of failure in hooks/running.yml,
+      # this is required for collect-logs to work
+      - include: plays/register_undercloud_host.yml
+
       - include_role:
           name: collect-logs
         delegate_to: undercloud
+        ignore_errors: True
+
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
       - include: plays/failure.yml
 
 
-- name: 'add the undercloud node to host list'
-  hosts: localhost
+- hosts: all:localhost
   vars:
-    dci_status: 'post-run'
+    rhos_release:
+      OSP8: 'liberty'
+      OSP9: 'mitaka'
+      OSP10: 'newton'
+      OSP11: 'ocata'
   tasks:
-    - block:
-      - include: plays/set_undercloud_authorized_keys.yml
-      rescue:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-
-      - include: plays/failure.yml
+    - name: Declare facts on all hosts
+      set_fact:
+        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
+        components: '{{ hostvars.localhost.job_informations.components }}'
+        release: '{{ rhos_release[dci_topic] }}'
 
 
 # Post-run state
