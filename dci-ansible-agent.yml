@@ -13,14 +13,13 @@
         topic: '{{ dci_topic }}'
       register: job_informations
     - set_fact:
-        metadata:
-          experimental: '{{ dci_experimental is defined and dci_experimental }}'
         job_id: '{{ hostvars.localhost.job_informations.job_id }}'
         components: '{{ hostvars.localhost.job_informations.components }}'
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations['job_id'] }}"
-        metadata: '{{ metadata }}'
+        metadata: '{{ dci_metadata }}'
+      when: dci_metadata is defined and dci_metadata
 
 
 # New state
