@@ -10,16 +10,16 @@ Install the rpm
 You be able to install the rpm of DCI Ansible Agent, you will need to
 activate some extra repositories.
 
-If you are running RHEL7, you need to enable a couple of extra channels:
+If you are running RHEL7, you need to enable a couple of extra channels::
 
     # subscription-manager repos '--disable=*' --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms
 
-You will also need the EPEL and DCI repositories:
+You will also need the EPEL and DCI repositories::
 
     # yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     # yum install -y https://packages.distributed-ci.io/dci-release.el7.noarch.rpm
 
-You can now install the ``dci-ansible-agent`` package:
+You can now install the ``dci-ansible-agent`` package::
 
     # yum install -y dci-ansible-agent
 
