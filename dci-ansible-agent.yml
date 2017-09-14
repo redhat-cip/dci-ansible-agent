@@ -191,6 +191,7 @@
     dci_status: 'post-run'
     remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
+    tempest_exit_on_failure: false
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
@@ -233,8 +234,6 @@
 
       - include_role:
           name: validate-tempest
-          args:
-            tempest_exit_on_failure: False
 
       - include_role:
           name: openstack-certification
