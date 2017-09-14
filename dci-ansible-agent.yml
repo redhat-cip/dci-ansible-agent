@@ -198,7 +198,6 @@
     openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
     openstack_certification_tempest_conf_path_is_remote: Yes
     openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
-    openstack_stackdump_dest_dir: '/var/lib/dci-ansible-agent/.quickstart'
   tasks:
     - block:
       - name: default-overrides.conf is in python-tempestconf wince OSP11
@@ -232,9 +231,6 @@
         copy:
           src: tempest-overrides.conf
           dest: ~/tempest-deployer-input.conf
-
-      - include_role:
-          name: openstack-stackdump
 
       - include_role:
           name: tripleo-inventory
@@ -277,12 +273,6 @@
     dci_status: 'post-run'
   tasks:
     - block:
-      - name: Upload stack details
-        dci_job:
-          id: '{{ job_id }}'
-          configuration: "{{ lookup('file', '/var/lib/dci-ansible-agent/.quickstart/tripleo-stack-dump.json') }}"
-        ignore_errors: True
-
       # NOTE(dsavinea) : We need to ignore the errors because cert.txt
       # is only present for OSP10 for the moment.
       - name: Upload results
