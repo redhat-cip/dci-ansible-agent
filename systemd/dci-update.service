@@ -3,7 +3,7 @@ Description=Update the DCI packages
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/yum update -y dci-ansible python-dciclient
+ExecStart=/usr/bin/yum update -y dci-ansible python-dciclient dci-ansible-agent
 SuccessExitStatus=0
 
 [Install]
