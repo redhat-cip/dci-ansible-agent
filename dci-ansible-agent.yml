@@ -240,8 +240,10 @@
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+        delegate_to: localhost
 
       - include: plays/failure.yml
+        delegate_to: localhost
 
 
 - name: Collect logs
@@ -258,8 +260,11 @@
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+        delegate_to: localhost
 
       - include: plays/failure.yml
+        delegate_to: localhost
+
 
 - name: 'Upload files'
   hosts: localhost
