@@ -205,14 +205,14 @@
           name: python-tempestconf
           state: present
         become: true
-        when: "dci_topic in ['OSP11']"
+        when: dci_topic in ['OSP11']
 
       - name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
         package:
           name: openstack-tempest
           state: present
         become: true
-        when: "dci_topic in ['OSP9', 'OSP10']"
+        when: dci_topic in ['OSP9', 'OSP10']
 
       - ini_file:
           path: /etc/tempest/default-overrides.conf
@@ -221,7 +221,7 @@
           value: '{{ item.value }}'
         with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
         become: true
-        when: "dci_topic in ['OSP9', 'OSP10'] and 'tempest' in remoteci_data.keys()"
+        when: dci_topic in ['OSP9', 'OSP10'] and 'tempest' in remoteci_data.keys()
 
       - name: Copy tempest config overrides
         copy:
