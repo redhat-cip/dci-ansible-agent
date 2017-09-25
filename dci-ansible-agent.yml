@@ -154,7 +154,7 @@
       - include: plays/register_undercloud_host.yml
 
       - include_role:
-          name: collect-logs
+          name: "{{ dci_topic }}/collect-logs"
         delegate_to: undercloud
         ignore_errors: True
 
@@ -191,6 +191,8 @@
     remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
     tempest_exit_on_failure: false
+    tempest_format: 'venv'
+    run_tempest: true
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
@@ -229,13 +231,13 @@
           dest: ~/tempest-deployer-input.conf
 
       - include_role:
-          name: tripleo-inventory
+          name: "{{ dci_topic }}/validate-tempest"
 
       - include_role:
-          name: validate-tempest
+          name: "{{ dci_topic }}/tripleo-inventory"
 
       - include_role:
-          name: openstack-certification
+          name: "openstack-certification"
         when: dci_topic in ['OSP10', 'OSP11']
 
       rescue:
@@ -256,7 +258,7 @@
   tasks:
     - block:
       - include_role:
-          name: collect-logs
+          name: "{{ dci_topic }}/collect-logs"
 
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
