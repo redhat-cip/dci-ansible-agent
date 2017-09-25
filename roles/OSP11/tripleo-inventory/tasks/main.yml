@@ -1,0 +1,15 @@
+---
+
+- name: Ensure gather_facts has been run against localhost
+  setup:
+  delegate_to: localhost
+  delegate_facts: True
+  when: hostvars['localhost'].ansible_user_dir is not defined
+
+- include: inventory.yml
+  when: inventory in ['multinode', 'all', 'undercloud']
+  static: no
+
+- include: openstack.yml
+  when: inventory == 'openstack'
+  static: no
