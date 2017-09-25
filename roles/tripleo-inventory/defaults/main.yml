@@ -1,9 +1,0 @@
----
-
-# SSH key used to access the undercloud machine.
-undercloud_key: "{{ local_working_dir }}/id_rsa_undercloud"
-# Default to 'undercloud' if the overcloud has not been deployed yet, or 'all'
-# in case we want to inventory all the hosts.
-inventory: undercloud
-# Type of undercloud.
-undercloud_type: virtual
