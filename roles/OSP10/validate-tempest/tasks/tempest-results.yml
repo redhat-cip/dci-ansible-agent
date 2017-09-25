@@ -1,0 +1,62 @@
+---
+- ignore_errors: true
+  block:
+    - name: Generate testrepository.subunit results file
+      shell: >
+        {% if tempest_format == 'venv' %}source {{ working_dir }}/tempest_git/.venv/bin/activate; {% endif %}
+        testr last --subunit | subunit-1to2 > {{ working_dir }}/tempest/testrepository.subunit
+      args:
+        chdir: "{{ working_dir }}/tempest"
+
+    - name: Generate HTML results file
+      shell: |
+        {% if tempest_format == 'venv' %}source {{ working_dir }}/tempest_git/.venv/bin/activate; {% endif %}
+        subunit2html $(find {{ working_dir }}/tempest/.testrepository -name [0-9] \
+        | head -1) {{ working_dir }}/tempest/tempest.html \
+        2>&1 >> {{ tempest_log_file }}
+
+    - name: Generate XML results file
+      shell: |
+        {% if tempest_format == 'venv' %}source {{ working_dir }}/tempest_git/.venv/bin/activate; {% endif %}
+        subunit2junitxml $(find {{ working_dir }}/tempest/.testrepository -name [0-9] \
+        | head -1) {{ working_dir }}/tempest/tempest.xml \
+        2>&1 >> {{ tempest_log_file }}
+
+    - name: Fetch HTML results
+      fetch:
+        src: "{{ working_dir }}/tempest/tempest.html"
+        dest: "{{ lookup('env', 'PWD') }}/tempest.html"
+        flat: yes
+
+    - name: Fetch nosetests results
+      fetch:
+        src: "{{ working_dir }}/tempest/tempest.xml"
+        dest: "{{ lookup('env', 'PWD') }}/nosetests.xml"
+        flat: yes
+
+    - name: Copying tempestmail files
+      synchronize:
+        src: tempestmail/
+        dest: "{{ working_dir }}/tempestmail/"
+        use_ssh_args: true
+
+    - name: Copying skip file
+      synchronize:
+        src: "vars/tempest_skip_{{ release }}.yml"
+        dest: "{{ working_dir }}/tempestmail/"
+        use_ssh_args: true
+
+    - name: Send tempest results by mail
+      shell: >
+          {% if lookup('env', 'LOG_PATH') %}LOG_PATH='{{ lookup('env', 'LOG_PATH') }}' {% endif %}
+          ./tempestmail.py -c {{ tempestmail_config }} --job
+          "{{ lookup('env', 'JOB_NAME')|default('Periodic job', true) }}"
+          --file "{{ working_dir }}/{{ tempest_log_file }}"
+          --skip-file "{{ working_dir }}/tempestmail/tempest_skip_{{ release }}.yml"
+      args:
+        chdir: "{{ working_dir }}/tempestmail"
+      ignore_errors: yes
+
+- name: Exit with tempest result code if configured
+  shell: tail -10 {{ tempest_log_file }}; exit {{ tempest_result.rc }}
+  when: tempest_result.rc != 0 and tempest_exit_on_failure|bool

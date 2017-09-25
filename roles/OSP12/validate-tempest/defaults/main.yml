@@ -1,0 +1,41 @@
+---
+
+floating_ip_cidr: "{{ undercloud_network_cidr }}"
+public_net_pool_start: "{{ floating_ip_cidr|nthhost(100) }}"
+public_net_pool_end: "{{ floating_ip_cidr|nthhost(120) }}"
+public_net_gateway: "{{ floating_ip_cidr|nthhost(1) }}"
+tempest_log_file: 'tempest_output.log'
+test_regex: smoke
+check_tempest_bugs: false
+
+public_net_name: public
+public_network_type: flat
+public_physical_network: datacentre
+public_segmentation_id: ''
+tenant_network_cidr: 192.168.0.0/24
+undercloud_public_net_name: ctlplane
+
+tempest_deployer_input_file: tempest-deployer-input.conf
+# steps:
+tempest_undercloud: false
+tempest_config: true
+tempest_overcloud: true
+run_tempest: false
+post_tempest: true
+tempest_format: packages # venv or packages
+tempest_whitelist_file_src: "whitelist_file.j2"
+tempest_whitelist_file: "whitelist_file.conf"
+tempest_whitelist: []
+tempest_plugins: []
+tempest_extra_config: {}# A dict containing values which needs to be overridden in tempest.conf
+skip_file_src: "skip_file.j2"
+skip_file: skip_file
+tempest_until_failure: false
+tempest_exit_on_failure: true
+# Set tempest_version for different release
+# For forked-tempest, we have branched name in synced with releases.
+tempest_version_dict: { 'newton': 'newton', 'ocata': '16.0.0', 'pike': '16.1.0', 'master': 'master'}
+tempest_version: "{{ tempest_version_dict[release] }}"
+tempestmail_config: config.yaml
+tempest_track_resources: true
+tempest_test_image_path: http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img
