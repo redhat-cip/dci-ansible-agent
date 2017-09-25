@@ -1,0 +1,39 @@
+#!/usr/bin/python
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+import json
+import os
+
+from novaclient import __version__ as nc_version
+from novaclient import client
+
+# We can remove this logic when newton (novaclient 6) is EOL
+if nc_version[0] <= "6":
+    nova = client.Client(2,
+                         os.environ.get("OS_USERNAME"),
+                         os.environ.get("OS_PASSWORD"),
+                         os.environ.get("OS_TENANT_NAME"),
+                         auth_url=os.environ.get("OS_AUTH_URL"))
+else:
+    nova = client.Client(2,
+                         os.environ.get("OS_USERNAME"),
+                         os.environ.get("OS_PASSWORD"),
+                         project_name=os.environ.get("OS_TENANT_NAME"),
+                         auth_url=os.environ.get("OS_AUTH_URL"))
+
+oc_servers = {server.name: server.networks['ctlplane'][0]
+              for server in nova.servers.list()
+              if server.networks.get('ctlplane')}
+print(json.dumps(oc_servers, indent=4))
