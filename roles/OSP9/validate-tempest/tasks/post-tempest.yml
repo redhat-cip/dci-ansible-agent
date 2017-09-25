@@ -1,0 +1,3 @@
+---
+- include: tempest-status.yml
+- include: tempest-results.yml
