@@ -1,135 +1,37 @@
 #!/bin/bash
-
+set -eux
 TMPDIR='/tmp/dci-tmp-dir'
 BASEDIR=$(pwd)
 
 
 get_repo() {
-    github=${1}
-    repo=$(basename ${github})
-    sha=${2}
-    roles=${3}
+    repo=${1}
+    roles=${2}
     cd ${TMPDIR}
-    git clone https://github.com/${github} ${repo}
+    git clone https://code.engineering.redhat.com/gerrit/${repo}.git ${repo}
     cd ${repo}
-    git checkout ${sha}
-    cd ${TMPDIR}
-    if [ -d ${repo}/roles ]; then
+    for topic in OSP8 OSP9 OSP10 OSP11 OSP12; do
+        branch=$(echo ${topic}|sed 's,OSP,origin/stable/rhos-,')
+        target=${BASEDIR}/roles/${topic}
+        mkdir -p ${target}
+        git checkout -b ${topic} ${branch}
+        # See: https://review.openstack.org/#/c/507889/
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP11" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/65/119365/3 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP10" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/83/119483/1 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP9" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/52/119452/2 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP8" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/57/119557/1 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP8" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/56/119556/2 && git cherry-pick FETCH_HEAD
+        # until https://review.openstack.org/#/c/507889/ is merged upstream and backported on all the branches
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  find -name '*.yml' -exec sed -i "s/lookup('env', 'PWD')/local_working_dir/" "{}" \;
         for i in ${roles}; do
-            cp -av ${repo}/roles/${i} ${BASEDIR}/roles/${i}
+           cp -av roles/${i} ${target}/${i}
         done
-    else
-        cp -av ${repo} ${BASEDIR}/roles/${roles}
-        rm -rf ${BASEDIR}/roles/${roles}/.git
-    fi
+	git reset --hard
+	git clean -ffdx
+    done
 }
 
 rm -Rf ${TMPDIR} ${BASEDIR}/roles
-mkdir -p ${TMPDIR} ${BASEDIR}/roles
-get_repo openstack/tripleo-quickstart dac8d90aafa7c33dd0c6c9a45926dcc882596597 "common tripleo-inventory"
-get_repo openstack/tripleo-quickstart-extras 6eeef321a0aedf610ac8dabb2d3c99f674d28b67 "collect-logs extras-common validate-tempest"
-
-cd ${BASEDIR}/roles
-cat << EOF | patch -p1
-diff -ru roles2/validate-tempest/tasks/stackviz.yml roles/validate-tempest/tasks/stackviz.yml
---- roles2/validate-tempest/tasks/stackviz.yml	2017-04-11 11:37:46.501719746 -0400
-+++ roles/validate-tempest/tasks/stackviz.yml	2017-04-10 15:28:53.352639119 -0400
-@@ -9,7 +9,8 @@
-   synchronize:
-       src: stackviz/
-       dest: "{{ working_dir }}/stackviz_static"
--      use_ssh_args: true
-+      # TODO(Goneri): https://github.com/ansible/ansible/issues/21774
-+      # use_ssh_args: true
- 
- - name: Install pip
-   easy_install:
-diff -ru roles2/validate-tempest/tasks/tempest-results.yml roles/validate-tempest/tasks/tempest-results.yml
---- roles2/validate-tempest/tasks/tempest-results.yml	2017-04-11 11:37:46.501719746 -0400
-+++ roles/validate-tempest/tasks/tempest-results.yml	2017-04-10 15:28:53.352639119 -0400
-@@ -2,7 +2,7 @@
- - name: Fetch nosetests results
-   fetch:
-     src: "{{ working_dir }}/tempest/tempest.xml"
--    dest: "{{ lookup('env', 'PWD') }}/nosetests.xml"
-+    dest: "{{ local_working_dir }}/nosetests.xml"
-     flat: yes
- 
- - name: Generate subunit results file
-@@ -14,7 +14,7 @@
- - name: Fetch subunit results
-   fetch:
-     src: "{{ working_dir }}/tempest/results.subunit"
--    dest: "{{ lookup('env', 'PWD') }}/results.subunit"
-+    dest: "{{ local_working_dir }}/results.subunit"
-     flat: yes
- 
- - ignore_errors: true
-@@ -36,7 +36,7 @@
-     - name: Fetch HTML results
-       fetch:
-         src: "{{ working_dir }}/tempest/tempest.html"
--        dest: "{{ lookup('env', 'PWD') }}/tempest.html"
-+        dest: "{{ local_working_dir}}/tempest.html"
-         flat: yes
- 
- - name: Exit with tempest result code if configured
-diff -ur roles.save/validate-tempest/templates/configure-tempest.sh.j2 roles/validate-tempest/templates/configure-tempest.sh.j2
---- roles.save/validate-tempest/templates/configure-tempest.sh.j2	2017-04-11 13:32:18.847670607 -0400
-+++ roles/validate-tempest/templates/configure-tempest.sh.j2	2017-04-11 15:19:09.000000000 -0400
-@@ -86,7 +86,7 @@
- {{ working_dir }}/tempest_git/tools/with_venv.sh pip install {{ working_dir }}/tempest_git junitxml
- # Create Tempest Workspace
- cd {{ working_dir }}/tempest
--{% if release in ['mitaka','newton'] %}
-+{% if release in ['liberty', 'mitaka','newton'] %}
- {{ working_dir }}/tempest_git/tools/configure-tempest-directory
- {% else %}
- {{ working_dir }}/tempest_git/tools/with_venv.sh tempest init {{ working_dir }}/tempest
-@@ -95,7 +95,7 @@
- {% elif tempest_format == "packages" %}
- # Install Tempest Package
- sudo yum -y install openstack-tempest python-junitxml
--{% if release in ['mitaka','newton'] %}
-+{% if release in ['liberty', 'mitaka','newton'] %}
- cd {{ working_dir }}/tempest
- /usr/share/openstack-tempest-*/tools/configure-tempest-directory
- {% else %}
-@@ -106,7 +106,7 @@
- {% endif %}
- 
- # Install OpenStack Services Tempest plugin
--{% if release != "mitaka" %}
-+{% if release not in ['liberty', 'mitaka'] %}
- # FIXME(chkumar246): Install tempest plugin from package currently then switch to install_test_packages script
- sudo yum -y install python-ceilometer-tests python-zaqar-tests python-ironic-inspector-tests python-gnocchi-tests \
-     python-aodh-tests python-nova-tests python-mistral-tests python-heat-tests python-keystone-tests \
-@@ -114,7 +114,7 @@
- {% endif %}
- 
- # Generate tempest configuration files
--{% if release in ['mitaka','newton'] %}
-+{% if release in ['liberty', 'mitaka','newton'] %}
- export TEMPESTCONF="{{ working_dir }}/tempest/tools/config_tempest.py"
- {% else %}
- {% if tempest_format == "venv" %}
-EOF
-
-cd ${BASEDIR}/roles
-cat << EOF | patch -p2
-diff --git a/roles/validate-tempest/defaults/main.yml b/roles/validate-tempest/defaults/main.yml
-index ca7d4ab..8d88236 100644
---- a/roles/validate-tempest/defaults/main.yml
-+++ b/roles/validate-tempest/defaults/main.yml
-@@ -31,6 +31,6 @@ tempest_failing: false
- tempest_exit_on_failure: true
- # Set tempest_version for different release
- # For forked-tempest, we have branched name in synced with releases.
--tempest_version_dict: { 'mitaka': 'mitaka', 'newton': 'newton',
--                         'ocata': '16.0.0', 'master': 'master'}
-+tempest_version_dict: { 'liberty': 'liberty', 'mitaka': 'mitaka', 'newton': 'newton',
-+                         'ocata': '16.0.0', 'master': 'master'}
- tempest_version: "{{ tempest_version_dict[release] }}"
-EOF
-
-curl -q 'https://review.openstack.org/changes/463058/revisions/ee5ffdccd048df13242f48fd5aed8f7e073a2289/patch?download'|base64 -d|patch -p2
+mkdir -p ${TMPDIR}
+get_repo tripleo-quickstart "common tripleo-inventory"
+get_repo tripleo-quickstart-extras "collect-logs extras-common validate-tempest"

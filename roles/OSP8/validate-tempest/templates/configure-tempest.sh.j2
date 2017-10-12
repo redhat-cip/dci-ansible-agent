@@ -1,0 +1,154 @@
+### --start_docs
+
+## Configure tempest
+## -----------------
+
+{% if tempest_overcloud|bool %}
+## ::
+source {{ working_dir }}/overcloudrc
+
+## * Clean up from any previous tempest run
+## ::
+
+rm -rf {{ working_dir }}/tempest
+# On doing tempest init workspace, it will create workspace directory
+# as well as .workspace directory to store workspace information
+# We need to delete .workspace directory otherwise tempest init failed
+# to create tempest directory.
+rm -rf {{ working_dir }}/.tempest
+rm -rf {{ working_dir }}/tempest_git
+rm -rf {{ working_dir }}/python-tempestconf
+
+## * Clean up network if it exists from previous run
+## ::
+
+for i in $(neutron floatingip-list -c id -f value)
+do
+    neutron floatingip-disassociate $i
+    neutron floatingip-delete $i
+done
+for i in $(neutron router-list -c id -f value); do neutron router-gateway-clear $i; done
+for r in $(neutron router-list -c id -f value); do
+    for p in $(neutron router-port-list $r -c id -f value); do
+        neutron router-interface-delete $r port=$p || true
+    done
+done
+for i in $(neutron router-list -c id -f value); do neutron router-delete $i; done
+for i in $(neutron port-list -c id -f value); do neutron port-delete $i; done
+for i in $(neutron net-list -c id -f value); do neutron net-delete $i; done
+
+neutron net-create {{ public_net_name }} --router:external=True \
+    --provider:network_type {{ public_network_type }} \
+    {% if public_segmentation_id != '' %}
+    --provider:segmentation_id {{ public_segmentation_id }} \
+{% endif %}
+    --provider:physical_network {{ public_physical_network }}
+
+public_net_id=$(neutron net-show {{ public_net_name }} -f value -c id)
+
+neutron subnet-create --name ext-subnet \
+    --allocation-pool \
+    start={{ public_net_pool_start }},end={{ public_net_pool_end }} \
+    --disable-dhcp \
+    --gateway {{ public_net_gateway }} \
+    {{ public_net_name }} {{ floating_ip_cidr }}
+{% else %}
+source {{ working_dir }}/stackrc
+public_net_id=$(neutron net-show {{ undercloud_public_net_name }} -f value -c id)
+{% endif %}
+
+## * Ensure heat_stack_owner role is present
+## ::
+openstack role show heat_stack_owner > /dev/null || openstack role create heat_stack_owner
+
+## * Generate a tempest configuration
+## ::
+
+mkdir {{ working_dir }}/tempest
+{% if tempest_format == "venv" %}
+{% if release in ['liberty', 'mitaka','newton'] %}
+# Clone all the git related stuff in a seperate directory
+git clone https://github.com/redhat-openstack/tempest {{ working_dir }}/tempest_git
+{% else %}
+git clone https://github.com/openstack/tempest {{ working_dir }}/tempest_git
+{% endif %}
+# set tempest_version
+pushd {{ working_dir }}/tempest_git
+git fetch origin {{ tempest_version }}
+git checkout {{ tempest_version }}
+popd
+# Install required dependency for creating venv
+sudo yum install -y libffi-devel openssl-devel python-virtualenv gcc
+# Create .venv in tempest_git directory with --system-site-packages to access tempest plugins
+virtualenv --system-site-packages {{ working_dir }}/tempest_git/.venv
+{{ working_dir }}/tempest_git/tools/with_venv.sh pip install -U pip
+{{ working_dir }}/tempest_git/tools/with_venv.sh pip install -U setuptools
+{{ working_dir }}/tempest_git/tools/with_venv.sh pip install {{ working_dir }}/tempest_git junitxml
+# Create Tempest Workspace
+cd {{ working_dir }}/tempest
+{% if release in ['liberty', 'mitaka','newton'] %}
+{{ working_dir }}/tempest_git/tools/configure-tempest-directory
+{% else %}
+{{ working_dir }}/tempest_git/tools/with_venv.sh tempest init {{ working_dir }}/tempest
+{% endif %}
+# Create Tempest Workspace from tempest rdo package
+{% elif tempest_format == "packages" %}
+# Install Tempest Package
+sudo yum -y install openstack-tempest python-junitxml
+{% if release in ['liberty', 'mitaka','newton'] %}
+cd {{ working_dir }}/tempest
+/usr/share/openstack-tempest-*/tools/configure-tempest-directory
+{% else %}
+# Install python-tempestconf and get default-overrides.conf in /etc/tempest dir.
+sudo yum -y install python-tempestconf
+tempest init {{ working_dir }}/tempest
+{% endif %}
+{% endif %}
+
+# Install OpenStack Services Tempest plugin
+# FIXME(chkumar246): Install tempest plugin from package currently then switch to install_test_packages script
+sudo yum -y install python-ceilometer-tests python-zaqar-tests python-gnocchi-tests \
+    python-aodh-tests python-nova-tests python-heat-tests python-keystone-tests \
+    python-ironic-tests python-glance-tests python-swift-tests python-neutron-tests python-cinder-tests \
+{% if release not in ["liberty", "mitaka"] %}
+sudo yum -y install python-mistral-tests python-ironic-inspector-tests
+{% endif %}
+
+# Generate tempest configuration files
+{% if release in ['liberty', 'mitaka','newton'] %}
+export TEMPESTCONF="{{ working_dir }}/tempest/tools/config_tempest.py"
+{% else %}
+{% if tempest_format == "venv" %}
+# Install python-tempestconf
+git clone https://github.com/redhat-openstack/python-tempestconf {{ working_dir }}/python-tempestconf
+{{ working_dir }}/tempest_git/tools/with_venv.sh pip install {{ working_dir }}/python-tempestconf
+export TEMPESTCONF="{{ working_dir }}/tempest_git/tools/with_venv.sh discover-tempest-config"
+{% elif tempest_format == "packages" %}
+export TEMPESTCONF="/usr/bin/discover-tempest-config"
+{% endif %}
+{% endif %}
+
+# Go to Tempest Workspace
+cd {{ working_dir }}/tempest
+
+# Generate Tempest Config file using python-tempestconf
+${TEMPESTCONF} --out etc/tempest.conf \
+  --network-id $public_net_id \
+  --deployer-input ~/{{ tempest_deployer_input_file }} \
+  --debug --create \
+  identity.uri $OS_AUTH_URL \
+  identity.admin_password $OS_PASSWORD \
+  identity.admin_username $OS_USERNAME \
+  network.tenant_network_cidr {{ tenant_network_cidr }} \
+  object-storage.operator_role swiftoperator \
+  compute.allow_tenant_isolation true \
+  compute.build_timeout 500 \
+  volume-feature-enabled.api_v1 False \
+  validation.image_ssh_user cirros \
+  validation.ssh_user cirros \
+  network.build_timeout 500 \
+  volume.build_timeout 500 \
+  orchestration.stack_owner_role heat_stack_owner
+
+### --stop_docs
+
