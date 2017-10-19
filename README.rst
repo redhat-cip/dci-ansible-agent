@@ -68,14 +68,13 @@ You should get an output similar to this one::
 Then, you need to edit the `/etc/dci-ansible-agent/settings.yml` file::
 
     dci_topic: "OSP10"
-    dci_client_id: "{{ lookup('env', 'DCI_CLIENT_ID') }}"
-    dci_api_secret: "{{ lookup('env', 'DCI_API_SECRET') }}"
     dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
-    dci_remoteci: "test-ovb-0"
     undercloud_ip: "fooo"
     dci_mirror_location: "/var/www/html"
     dci_config_dir: "/etc/dci-ansible-agent"
     dci_cache_dir: "/var/lib/dci-ansible-agent"
+
+`undercloud_ip` is probably the sole parameter that you have to change for a first run.
 
 ------------
 
