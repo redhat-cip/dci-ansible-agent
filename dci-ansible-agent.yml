@@ -171,6 +171,7 @@
       OSP9: 'mitaka'
       OSP10: 'newton'
       OSP11: 'ocata'
+      OSP12: 'pike'
   tasks:
     - name: Declare facts on all hosts
       set_fact:
