@@ -54,8 +54,10 @@ install -p -d -m 755 %{buildroot}/%{_sharedstatedir}/dci-ansible-agent
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
+# NOTE(spredzy): Specify /bin/bash instead of /sbin/nologin
+# because of https://github.com/ansible/ansible/issues/30620
 getent passwd %{name} >/dev/null || \
-    useradd -r -m -g %{name} -d %{_sharedstatedir}/%{name} -s /sbin/nologin \
+    useradd -r -m -g %{name} -d %{_sharedstatedir}/%{name} -s /bin/bash \
             -c "DCI-Agent service" %{name}
 exit 0
 
