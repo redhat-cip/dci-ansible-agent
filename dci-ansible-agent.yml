@@ -194,9 +194,7 @@
     tempest_exit_on_failure: false
     run_tempest: true
     test_regex: ''
-    # NOTE(Goneri): we avoid the skip-file because of a bug with os-testr on OSP9:
-    #  https://bugs.launchpad.net/os-testr/+bug/1506215
-    skip_file_src: ''
+    skip_file_src: "{{ remoteci_data['tempest']['skip_file_src'] | default('') }}"
     openstack_certification_output_format: junit
     openstack_certification_output_filename: cert.junit
     openstack_certification_dest_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
