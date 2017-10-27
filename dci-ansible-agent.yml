@@ -242,7 +242,7 @@
 
       - include_role:
           name: "openstack-certification"
-        when: dci_topic in ['OSP10', 'OSP11']
+        when: dci_topic in ['OSP10', 'OSP11'] and dci_certification_enabled is defined and dci_certification_enabled
 
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"

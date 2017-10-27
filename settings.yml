@@ -5,6 +5,7 @@ dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
 dci_cache_dir: "/var/lib/dci-ansible-agent"
 dci_teardown_on_failure: True
+dci_certification_enabled: True
 
 #
 # dci_metadata: Metadata to attach to a job [optional]
