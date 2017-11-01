@@ -1,4 +1,4 @@
-ansible-role-tripleo-tempest
+validate-tempest
 =========
 
 Run tempest tests on undercloud or overcloud.
@@ -34,6 +34,10 @@ Role Variables
                      installed
 * `tempest_extra_config`: dict - A dict of tempest configuration which needs to be overridden in tempest.conf,
                           It should be like section.key: value.
+* `tempest_conf_removal`: dict - A dict of tempest configuration which will be
+                          removed from tempest.conf file.
+                          Format: section.key: value
+* `public_physical_network`: <string> The name of the border physical network (default: datacentre).
 
 Skip tests file
 ---------------
@@ -88,7 +92,7 @@ Example Playbook
       hosts: undercloud
       gather_facts: no
       roles:
-        - tripleo-tempest
+        - validate-tempest
 
 License
 -------
