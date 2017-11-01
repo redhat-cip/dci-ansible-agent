@@ -17,11 +17,16 @@ get_repo() {
         git checkout -b ${topic} ${branch}
 
         # See: https://review.openstack.org/#/c/507889/
-        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP11" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/65/119365/3 && git cherry-pick FETCH_HEAD
-        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP10" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/83/119483/1 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP11" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/65/119365/5 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP10" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/65/119365/5 && git cherry-pick FETCH_HEAD
         [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP9" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/52/119452/2 && git cherry-pick FETCH_HEAD
         [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP8" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/57/119557/1 && git cherry-pick FETCH_HEAD
         [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP8" ] && git fetch https://code.engineering.redhat.com/gerrit/tripleo-quickstart-extras refs/changes/56/119556/2 && git cherry-pick FETCH_HEAD
+
+        # https://review.openstack.org/#/c/514313/
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP10" ] && git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/13/514313/1 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP11" ] && git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/13/514313/1 && git cherry-pick FETCH_HEAD
+        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP12" ] && git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/13/514313/1 && git cherry-pick FETCH_HEAD
         # until https://review.openstack.org/#/c/507889/ is merged upstream and backported on all the branches
 
         [ ${repo} = 'tripleo-quickstart-extras' ] &&  find -name '*.yml' -exec sed -i "s/lookup('env', 'PWD')/local_working_dir/" "{}" \;

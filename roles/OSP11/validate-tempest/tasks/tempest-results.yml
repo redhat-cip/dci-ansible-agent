@@ -15,6 +15,12 @@
         | head -1) {{ working_dir }}/tempest/tempest.html \
         2>&1 >> {{ tempest_log_file }}
 
+    - name: Generate XML results file
+      shell: |
+        find '{{ working_dir }}/tempest/.testrepository/' -regex '.*/[0-9]+' \
+        | while read name; do cat "$name"; done \
+        > '{{ working_dir }}/tempest/tempest.xml'
+
     - name: Fetch HTML results
       fetch:
         src: "{{ working_dir }}/tempest/tempest.html"
@@ -25,18 +31,6 @@
       fetch:
         src: "{{ working_dir }}/tempest/tempest.xml"
         dest: "{{ local_working_dir }}/nosetests.xml"
-        flat: yes
-
-    - name: Generate subunit results file
-      shell: |
-        find '{{ working_dir }}/tempest/.testrepository/' -regex '.*/[0-9]+' \
-        | while read name; do cat "$name"; done \
-        > '{{ working_dir }}/tempest/results.subunit'
-
-    - name: Fetch subunit results
-      fetch:
-        src: "{{ working_dir }}/tempest/results.subunit"
-        dest: "{{ local_working_dir }}/results.subunit"
         flat: yes
 
     - name: Copying tempestmail files
