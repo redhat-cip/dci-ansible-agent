@@ -61,5 +61,5 @@ known_failures:
     reason: 'Difference in Implied Roles check API return code'
     lp: 'https://bugs.launchpad.net/keystone/+bug/1660603'
   - test: 'tempest.scenario.test_network_basic_ops.TestNetworkBasicOps.test_mtu_sized_frames'
-    reason: 'test is failing, it is being investigated'
-    lp: 'https://bugs.launchpad.net/tripleo/+bug/1714660'
+    reason: 'Test is failing, it is being investigated'
+    lp: 'https://bugs.launchpad.net/tripleo/+bug/1731988'

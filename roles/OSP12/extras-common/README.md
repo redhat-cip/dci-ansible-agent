@@ -29,9 +29,9 @@ Role Variables
   for libvirt environments.
 - `local_docker_registry_host`: <"{{undercloud_network_gateway|default(undercloud_network_cidr|nthhost(1))}}"> -- host of the local (undercloud) docker registry
 - `docker_registry_host`: <'docker.io'> -- host of the primary docker registry
-- `docker_registry_namespace`: <'tripleoupstream'> -- namespace of
+- `docker_registry_namespace`: <'tripleomaster'> -- namespace of
   docker images used for TripleO deployment
 - `docker_image_tag`: <'latest'> -- tag of docker images used for
   TripleO deployment
-- `deploy_composable_scenario`: <false> -- whether to deploy one of the
-  composable scenarios
+- `composable_scenario`: <''> -- path to the composable scenarios used at deployment time
+- `upgrade_composable_scenario`: <''> -- path to the composable scenarios used at upgrade time
