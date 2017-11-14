@@ -220,19 +220,18 @@
         become: true
         when: dci_topic in ['OSP9', 'OSP10']
 
-      - ini_file:
-          path: /etc/tempest/default-overrides.conf
-          section: '{{ item.section }}'
-          option: '{{ item.option }}'
-          value: '{{ item.value }}'
-        with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
-        become: true
-        when: dci_topic in ['OSP9', 'OSP10'] and 'tempest' in remoteci_data.keys()
-
       - name: Copy tempest config overrides
         copy:
           src: tempest-overrides.conf
           dest: ~/tempest-deployer-input.conf
+
+      - ini_file:
+          path: ~/tempest-deployer-input.conf
+          section: '{{ item.section }}'
+          option: '{{ item.option }}'
+          value: '{{ item.value }}'
+        with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
+        when: "'tempest' in remoteci_data.keys()"
 
       - include_role:
           name: "{{ dci_topic }}/validate-tempest"
