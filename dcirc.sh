@@ -7,3 +7,8 @@ DCI_API_SECRET=<api_secret>
 export DCI_CS_URL
 export DCI_CLIENT_ID
 export DCI_API_SECRET
+
+#DCI_REGISTRY_USER=<registry_user>
+#DCI_REGISTRY_PASSWORD=<registry_password>
+#export DCI_REGISTRY_USER
+#export DCI_REGISTRY_PASSWORD
