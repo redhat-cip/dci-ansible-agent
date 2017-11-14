@@ -49,6 +49,7 @@ install -p -D -m 644 hooks/success.yml %{buildroot}%{_sysconfdir}/dci-ansible-ag
 install -p -D -m 644 settings.yml %{buildroot}%{_sysconfdir}/dci-ansible-agent/settings.yml
 install -p -D -m 644 dci-ansible-agent.sudo %{buildroot}%{_sysconfdir}/sudoers.d/dci-ansible-agent
 install -p -d -m 755 %{buildroot}/%{_sharedstatedir}/dci-ansible-agent
+install -p -D -m 644 fetch_images.py %{buildroot}%{_datadir}/dci-ansible-agent/fetch_images.py
 
 %clean
 
