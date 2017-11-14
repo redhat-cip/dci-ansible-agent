@@ -95,6 +95,9 @@
           remote_src: True
         with_items: "{{ components }}"
 
+      - include: plays/sync_registry.yaml
+        when: dci_topic in ['OSP12']
+
       - name: Prepare the YUM repo file
         yum_repository:
           name: '{{ item["canonical_project_name"] }}'

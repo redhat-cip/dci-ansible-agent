@@ -1,0 +1,29 @@
+---
+- name: install the registry dependency
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - docker
+  - python-docker-py
+  - docker-distribution
+  become: True
+- service:
+    name: docker
+    state: started
+  become: True
+- name: Prepare docker-distribution configuration
+  template:
+    src: docker_distribution.yml.j2
+    dest: /etc/docker-distribution/registry/config.yml
+  become: True
+- service:
+    name: docker-distribution
+    state: restarted
+  become: True
+- shell: |
+    source /etc/dci-ansible-agent/dcirc.sh
+    python /usr/share/dci-ansible-agent/fetch_images.py \
+      {{ dci_mirror_location | quote }}/dci_repo/RH7-RHOS-12.0/container_images.yaml \
+      {{ dci_mirror_location | quote }}/dci_repo/RH7-RHOS-12.0/container_images_local.yaml
+  become: True
