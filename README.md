@@ -2,6 +2,26 @@
 
 ## First steps
 
+## Requirements
+
+The agent will run on a host call `jumpbox`. Jumbox can be a VM.
+
+* It must be running the latest stable RHEL release
+* It must have access to Internet
+* It must have a stable internal IP
+* It must be able to reach the undercloud host (SSH)
+* It must be able to expose its port 80 and 5000 to the nodes of the platform
+* It must be able to reach:
+    * the following hosts: api.distributed-ci.io:443 and registry.distributed-ci.io:443
+    * the tool used to redeploy the undercloud
+    * have access to the repository where the OSP-d configuration is stored
+    (instackenv.json, TripleO template)
+    * have 60GB of free space available to store the cache (Yum repositories
+    and images). 200GB strongly adviced.
+    * the undercloud IP address
+* Finally it must be registered on the RHSM wih a valid subscription
+
+
 ### Install the rpm
 
 You be able to install the rpm of DCI Ansible Agent, you will need to activate some extra repositories.
@@ -113,3 +133,16 @@ Two systemd timers are provided by the package, dci-ansible-agent.timer will ens
     # systemctl start dci-update.timer
 
 If you are using a HTTP proxy, you should also edit /etc/yum.conf and configure the proxy parameter to be sure the dci-update timer will be able to refresh DCI packages.
+
+## OSP12
+
+During an OSP12 deploy, an image registry will be set up on the jumpbox host. The agent will synchronize the OSP images for you on this host.
+This means you will have to point your TripleO configuration to this registry instead of the classic http://registry.access.redhat.com/ .
+
+Before you do the `openstack overcloud deploy`, you will have to prepare a `~/docker_registry.yaml` file with the `openstack overcloud container image prepare`. For example:
+
+    # su - stack
+    $ source ~/.stackrc
+    $ export jumpbox_ip=192.168.4.5
+    $ openstack overcloud container image prepare --namespace ${jumpbox_ip}:5000/rhosp12  --output-env-file --output-env-file ~/docker_registry.yaml
+    $ openstack overcloud deploy --templates (...) -e /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml -e ~/docker_registry.yaml
