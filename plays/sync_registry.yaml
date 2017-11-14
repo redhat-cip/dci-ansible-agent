@@ -1,0 +1,37 @@
+---
+- name: install the registry dependency
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - docker
+  - python-docker-py
+  - docker-distribution
+  become: True
+- service:
+    name: docker
+    state: started
+  become: True
+- name: Prepare docker-distribution configuration
+  template:
+    src: docker_distribution.yml.j2
+    dest: /etc/docker-distribution/registry/config.yml
+  become: True
+- name: Ensure the local docker can push in the registry
+  lineinfile:
+    path: /etc/sysconfig/docker
+    regexp: '^INSECURE_REGISTRY='
+    line: "INSECURE_REGISTRY=\"--insecure-registry {{ dci_baseurl|regex_replace('http://') }}:5000\""
+  become: True
+- name: Restart the docker services
+  service:
+    name: '{{ item }}'
+    state: restarted
+  become: True
+  with_items:
+  - docker
+  - docker-distribution
+- shell: |
+    source /etc/dci-ansible-agent/dcirc.sh
+    python /usr/share/dci-ansible-agent/fetch_images.py /var/www/html/dci_repo/RH7-RHOS-12.0/container_images.yaml /var/www/html/dci_repo/RH7-RHOS-12.0/container_images_local.yaml
+  become: True
