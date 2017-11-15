@@ -19,6 +19,21 @@ You can now install the `dci-ansible-agent` package:
 
     # yum install -y dci-ansible-agent
 
+### Configure your time source
+
+It's important to have an chronized clock. Chrony should be started and running.
+You can valide the server clock is synchronized with the following command:
+
+    $ chronyc activity
+    200 OK
+    6 sources online
+    0 sources offline
+    0 sources doing burst (return to online)
+    0 sources doing burst (return to offline)
+    0 sources with unknown address
+
+If Chrony is not running, you can follow [the official documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sect-using_chrony) to set it up.
+
 ### Configuration
 
 You start using the DCI Ansible Agent, you need to adjust a couple of configuration files. The first one is \`/etc/dci-ansible-agent/dcirc.sh\`:
@@ -54,7 +69,14 @@ You should get an output similar to this one:
     |                  id                  |    name   | state  | country | email | notification |
     +--------------------------------------+-----------+--------+---------+-------+--------------+
     | a2780b4c-0cdc-4a4a-a9ed-44930562ecce | RACKSPACE | active |   None  |  None |     None     |
-    +--------------------------------------+-----------+--------+---------+-------+--------------+
+    +--------------------------------------|-----------|--------|---------|-------|--------------+
+
+
+If you get a error with the call above, you can validate the API server is
+reachable with the following `curl` call:
+
+    $ curl https://api.distributed-ci.io/api/v1
+    {"_status": "OK", "message": "Distributed CI."}
 
 ------------------------------------------------------------------------
 
