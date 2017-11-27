@@ -50,6 +50,7 @@ def parse_image(image, private_registry):
         'src': '%s/%s/%s' % (repo, project, image_name),
 	'local_name': '%s/%s:latest' % (project, image_name),
 	'dest': '%s/%s/%s' % (private_registry, project, image_name),
+	'dest_no_suffix': '%s/%s/%s' % (private_registry, project, image_name.replace('-docker', '')),
     }
 
 
@@ -62,11 +63,24 @@ def tag_image(image):
     docker_image_id = client.inspect_image('%s:%s' % (image['src'], image['tag']))['Id']
     print('docker %s %s:%s' % (docker_image_id, image['dest'], 'latest'))
     client.tag(docker_image_id, repository=image['dest'], tag='latest')
+    print('docker %s %s:%s' % (docker_image_id, image['dest'], 'pcmklatest'))
+    client.tag(docker_image_id, repository=image['dest'], tag='pcmklatest')
+    print('docker %s %s:%s' % (docker_image_id, image['dest_no_suffix'], 'latest'))
+    client.tag(docker_image_id, repository=image['dest_no_suffix'], tag='latest')
+    # pcmklatest are needed for some cases
+    print('docker %s %s:%s' % (docker_image_id, image['dest_no_suffix'], 'pcmklatest'))
+    client.tag(docker_image_id, repository=image['dest_no_suffix'], tag='pcmklatest')
 
 
 def push_image(image):
     print('docker push %s:%s' % (image['dest'], 'latest'))
     client.push(image['dest'], tag='latest')
+    print('docker push %s:%s' % (image['dest'], 'pcmklatest'))
+    client.push(image['dest'], tag='pcmklatest')
+    print('docker push %s:%s' % (image['dest_no_suffix'], 'latest'))
+    client.push(image['dest_no_suffix'], tag='latest')
+    print('docker push %s:%s' % (image['dest_no_suffix'], 'pcmklatest'))
+    client.push(image['dest_no_suffix'], tag='pcmklatest')
 
 
 def main():
