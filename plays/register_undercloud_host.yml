@@ -38,8 +38,10 @@
 
 - name: Add the jumpbox in the virthost group
   add_host:
-    name: "localhost"
+    name: "virthost"
     groups: "virthost"
+    ansible_connection: local
+    ansible_user: "{{ lookup('env', 'USER') }}"
 
 - name: Ensure ~/.quickstart is a thing to please tripleo-inventory
   file:
