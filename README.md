@@ -58,16 +58,7 @@ You should get an output similar to this one:
 
 ------------------------------------------------------------------------
 
-Then, you need to edit the /etc/dci-ansible-agent/settings.yml file:
-
-    dci_topic: "OSP10"
-    dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
-    undercloud_ip: "fooo"
-    dci_mirror_location: "/var/www/html"
-    dci_config_dir: "/etc/dci-ansible-agent"
-    dci_cache_dir: "/var/lib/dci-ansible-agent"
-
-undercloud\_ip is probably the sole parameter that you have to change for a first run.
+Then, you need to edit the `/etc/dci-ansible-agent/settings.yml` to adjust some settings to match you environment. The latest version of the default settings is [available on GitHub](https://github.com/redhat-cip/dci-ansible-agent/blob/master/settings.yml)
 
 ------------------------------------------------------------------------
 
