@@ -12,3 +12,42 @@ dci_teardown_on_failure: True
 # dict of key/pair values one might want to attach to a job
 #
 dci_metadata: {}
+
+
+#
+# Settings for Tempest
+#  adjust to match your deployment
+#
+
+# You should adjust this one to your floating IP network CIDR
+floating_ip_cidr: 192.168.24.0/24
+# The following defaults should be changed if e.g. the public API is on the same network, to avoid collisions
+public_net_pool_start: "{{ floating_ip_cidr | nthhost(100) }}"
+public_net_pool_end: "{{ floating_ip_cidr | nthhost(120) }}"
+public_net_gateway: "{{ floating_ip_cidr | nthhost(1) }}"
+
+# Change this to a higher or lower value if you encounter some concurrency issues
+tempest_workers: 6
+
+tempest_extra_config:
+  # Set this to the name of the public network you want to be created
+  network.floating_network_name: public
+  # Is the 'backup' feature for cinder/volumes enabled on your deployment ?
+  volume-feature-enabled.backup: False
+  # Is ceilometer available on you deployment ? Should be False if using gnocchi
+  # which is the default since OSP10
+  service_available.ceilometer: False
+  # Is Sahara deployed ?
+  service_available.sahara: False
+  # Parameters required for heat-plugin
+  heat_plugin.region: regionOne
+  heat_plugin.minimal_image_ref: cirros-0.3.5-x86_64-disk.img
+  heat_plugin.image_ref: cirros-0.3.5-x86_64-disk.img
+  heat_plugin.minimal_instance_type: m1.micro
+  heat_plugin.instance_type: m1.micro
+  heat_plugin.admin_username: $OS_USERNAME
+  heat_plugin.admin_password: $OS_PASSWORD
+  heat_plugin.username: demo
+  heat_plugin.tenant_name: demo
+  heat_plugin.password: secrete
+  heat_plugin.auth_url: $OS_AUTH_URL
