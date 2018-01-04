@@ -76,6 +76,24 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 -   \`teardown.yml\`: this playbook clean the full playform.
 
+### How to use the images (OSP12)
+
+If you are use OSP12, you need to adjust your automation to fetch the images on the undercloud and make use of them during the deployment.
+Before you start the overcloud deploy with the `openstack overcloud deploy --templates [additional parameters]` command, you have to call the following command on the undercloud node.
+
+    $ openstack overcloud container image prepare --namespace ${jump_box}:5000/rhosp12  --output-env-file ~/docker_registry.yaml
+
+:information_source: `${jump_box}` is the IP address of the Jumpbox machine.
+
+You don't have to do any additional `openstack overcloud container` call unless you want to rebuild or patch an image.
+
+The Overcloud deployment is standard, you just have to include the two following extra Heat template:
+
+- /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
+- ~/docker_registry.yaml
+
+See the upstream documentation if you need more details: [Deploying the containerized Overcloud](https://docs.openstack.org/tripleo-docs/latest/install/containers_deployment/overcloud.html#deploying-the-containerized-overcloud)
+
 ### Start the service
 
 The agent comes with a systemd configuration that simplify its execution. You can just start the agent:
