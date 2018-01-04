@@ -5,10 +5,7 @@
 
 {% if tempest_overcloud|bool %}
 ## ::
-{% if release in ['newton', 'ocata'] or 'mistral' in tempest_plugins %}
-# Currently mistral does not works with Identity V3 api
-# FIXME(chkumar): https://bugs.launchpad.net/tripleo/+bug/1711083
-# Tracking bug for the same.
+{% if release in ['newton', 'ocata', 'pike'] %}
 source {{ working_dir }}/overcloudrc
 {% else %}
 source {{ working_dir }}/overcloudrc.v3
@@ -45,11 +42,14 @@ for i in $(neutron port-list -c id -f value); do neutron port-delete $i; done
 for i in $(neutron net-list -c id -f value); do neutron net-delete $i; done
 
 neutron net-create {{ public_net_name }} --router:external=True \
+{% if public_physical_network != '' %}
     --provider:network_type {{ public_network_type }} \
     {% if public_segmentation_id != '' %}
     --provider:segmentation_id {{ public_segmentation_id }} \
 {% endif %}
     --provider:physical_network {{ public_physical_network }}
+{% endif %}
+
 
 public_net_id=$(neutron net-show {{ public_net_name }} -f value -c id)
 
@@ -64,9 +64,13 @@ source {{ working_dir }}/stackrc
 public_net_id=$(neutron net-show {{ undercloud_public_net_name }} -f value -c id)
 {% endif %}
 
-## * Ensure heat_stack_owner role is present
+## * Ensure creator and Member role is present
+## * Member role is needed for Heat tests.
+## * creator role is needed for Barbican for running volume encryption tests.
 ## ::
-openstack role show heat_stack_owner > /dev/null || openstack role create heat_stack_owner
+openstack role show Member > /dev/null || openstack role create Member
+
+openstack role show creator > /dev/null || openstack role create creator
 
 ## * Generate a tempest configuration
 ## ::
@@ -127,7 +131,7 @@ export TEMPESTCONF="{{ working_dir }}/tempest/tools/config_tempest.py"
 {% else %}
 {% if tempest_format == "venv" %}
 # Install python-tempestconf
-git clone https://github.com/redhat-openstack/python-tempestconf {{ working_dir }}/python-tempestconf
+git clone https://git.openstack.org/openstack/python-tempestconf {{ working_dir }}/python-tempestconf
 {{ working_dir }}/tempest_git/tools/with_venv.sh pip install {{ working_dir }}/python-tempestconf
 export TEMPESTCONF="{{ working_dir }}/tempest_git/tools/with_venv.sh discover-tempest-config"
 {% elif tempest_format == "packages" %}
@@ -147,15 +151,19 @@ ${TEMPESTCONF} --out etc/tempest.conf \
   --network-id $public_net_id \
   --deployer-input ~/{{ tempest_deployer_input_file }} \
   --image {{ tempest_test_image_path }} \
-  --debug --create \
+  --debug \
+  {% if tempest_conf_removal %}
+  {% for key, value in tempest_conf_removal.iteritems() %}
+  --remove {{ key }}={{ value }} \
+  {% endfor %}
+  {% endif %}
+  --create \
+  {% if release in ['newton','ocata', 'pike'] %}
   identity.uri $OS_AUTH_URL \
-  {% if release in ['newton','ocata'] %}
   identity.admin_password $OS_PASSWORD \
   identity.admin_username $OS_USERNAME \
   compute.allow_tenant_isolation true \
   {% else %}
-  auth.admin_password $OS_PASSWORD \
-  auth.admin_username $OS_USERNAME \
   auth.use_dynamic_credentials true \
   {% endif %}
   compute-feature-enabled.attach_encrypted_volume False \
@@ -174,7 +182,8 @@ ${TEMPESTCONF} --out etc/tempest.conf \
   {{ key }} {{ value }} \
   {% endfor %}
   {% endif %}
-  orchestration.stack_owner_role heat_stack_owner
+  compute-feature-enabled.console_output true \
+  orchestration.stack_owner_role Member
 
 ### --stop_docs
 

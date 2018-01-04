@@ -1,4 +1,4 @@
-ansible-role-tripleo-tempest
+validate-tempest
 =========
 
 Run tempest tests on undercloud or overcloud.
@@ -28,12 +28,17 @@ Role Variables
 * `tempest_until_failure`: false/true - default is false, repeat the run again and again until failure occurs
 * `tempest_exit_on_failure`: true/false - whether to exit from role with tempest exit code (default: true)
 * `tempestmail_config`: config.yaml - name of config file for tempestmail script
+* `tempestmail_log_server`: string - Server where the logs are saved
 * `tempest_track_resources`: true/false - whether to save the state of resources after tempest run (default: true)
 * `check_tempest_bugs`: true/false - Will check every bugzilla and launchpad bug in the yaml skip file
 * `tempest_plugins`: list - List of openstack services tempest plugins to be
                      installed
 * `tempest_extra_config`: dict - A dict of tempest configuration which needs to be overridden in tempest.conf,
                           It should be like section.key: value.
+* `tempest_conf_removal`: dict - A dict of tempest configuration which will be
+                          removed from tempest.conf file.
+                          Format: section.key: value
+* `public_physical_network`: <string> The name of the border physical network (default: datacentre).
 
 Skip tests file
 ---------------
@@ -88,7 +93,7 @@ Example Playbook
       hosts: undercloud
       gather_facts: no
       roles:
-        - tripleo-tempest
+        - validate-tempest
 
 License
 -------
