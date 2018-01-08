@@ -13,11 +13,11 @@
         topic: '{{ dci_topic }}'
       register: job_informations
     - set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
-        components: '{{ hostvars.localhost.job_informations.components }}'
+        job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+        components: '{{ hostvars.localhost.job_informations.job.components }}'
     - name: Set the metadata
       dci_job:
-        id: "{{ job_informations['job_id'] }}"
+        id: "{{ job_informations.job.id }}"
         metadata: '{{ dci_metadata }}'
       when: dci_metadata is defined and dci_metadata
 
@@ -102,7 +102,7 @@
           baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
           gpgcheck: no
           file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
-        with_items: '{{ job_informations["components"] }}'
+        with_items: '{{ job_informations["job"]["components"] }}'
 
       - name: Generating RSA key for stack
         user:
@@ -175,8 +175,8 @@
   tasks:
     - name: Declare facts on all hosts
       set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job_id }}'
-        components: '{{ hostvars.localhost.job_informations.components }}'
+        job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+        components: '{{ hostvars.localhost.job_informations.job.components }}'
         release: '{{ rhos_release[dci_topic] }}'
 
 
@@ -189,7 +189,7 @@
   hosts: 'undercloud'
   vars:
     dci_status: 'post-run'
-    remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
+    remoteci_data: "{{ hostvars['localhost'].job_informations['job']['remoteci']['data']|default({}) }}"
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
     tempest_exit_on_failure: false
     run_tempest: true
