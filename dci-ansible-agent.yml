@@ -290,7 +290,7 @@
           job_id: '{{ job_id }}'
           mime: '{{ item.mime }}'
         with_items:
-          - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
+          - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/cert.junit", 'mime': 'application/junit'}
           - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
           - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
           - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
