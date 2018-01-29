@@ -150,3 +150,14 @@ Two systemd timers are provided by the package, dci-ansible-agent.timer will ens
     # systemctl start dci-update.timer
 
 If you are using a HTTP proxy, you should also edit /etc/yum.conf and configure the proxy parameter to be sure the dci-update timer will be able to refresh DCI packages.
+
+#### How to adjust the timer configuration
+
+    # systemctl edit --full dci-ansible-agent.timer
+
+You have to edit the value of the `OnUnitActiveSec` key. According to systemd documentation:
+
+> OnUnitActiveSec= defines a timer relative to when the unit the timer is activating was last activated.
+> OnUnitInactiveSec= defines a timer relative to when the unit the timer is activating was last deactivated.
+
+DCI comes with a default value of 1h, you can increase to 12h for example.
