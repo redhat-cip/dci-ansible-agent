@@ -296,11 +296,6 @@
           - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
         ignore_errors: yes
 
-      - name: Clean result files
-        file:
-          name: "{{ lookup('env', 'HOME') }}/.quickstart"
-          state: absent
-
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
