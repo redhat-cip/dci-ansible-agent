@@ -161,3 +161,12 @@ You have to edit the value of the `OnUnitActiveSec` key. According to systemd do
 > OnUnitInactiveSec= defines a timer relative to when the unit the timer is activating was last deactivated.
 
 DCI comes with a default value of 1h, you can increase to 12h for example.
+
+### Debug: How to manually run the agent
+
+You may want to trace the agent execution to understand a problem. In this case, you can call it manually:
+
+    # su - dci-ansible-agent -s /bin/bash
+    $ cd /usr/share/dci-ansible-agent
+    $ source /etc/dci-ansible-agent/dcirc.sh
+    $ /usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
