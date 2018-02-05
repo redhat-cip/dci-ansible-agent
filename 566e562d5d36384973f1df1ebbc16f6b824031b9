@@ -1,0 +1,9 @@
+Code-Review+1: Leif Madsen <leif@leifmadsen.com>
+Code-Review+2: Yanis Guenane <yguenane@gmail.com>
+Workflow+1: Yanis Guenane <yguenane@gmail.com>
+Verified+2: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-by: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-at: Mon, 05 Feb 2018 07:34:56 +0000
+Reviewed-on: https://softwarefactory-project.io/r/11098
+Project: dci-ansible-agent
+Branch: refs/heads/master
