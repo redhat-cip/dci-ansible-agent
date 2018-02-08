@@ -1,0 +1,4 @@
+- name: Ensure the jumpbox time is correct
+  command: chronyc tracking
+  register: chrony_result
+  failed_when: not 'Normal' in chrony_result.stdout
