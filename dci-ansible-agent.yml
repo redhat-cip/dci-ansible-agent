@@ -21,6 +21,13 @@
         metadata: '{{ dci_metadata }}'
       when: dci_metadata is defined and dci_metadata
 
+- name: 'Sanity check'
+  hosts: localhost
+  vars:
+    dci_status: 'new'
+  tasks:
+    - name: Check the jumpbox sanity
+      include: plays/sanity_check.yml
 
 # New state
 #
