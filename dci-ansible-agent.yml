@@ -236,6 +236,10 @@
         with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
         when: "'tempest' in remoteci_data.keys()"
 
+      - name: Pull all tempest tests
+        command: 'yum install -y python-*-tests'
+        become: true
+
       - include_role:
           name: "{{ dci_topic }}/validate-tempest"
 
