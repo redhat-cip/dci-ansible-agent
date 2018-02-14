@@ -1,6 +1,10 @@
 dci_topic: "OSP10"
-dci_baseurl: "http://{{ ansible_default_ipv4.address }}"
-undercloud_ip: "fooo"
+# The public IP address of the jumpbox that will be exposed to the
+# OpenStack cluster
+dci_base_ip: "{{ ansible_default_ipv4.address }}"
+# The location of the HTT mirror
+dci_baseurl: "http://{{ dci_base_ip }}"
+#undercloud_ip: "fooo"
 dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
 dci_cache_dir: "/var/lib/dci-ansible-agent"

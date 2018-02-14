@@ -8,4 +8,4 @@ storage:
     filesystem:
         rootdirectory: /var/lib/registry
 http:
-    addr: {{ dci_baseurl|regex_replace('http://') }}:5000
+    addr: {{ dci_base_ip }}:5000
