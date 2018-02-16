@@ -11,7 +11,8 @@
       dci_job:
         components: '{{ dci_components|default([]) }}'
         topic: '{{ dci_topic }}'
-      register: job_informations
+      register: new_job_informations
+
     - set_fact:
         job_id: '{{ hostvars.localhost.job_informations.job.id }}'
         components: '{{ hostvars.localhost.job_informations.job.components }}'
@@ -26,94 +27,19 @@
   vars:
     dci_status: 'new'
   tasks:
-    - name: Check the jumpbox sanity
-      include: plays/sanity_check.yml
-
-# New state
-#
-# User is free to do whaterver she needs before entering pre-run state.
-# Usually this is used to sync the components the job is relying on.
-#
-- name: 'Creating the local mirrors and synchronizing them'
-  hosts: localhost
-  vars:
-    dci_status: 'new'
-  tasks:
     - block:
-      - name: Ensure Apache is installed
-        package:
-          name: 'httpd'
-          state: 'present'
-        become: true
-      - name: Ensure Apache is running
-        systemd:
-          name: 'httpd'
-          state: 'started'
-        become: true
-      - name: Ensure python-firewall is installed
-        package:
-          name: 'python-firewall'
-          state: 'present'
-        become: true
-      - name: Open port 80 on the firewall
-        firewalld:
-          zone: public
-          service: http
-          permanent: true
-          state: enabled
-        register: result
-        failed_when: false
-        become: true
-      - name: Check the HTTP mirror
-        include: plays/sanity_check_http.yml
-      - name: Drop existing repo dir
-        file:
-          path: '{{ dci_mirror_location }}/dci_repo'
-          state: absent
-        become: true
-      - name: Ensure proper directories are created
-        file:
-          path: '{{ item }}'
-          state: directory
-          owner: '{{ ansible_user_id }}'
-          group: '{{ ansible_user_gid }}'
-        with_items:
-          - '{{ dci_cache_dir }}'
-          - '{{ dci_mirror_location }}/dci_repo'
-        become: true
-      - name: Identify outdated files from the cache
-        find:
-          path: '{{ dci_cache_dir }}'
-          age: '4w'
-        register: old_files_found
-      - name: Purge old files from the local cache
-        file:
-          path: '{{ item.path }}'
-          state: absent
-        with_items: '{{ old_files_found.files }}'
+      - name: Check the jumpbox sanity
+        include: plays/sanity_check.yml
 
-      - name: Generating RSA key for stack
-        user:
-          name: '{{ ansible_user_id }}'
-          generate_ssh_key: 'yes'
+      - include: plays/purge_cache.yml
 
-      - include: plays/fetch_bits.yaml
+      - include: plays/prepare_local_mirror.yml
 
-      rescue:
-      - include: plays/failure.yml
+      - include: plays/fetch_bits.yml
 
+      - set_fact:
+          dci_status: 'pre-run'
 
-# Pre-run state
-#
-# User is free to do whaterver she needs before entering pre-run state.
-# Usually this is used to boot (not provision) the undercloud
-#
-- name: 'Spawning the undercloud'
-  hosts: localhost
-  vars:
-    dci_status: 'pre-run'
-  tasks:
-    - block:
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
 
       rescue:
