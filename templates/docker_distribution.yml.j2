@@ -8,4 +8,4 @@ storage:
     filesystem:
         rootdirectory: /var/lib/registry
 http:
-    addr: {{ dci_base_ip }}:5000
+    addr: {{ dci_base_ip|ansible_default_ipv4.address }}:5000
