@@ -184,6 +184,9 @@
       OSP10: 'newton'
       OSP11: 'ocata'
       OSP12: 'pike'
+      RDO-Newton: 'newton'
+      RDO-Ocata: 'ocata'
+      RDO-Pike: 'pike'
   tasks:
     - name: Declare facts on all hosts
       set_fact:
@@ -230,7 +233,7 @@
           name: openstack-tempest
           state: present
         become: true
-        when: dci_topic in ['OSP9', 'OSP10']
+        when: dci_topiic in ['OSP9', 'OSP10', 'RDO-Newton', 'RDO-Ocata']
 
       - name: Copy tempest config overrides
         copy:
