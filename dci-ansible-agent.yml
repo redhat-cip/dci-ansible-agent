@@ -11,6 +11,8 @@
       dci_job:
         components: '{{ dci_components|default([]) }}'
         topic: '{{ dci_topic }}'
+        # id: '88fbd033-07b5-4cce-bb71-f320276cb0d0'
+        # embed: 'remoteci,rconfiguration,topic,components'
       register: job_informations
 
     - set_fact:
@@ -58,11 +60,60 @@
   hosts: localhost
   vars:
     dci_status: 'running'
+    next_topic:
+      OSP9: 'OSP10'
+      OSP10: 'OSP11'
+      OSP11: 'OSP12'
   tasks:
     - block:
+      - set_fact:
+          # job_informations may be redefined below. We need a set_fact here to
+          # store a static result.
+          update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
+          upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic[job_informations.job.topic.name] }}.yml'
+      - stat:
+          path: '{{ update_playbook }}'
+        register: update_playbook_stat
+      - stat:
+          path: '{{ upgrade_playbook }}'
+        register: upgrade_playbook_stat
       - include: '{{ dci_config_dir }}/hooks/running.yml'
 
       - include: plays/register_undercloud_host.yml
+
+      - include: plays/run_tests.yml
+        delegate_to: undercloud
+
+      - include: plays/collect_logs.yml
+      - include: plays/upload_logs.yml
+
+      - name: Update the deployment
+        block:
+        - include: '{{ update_playbook }}'
+        - include: plays/run_tests.yml
+          delegate_to: undercloud
+
+        - include: plays/collect_logs.yml
+        - include: plays/upload_logs.yml
+
+        when: job_informations.job.rconfiguration.data.is_frozen is defined and update_playbook_stat.stat.exists
+
+      - name: Upgrade the deployment to the next release
+        block:
+        - dci_job:
+            id: '{{ job_informations.job.id }}'
+            upgrade: True
+          register: new_job_informations
+
+        - set_fact:
+            dci_status: 'running'
+
+        - include: '{{ upgrade_playbook }}'
+        - include: plays/run_tests.yml
+          delegate_to: undercloud
+
+        - include: plays/collect_logs.yml
+        when: upgrade_playbook_stat.stat.exists
 
       rescue:
       # Included a second time in case of failure in hooks/running.yml,
@@ -70,64 +121,7 @@
       - include: plays/register_undercloud_host.yml
 
       - include: plays/collect_logs.yml
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
-      - include: plays/failure.yml
-
-
-- hosts: all:localhost
-  vars:
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
-      OSP12: 'pike'
-      RDO-Newton: 'newton'
-      RDO-Ocata: 'ocata'
-      RDO-Pike: 'pike'
-  tasks:
-    - name: Declare facts on all hosts
-      set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job.id }}'
-        components: '{{ hostvars.localhost.job_informations.job.components }}'
-        release: '{{ rhos_release[dci_topic] }}'
-
-
-# Post-run state
-#
-# User is free to do whaterver she needs before entering post-run state.
-# Usually this is used to run tests, certifications, etc...
-#
-- name: 'Running tests'
-  hosts: 'undercloud'
-  tasks:
-    - block:
-      - include: play/run_tests.yml
-
-      - include: plays/collect_logs.yml
-
-      rescue:
-      - include: plays/collect_logs.yml
-
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-        delegate_to: localhost
-
-      - include: plays/failure.yml
-        delegate_to: localhost
-
-
-- name: 'Upload files'
-  hosts: localhost
-  vars:
-    dci_status: 'post-run'
-  tasks:
-    - block:
-      - include: plays/upload_logs.yml
-
-      rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
