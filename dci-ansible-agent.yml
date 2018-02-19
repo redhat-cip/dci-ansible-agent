@@ -58,11 +58,61 @@
   hosts: localhost
   vars:
     dci_status: 'running'
+    next_topic:
+      OSP9: 'OSP10'
+      OSP10: 'OSP11'
+      OSP11: 'OSP12'
   tasks:
     - block:
+      - set_fact:
+          # job_informations may be redefined below. We need a set_fact here to
+          # store a static result.
+          update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
+          upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic[job_informations.job.topic.name] }}.yml'
+      - stat:
+          path: '{{ update_playbook }}'
+        register: update_playbook_stat
+      - stat:
+          path: '{{ upgrade_playbook }}'
+        register: upgrade_playbook_stat
+
       - include: '{{ dci_config_dir }}/hooks/running.yml'
 
       - include: plays/register_undercloud_host.yml
+
+      # RUN TESTS
+
+      - include: '{{ update_playbook }}'
+        when: job_informations.job.rconfiguration.data.is_frozen is defined
+
+      # RUN TESTS
+
+      - dci_job:
+          id: '{{ job_informations.job.id }}'
+          upgrade: True
+        register: new_job_informations
+        when: update_playbook_stat.stat.exists
+
+      - debug:
+          var: new_job_informations
+
+      - set_fact:
+          job_informations: '{{ new_job_informations.changed|ternary(new_job_informations, job_informations)}}'
+
+      - set_fact:
+          dci_status: 'pre-run'
+
+      - include: plays/fetch_bits.yml
+        when: update_playbook_stat.stat.exists
+
+      - set_fact:
+          dci_status: 'running'
+
+      - include: '{{ upgrade_playbook }}'
+        when: update_playbook_stat.stat.exists
+
+
+      # RUN TESTS
 
       rescue:
       # Included a second time in case of failure in hooks/running.yml,
