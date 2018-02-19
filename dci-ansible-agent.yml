@@ -233,7 +233,7 @@
           name: openstack-tempest
           state: present
         become: true
-        when: dci_topiic in ['OSP9', 'OSP10', 'RDO-Newton', 'RDO-Ocata']
+        when: dci_topic in ['OSP9', 'OSP10', 'RDO-Newton', 'RDO-Ocata']
 
       - name: Copy tempest config overrides
         copy:
