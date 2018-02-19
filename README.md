@@ -140,16 +140,18 @@ This is for example necessary if you want to create a ssh key:
 
     $ ssh-keygen
 
-### Use the timers
+### Keep the packages up to date
 
-Two systemd timers are provided by the package, dci-ansible-agent.timer will ensure the agent will be call automatically severial time a day. dci-update.timer will refresh the dci packages automatically. To enable them, just run:
+DCI publishs update in a daily fashon. We strongly advice to use yum-cron to keep your system up to date.
+
+- [Red Hat KB1579503](https://access.redhat.com/solutions/1579503)
+
+### Use the timer to trigger the agent
+
+Two systemd timers are provided by the package, dci-ansible-agent.timer will ensure the agent will be call automatically severial time a day. To enable it, just run run:
 
     # systemctl enable dci-ansible-agent.timer
     # systemctl start dci-ansible-agent.timer
-    # systemctl enable dci-update.timer
-    # systemctl start dci-update.timer
-
-If you are using a HTTP proxy, you should also edit /etc/yum.conf and configure the proxy parameter to be sure the dci-update timer will be able to refresh DCI packages.
 
 #### How to adjust the timer configuration
 
