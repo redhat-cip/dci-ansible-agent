@@ -1,0 +1,22 @@
+- name: Prepare the undercloud tarball
+  command: "tar cfz undercloud.tar.gz undercloud"
+  args:
+    chdir: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
+
+- name: Upload results
+  dci_file:
+    path: '{{ item.path }}'
+    name: '{{ item.name }}'
+    job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+    mime: '{{ item.mime }}'
+  with_items:
+    - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest/tempest.xml", 'mime': 'application/junit'}
+    - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
+    - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
+    - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
+  ignore_errors: yes
+
+- name: Clean result files
+  file:
+    name: "{{ lookup('env', 'HOME') }}/.quickstart"
+    state: absent
