@@ -97,6 +97,7 @@
           var: new_job_informations
 
       - set_fact:
+          job_id: '{{ hostvars.localhost.job_informations.job.id }}'
           job_informations: '{{ new_job_informations.changed|ternary(new_job_informations, job_informations)}}'
 
       - set_fact:
@@ -128,25 +129,6 @@
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
       - include: plays/failure.yml
-
-
-- hosts: all:localhost
-  vars:
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
-      OSP12: 'pike'
-      RDO-Newton: 'newton'
-      RDO-Ocata: 'ocata'
-      RDO-Pike: 'pike'
-  tasks:
-    - name: Declare facts on all hosts
-      set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job.id }}'
-        components: '{{ hostvars.localhost.job_informations.job.components }}'
-        release: '{{ rhos_release[dci_topic] }}'
 
 
 # Post-run state
