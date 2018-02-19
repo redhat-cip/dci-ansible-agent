@@ -20,6 +20,7 @@
   command: yum check-update dci-ansible ansible dci-ansible-agent python-dciclient python-requests
   register: yum_check_update_result
   failed_when: False
+  become: True
 - fail:
     msg: "Please update your system with: yum update -y"
   when: yum_check_update_result.rc != 0
