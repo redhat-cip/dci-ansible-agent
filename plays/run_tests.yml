@@ -1,0 +1,72 @@
+- set_fact:
+    remoteci_data: "{{ hostvars['localhost'].job_informations['job']['remoteci']['data']|default({}) }}"
+- set_fact:
+    remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
+- set_fact:
+    rhos_release:
+      OSP8: 'liberty'
+      OSP9: 'mitaka'
+      OSP10: 'newton'
+      OSP11: 'ocata'
+      OSP12: 'pike'
+      RDO-Newton: 'newton'
+      RDO-Ocata: 'ocata'
+      RDO-Pike: 'pike'
+- set_fact:
+    release: '{{ rhos_release[dci_topic] }}'
+    dci_status: 'post-run'
+    tempest_exit_on_failure: false
+    run_tempest: true
+    test_regex: ''
+    # NOTE(Goneri): we avoid the skip-file because of a bug with os-testr on OSP9:
+    #  https://bugs.launchpad.net/os-testr/+bug/1506215
+    skip_file_src: ''
+    openstack_certification_output_format: junit
+    openstack_certification_output_filename: cert.junit
+    openstack_certification_dest_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
+    openstack_certification_results_download: true
+    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+    openstack_certification_tempest_conf_path_is_remote: Yes
+    openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
+
+- name: default-overrides.conf is in python-tempestconf since OSP11
+  package:
+    name: python-tempestconf
+    state: present
+  become: true
+  when: dci_topic in ['OSP11', 'OSP12']
+
+- name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
+  package:
+    name: openstack-tempest
+    state: present
+  become: true
+  when: dci_topiic in ['OSP9', 'OSP10', 'RDO-Newton', 'RDO-Ocata']
+
+- name: Copy tempest config overrides
+  copy:
+    src: tempest-overrides.conf
+    dest: ~/tempest-deployer-input.conf
+
+- ini_file:
+    path: ~/tempest-deployer-input.conf
+    section: '{{ item.section }}'
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
+  with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
+  when: "'tempest' in remoteci_data.keys()"
+
+- name: Pull all tempest tests
+  command: 'yum install -y python-*-tests'
+  become: true
+
+- include_role:
+    name: "{{ dci_topic }}/validate-tempest"
+
+- include_role:
+    name: "{{ dci_topic }}/tripleo-inventory"
+
+- include_role:
+    name: "openstack-certification"
+  when: dci_topic in ['OSP10', 'OSP11', 'OSP12']
+
