@@ -77,43 +77,56 @@
         register: upgrade_playbook_stat
 
       - include: '{{ dci_config_dir }}/hooks/running.yml'
-
       - include: plays/register_undercloud_host.yml
+      - include: plays/run_tests.yml
+        delegate_to: undercloud
 
-      # RUN TESTS
+      - include_role:
+          name: "{{ dci_topic }}/collect-logs"
+        delegate_to: undercloud
+      - include: plays/upload_logs.yml
 
-      - include: '{{ update_playbook }}'
+      - name: Update the deployment
+        block:
+        - include: '{{ update_playbook }}'
+        - include: plays/run_tests.yml
+          delegate_to: undercloud
+
+        - include_role:
+            name: "{{ dci_topic }}/collect-logs"
+          delegate_to: undercloud
+        - include: plays/upload_logs.yml
+
         when: job_informations.job.rconfiguration.data.is_frozen is defined
 
-      # RUN TESTS
+      - name: Upgrade the deployment to the next release
+        block:
+        - dci_job:
+            id: '{{ job_informations.job.id }}'
+            upgrade: True
+          register: new_job_informations
 
-      - dci_job:
-          id: '{{ job_informations.job.id }}'
-          upgrade: True
-        register: new_job_informations
+        - set_fact:
+            dci_status: 'pre-run'
+
+        - include: plays/fetch_bits.yml
+          when: update_playbook_stat.stat.exists
+
+        - set_fact:
+            dci_status: 'running'
+
+        - include: '{{ upgrade_playbook }}'
+          when: update_playbook_stat.stat.exists
+
+        - include: plays/run_tests.yml
+          delegate_to: undercloud
+
+        - include_role:
+            name: "{{ dci_topic }}/collect-logs"
+          delegate_to: undercloud
+        - include: plays/upload_logs.yml
         when: update_playbook_stat.stat.exists
 
-      - debug:
-          var: new_job_informations
-
-      - set_fact:
-          job_id: '{{ hostvars.localhost.job_informations.job.id }}'
-          job_informations: '{{ new_job_informations.changed|ternary(new_job_informations, job_informations)}}'
-
-      - set_fact:
-          dci_status: 'pre-run'
-
-      - include: plays/fetch_bits.yml
-        when: update_playbook_stat.stat.exists
-
-      - set_fact:
-          dci_status: 'running'
-
-      - include: '{{ upgrade_playbook }}'
-        when: update_playbook_stat.stat.exists
-
-
-      # RUN TESTS
 
       rescue:
       # Included a second time in case of failure in hooks/running.yml,
@@ -125,61 +138,6 @@
         delegate_to: undercloud
         ignore_errors: True
 
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-
-      - include: plays/failure.yml
-
-
-# Post-run state
-#
-# User is free to do whaterver she needs before entering post-run state.
-# Usually this is used to run tests, certifications, etc...
-#
-- name: 'Running tests'
-  hosts: 'undercloud'
-  tasks:
-    - block:
-      - include: play/run_tests.yml
-
-      rescue:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-        delegate_to: localhost
-
-      - include: plays/failure.yml
-        delegate_to: localhost
-
-
-- name: Collect logs
-  hosts: 'undercloud'
-  vars:
-    dci_status: 'post-run'
-    artcl_tar_gz: true
-    artcl_gzip_only: false
-  tasks:
-    - block:
-      - include_role:
-          name: "{{ dci_topic }}/collect-logs"
-
-      rescue:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-        delegate_to: localhost
-
-      - include: plays/failure.yml
-        delegate_to: localhost
-
-
-- name: 'Upload files'
-  hosts: localhost
-  vars:
-    dci_status: 'post-run'
-  tasks:
-    - block:
-      - include: plays/upload_logs.yml
-
-      rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
