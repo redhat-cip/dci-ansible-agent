@@ -11,7 +11,7 @@
       dci_job:
         components: '{{ dci_components|default([]) }}'
         topic: '{{ dci_topic }}'
-      register: new_job_informations
+      register: job_informations
 
     - set_fact:
         job_id: '{{ hostvars.localhost.job_informations.job.id }}'
