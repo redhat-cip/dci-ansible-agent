@@ -1,4 +1,8 @@
 - set_fact:
+    remoteci_data: "{{ hostvars['localhost'].job_informations['job']['remoteci']['data']|default({}) }}"
+- set_fact:
+    remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
+- set_fact:
     rhos_release:
       OSP8: 'liberty'
       OSP9: 'mitaka'
@@ -8,10 +12,9 @@
       RDO-Newton: 'newton'
       RDO-Ocata: 'ocata'
       RDO-Pike: 'pike'
+- set_fact:
     release: '{{ rhos_release[dci_topic] }}'
     dci_status: 'post-run'
-    remoteci_data: "{{ hostvars['localhost'].job_informations['job']['remoteci']['data']|default({}) }}"
-    remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
     tempest_exit_on_failure: false
     run_tempest: true
     test_regex: ''
