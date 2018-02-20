@@ -1,14 +1,13 @@
-- name: Extract the undercloud.tar.gz on the jumpbox
-  unarchive:
-    src: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz"
-    dest: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
-# NOTE(dsavinea) : We need to ignore the errors because cert.txt
-# is only present for OSP10 for the moment.
+- name: Prepare the undercloud tarball
+  command: "tar cfx undercloud.tar.gz undercloud"
+  args:
+    chdir: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
+
 - name: Upload results
   dci_file:
     path: '{{ item.path }}'
     name: '{{ item.name }}'
-    job_id: '{{ job_id }}'
+    job_id: '{{ hostvars.localhost.job_informations.job.id }}'
     mime: '{{ item.mime }}'
   with_items:
     - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest/tempest.xml", 'mime': 'application/junit'}

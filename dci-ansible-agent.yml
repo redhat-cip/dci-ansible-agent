@@ -121,7 +121,7 @@
       - include: plays/register_undercloud_host.yml
 
       - include_role:
-          name: "{{ dci_topic }}/collect-logs"
+          name: "OSP12/collect-logs"
         delegate_to: undercloud
         ignore_errors: True
 
