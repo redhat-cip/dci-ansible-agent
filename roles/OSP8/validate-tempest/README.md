@@ -20,9 +20,7 @@ Role Variables
 * `test_regex` - tests regular expression for testr run, i.e. smoke
 * `run_tempest`: false/true - to run tempest or not
 * `skip_file_src`: path to skip tests file, set it empty if running without skip list: `skip_file_src=''`
-* `tempest_workers`: int - how many parallel workers to run (default is number of cores)
-* `tempest_isolated`: false/true - if to run every test id in separate test runner (default is false)
-* `tempest_tests_file`: path to file - path to file with tests to run
+* `tempest_workers`: int - how many parallel workers to run (default is half the number of cores/threads)
 * `tempest_until_failure`: false/true - default is false, repeat the run again and again until failure occurs
 * `tempest_failing`: false/true - default is false, run only tests known to be failing
 * `tempest_exit_on_failure`: true/false - whether to exit from role with tempest exit code (default: true)
