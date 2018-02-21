@@ -1,5 +1,5 @@
 - name: Prepare the undercloud tarball
-  command: "tar cfx undercloud.tar.gz undercloud"
+  command: "tar cfz undercloud.tar.gz undercloud"
   args:
     chdir: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
 
