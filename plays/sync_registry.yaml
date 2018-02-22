@@ -8,14 +8,20 @@
   - python-docker-py
   - docker-distribution
   become: True
+- name: Prepare docker configuration
+  copy:
+    content: |
+      {"storage-driver": "overlay2", "insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:5000"] }
+    dest: /etc/docker/daemon.json
+  become: True
+- service:
+    name: docker
+    state: restarted
+  become: True
 - name: Prepare docker-distribution configuration
   template:
     src: docker_distribution.yml.j2
     dest: /etc/docker-distribution/registry/config.yml
-  become: True
-- service:
-    name: docker
-    state: started
   become: True
 - service:
     name: docker-distribution
