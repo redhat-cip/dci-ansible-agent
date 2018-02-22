@@ -143,11 +143,6 @@
       # this is required for collect-logs to work
       - include: plays/register_undercloud_host.yml
 
-      - include_role:
-          name: "{{ dci_topic }}/collect-logs"
-        delegate_to: undercloud
-        ignore_errors: True
-
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
@@ -240,27 +235,11 @@
           name: "openstack-certification"
         when: dci_topic in ['OSP10', 'OSP11', 'OSP12']
 
-      rescue:
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-        delegate_to: localhost
-
-      - include: plays/failure.yml
-        delegate_to: localhost
-
-
-- name: Collect logs
-  hosts: 'undercloud'
-  vars:
-    dci_status: 'post-run'
-    artcl_tar_gz: true
-    artcl_gzip_only: false
-  tasks:
-    - block:
-      - include_role:
-          name: "{{ dci_topic }}/collect-logs"
+      - include: plays/collect_logs.yml
 
       rescue:
+      - include: plays/collect_logs.yml
+
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
         delegate_to: localhost

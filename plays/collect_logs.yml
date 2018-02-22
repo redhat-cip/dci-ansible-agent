@@ -1,0 +1,5 @@
+- include_role:
+    name: "OSP12/collect-logs"
+  vars:
+    inventory_hostname: undercloud
+  delegate_to: undercloud
