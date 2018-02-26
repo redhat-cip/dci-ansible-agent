@@ -72,6 +72,7 @@
       - set_fact:
           # job_informations may be redefined below. We need a set_fact here to
           # store a static result.
+          update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
           upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic[job_informations.job.topic.name] }}.yml'
           # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
           # tripleo-inventory depends on the common role, however the role is not include
@@ -79,6 +80,9 @@
           # Here we manually declare the deploy_supplemental_node variable to avoid an
           # undefined value during the role execution
           deploy_supplemental_node: No
+      - stat:
+          path: '{{ update_playbook }}'
+        register: update_playbook_stat
       - stat:
           path: '{{ upgrade_playbook }}'
         register: upgrade_playbook_stat
@@ -88,6 +92,21 @@
 
       - include: plays/run_tests.yml
         delegate_to: undercloud
+
+      - name: Update the deployment
+        block:
+        - include: plays/collect_logs.yml
+        - include: plays/upload_logs.yml
+
+        - dci_job:
+            id: '{{ job_informations.job.id }}'
+            update: True
+          register: job_informations
+
+        - include: '{{ update_playbook }}'
+        - include: plays/run_tests.yml
+          delegate_to: undercloud
+        when: update_playbook_stat.stat.exists
 
       - name: Upgrade the deployment to the next release
         block:

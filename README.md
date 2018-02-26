@@ -122,16 +122,19 @@ The Overcloud deployment is standard, you just have to include the two following
 
 See the upstream documentation if you need more details: [Deploying the containerized Overcloud](https://docs.openstack.org/tripleo-docs/latest/install/containers_deployment/overcloud.html#deploying-the-containerized-overcloud)
 
-### How to run the Upgrade
+### How to run the Update and Upgrade
 
-After the deployment of the OpenStack, the agent will look for an upgrade playbook.
+After the deployment of the OpenStack, the agent will look for an update or an upgrade playbook.
 If the playbook exists it will run it in order to upgrade the installation.
 
 The agent expects the upgrade playbook to have the following naming convention:
 
      /etc/dci-ansible-agent/hooks/upgrade_from_OSP9_to_OSP10.yml
 
-Here, `OSP9` is the current version and `OSP10` is the version to upgrade to.
+In this example, `OSP9` is the current version and `OSP10` is the version to upgrade to.
+And here is an example of an update playbook:
+
+     /etc/dci-ansible-agent/hooks/update_OSP9.yml
 
 ### Start the service
 
