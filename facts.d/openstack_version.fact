@@ -1,0 +1,38 @@
+#!/bin/bash
+# Guess the OpenStack version from the nova microversion
+# https://docs.openstack.org/nova/latest/reference/api-microversion-history.html
+
+function openstack_version_from_nova_version () {
+    nova_version=$1
+
+    if [ ${nova_version} -gt 60 ]; then echo 'rocky'; return; fi
+    if [ ${nova_version} -gt 53 ]; then echo 'queens'; return; fi
+    if [ ${nova_version} -gt 42 ]; then echo 'pike'; return; fi
+    if [ ${nova_version} -gt 38 ]; then echo 'ocata'; return; fi
+    if [ ${nova_version} -gt 25 ]; then echo 'newton'; return; fi
+    if [ ${nova_version} -gt 12 ]; then echo 'mitaka'; return; fi
+    if [ ${nova_version} -gt 3 ]; then echo 'liberty'; return; fi
+
+    echo 'unknown'
+}
+
+
+function get_microversion () {
+    rc_file=$1
+    source $1
+    openstack --os-compute-api-version 2.99  server list 2>&1|awk '/versions/ {print $7}'|sed s,^2\.,,
+}
+
+undercloud_version="null"
+overcloud_version="null"
+
+if [ -f /home/stack/stackrc ]; then
+    v=$(get_microversion /home/stack/stackrc)
+    undercloud_version="\"$(openstack_version_from_nova_version ${v})\""
+fi
+if [ -f /home/stack/overcloudrc ]; then
+    v=$(get_microversion /home/stack/overcloudrc)
+    overcloud_version="\"$(openstack_version_from_nova_version ${v})\""
+fi
+
+echo "{\"undercloud\": ${undercloud_version}, \"overcloud\": ${overcloud_version}}"
