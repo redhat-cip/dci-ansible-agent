@@ -102,6 +102,14 @@
         - include: plays/collect_logs.yml
         when: upgrade_playbook_stat.stat.exists
 
+      - include: plays/load_undercloud_extra_facts.yml
+      - debug:
+          msg:
+            - "OpenStack version in use:"
+            - "  undercloud: {{ undercloud_facts.ansible_facts.ansible_local.openstack_version.undercloud }}"
+            - "  overcloud: {{ undercloud_facts.ansible_facts.ansible_local.openstack_version.overcloud }}"
+
+
       rescue:
       # Included a second time in case of failure in hooks/running.yml,
       # this is required for collect-logs to work
