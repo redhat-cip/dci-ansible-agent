@@ -1,0 +1,20 @@
+- name: "Create custom fact directory"
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+  become: True
+  delegate_to: undercloud
+- name: "Insert custom DCI fact"
+  copy:
+    src: facts.d/openstack_version.fact
+    dest: /etc/ansible/facts.d/openstack_version.fact
+    mode: 0755
+  become: True
+  delegate_to: undercloud
+- name: "Re-run setup to use custom facts"
+  setup:
+  become: True
+  delegate_to: undercloud
+  register: undercloud_facts
+- debug:
+    var: undercloud_facts.ansible_facts.ansible_local
