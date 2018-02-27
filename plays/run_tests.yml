@@ -61,10 +61,10 @@
   become: true
 
 - include_role:
-    name: "{{ dci_topic }}/validate-tempest"
+    name: "{{ hostvars.localhost.job_informations.job.topic.name }}/validate-tempest"
 
 - include_role:
-    name: "{{ dci_topic }}/tripleo-inventory"
+    name: "{{ hostvars.localhost.job_informations.job.topic.name }}/tripleo-inventory"
 
 - include_role:
     name: "openstack-certification"
