@@ -1,0 +1,11 @@
+- name: Identify outdated files from the cache
+  find:
+    path: '{{ dci_cache_dir }}'
+    age: '4w'
+  register: old_files_found
+- name: Purge old files from the local cache
+  file:
+    path: '{{ item.path }}'
+    state: absent
+  with_items: '{{ old_files_found.files }}'
+
