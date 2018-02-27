@@ -91,35 +91,13 @@
           path: '{{ item.path }}'
           state: absent
         with_items: '{{ old_files_found.files }}'
-      - name: Retrieve component
-        dci_component:
-          dest: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
-          id: '{{ item["id"] }}'
-        with_items: "{{ components }}"
-
-      - name: Unarchive component
-        unarchive:
-          src: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
-          dest: '{{ dci_mirror_location }}/dci_repo'
-          remote_src: True
-        with_items: "{{ components }}"
-
-      - include: plays/sync_registry.yaml
-        when: dci_topic in ['OSP12']
-
-      - name: Prepare the YUM repo file
-        yum_repository:
-          name: '{{ item["canonical_project_name"] }}'
-          description: '{{ item["canonical_project_name"] }}'
-          baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
-          gpgcheck: no
-          file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
-        with_items: '{{ job_informations["job"]["components"] }}'
 
       - name: Generating RSA key for stack
         user:
           name: '{{ ansible_user_id }}'
           generate_ssh_key: 'yes'
+
+      - include: plays/fetch_bits.yaml
 
       rescue:
       - include: plays/failure.yml
