@@ -1,0 +1,8 @@
+Code-Review+2: François Charlier <francois.charlier@redhat.com>
+Workflow+1: François Charlier <francois.charlier@redhat.com>
+Verified+2: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-by: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-at: Tue, 27 Feb 2018 15:02:51 +0000
+Reviewed-on: https://softwarefactory-project.io/r/11273
+Project: dci-ansible-agent
+Branch: refs/heads/master
