@@ -69,6 +69,7 @@
       # this is required for collect-logs to work
       - include: plays/register_undercloud_host.yml
 
+      - include: plays/collect_logs.yml
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
@@ -180,29 +181,7 @@
     dci_status: 'post-run'
   tasks:
     - block:
-      - name: Extract the undercloud.tar.gz on the jumpbox
-        unarchive:
-          src: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz"
-          dest: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
-      # NOTE(dsavinea) : We need to ignore the errors because cert.txt
-      # is only present for OSP10 for the moment.
-      - name: Upload results
-        dci_file:
-          path: '{{ item.path }}'
-          name: '{{ item.name }}'
-          job_id: '{{ job_id }}'
-          mime: '{{ item.mime }}'
-        with_items:
-          - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest/tempest.xml", 'mime': 'application/junit'}
-          - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
-          - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
-          - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
-        ignore_errors: yes
-
-      - name: Clean result files
-        file:
-          name: "{{ lookup('env', 'HOME') }}/.quickstart"
-          state: absent
+      - include: plays/upload_logs.yml
 
       rescue:
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
