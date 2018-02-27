@@ -16,16 +16,16 @@ get_repo() {
         mkdir -p ${target}
         git checkout -b ${topic} ${branch}
 
-
-        # until https://review.openstack.org/#/c/521650 is merged upstream and backported
-        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP11" ] && git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/50/521650/1 && git cherry-pick FETCH_HEAD
-        [ ${repo} = 'tripleo-quickstart-extras' ] &&  [ ${topic} = "OSP10" ] && git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/50/521650/1 && git cherry-pick FETCH_HEAD
-
-        # until https://review.openstack.org/#/c/507889/ is merged upstream and backported on all the branches
-        [ ${repo} = 'tripleo-quickstart-extras' ] &&  find -name '*.yml' -exec sed -i "s/lookup('env', 'PWD')/local_working_dir/" "{}" \;
-
-        # until https://review.openstack.org/#/c/518575/ is merged upstream and backported on all the internal branches
-        [ ${repo} = 'tripleo-quickstart-extras' ] && git ls-files '*pre-tempest.yml' | xargs sed -i 's/processor_count/processor_vcpus/'
+        if [ ${repo} = 'tripleo-quickstart-extras' ]; then
+            git remote show redhat_gerrit || git remote add redhat_gerrit ssh://code.engineering.redhat.com:22/tripleo-quickstart-extras.git
+            [ ${topic} = "OSP12" ] && git review -r redhat_gerrit -x 130686
+            [ ${topic} = "OSP11" ] && git review -r redhat_gerrit -x 130687
+            [ ${topic} = "OSP10" ] && git review -r redhat_gerrit -x 130688
+            [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130689
+            [ ${topic} = "OSP8" ] && git review -r redhat_gerrit -x 130690
+            [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130692
+            [ ${topic} = "OSP8" ] && git review -r redhat_gerrit -x 130694
+	fi
 
         for i in ${roles}; do
            cp -av roles/${i} ${target}/${i}

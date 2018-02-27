@@ -5,11 +5,7 @@
 
 {% if tempest_overcloud|bool %}
 ## ::
-{% if release in ['newton', 'ocata', 'pike'] %}
 source {{ working_dir }}/overcloudrc
-{% else %}
-source {{ working_dir }}/overcloudrc.v3
-{% endif %}
 
 ## * Clean up from any previous tempest run
 ## ::
@@ -183,6 +179,7 @@ ${TEMPESTCONF} --out etc/tempest.conf \
   {% endfor %}
   {% endif %}
   compute-feature-enabled.console_output true \
+  scenario.img_file {{ tempest_test_image_name }} \
   orchestration.stack_owner_role Member
 
 ### --stop_docs

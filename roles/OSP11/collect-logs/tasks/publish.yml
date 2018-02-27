@@ -10,7 +10,8 @@
 
 - name: fetch and gzip the console log
   shell: >
-    curl -k {{ lookup('env', 'BUILD_URL') }}/consoleText | gzip > {{ artcl_collect_dir }}/console.txt.gz
+    curl -k "{{ lookup('env', 'BUILD_URL') }}/timestamps/?time=yyyy-MM-dd%20HH:mm:ss.SSS%20|&appendLog&locale=en_GB"
+    | gzip > {{ artcl_collect_dir }}/console.txt.gz
   when: lookup('env', 'BUILD_URL') != ""
 
 - name: Generate the README for the logs
@@ -20,7 +21,11 @@
 
 - name: Retrieve the ARA static playbook report
   command: cp -a {{ local_working_dir }}/ara {{ artcl_collect_dir }}/ara
-  ignore_errors: "yes"
+  ignore_errors: yes
+
+- include: ara_graphite.yml
+  when: ara_graphite_server is defined
+  ignore_errors: yes
 
 - name: fetch stackviz results to the root of the collect_dir
   shell: >
@@ -34,6 +39,14 @@
     cp {{ artcl_collect_dir }}/undercloud/home/stack/tempest/tempest.{xml,html}{,.gz} {{ artcl_collect_dir }} || true;
     gunzip {{ artcl_collect_dir }}/tempest.{xml,html}.gz || true;
 
+- name: Fetch .sh and .log files from local working directory on localhost
+  shell: >
+    cp {{ item }} {{ artcl_collect_dir }}/
+  with_items:
+    - "{{ local_working_dir }}/*.sh"
+    - "{{ local_working_dir }}/*.log"
+  ignore_errors: "yes"
+
 - name: Rename compressed text based files to end with txt.gz extension
   shell: >
     find {{ artcl_collect_dir }}/ -type f |
@@ -42,6 +55,11 @@
     /\.(conf|ini|json|sh|log|yaml|yml|repo)\.gz$/ { rename($0) }
     /(\/var\/log\/|\/etc\/)[^ \/\.]+\.gz$/ { rename($0) }';
   when: artcl_txt_rename|bool
+
+- name: Create the reproducer script
+  include_role:
+    name: create-reproducer-script
+  when: lookup('env', 'TOCI_JOBTYPE') != ''
 
 - name: upload to the artifact server using pubkey auth
   shell: rsync -av --quiet -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" {{ artcl_collect_dir }}/ {{ artcl_rsync_path }}/{{ lookup('env', 'BUILD_TAG') }}

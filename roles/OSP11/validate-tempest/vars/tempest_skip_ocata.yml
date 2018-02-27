@@ -63,3 +63,12 @@ known_failures:
   - test: 'tempest.api.orchestration.stacks.test_neutron_resources.NeutronResourcesTestJSON'
     reason: time out
     lp: 'https://bugs.launchpad.net/tripleo/+bug/1723137'
+  - test: 'tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_boot_server_from_encrypted_volume_luks'
+    reason: 'Legacy encryption is not properly configured by TripleO in Ocata and barbican is not deployed in overcloud'
+    lp: 'https://bugs.launchpad.net/tripleo/+bug/1733574'
+  - test: 'tempest.api.identity.admin.v3.test_roles.RolesV3TestJSON.test_implied_roles_create_check_show_delete'
+    reason: 'Difference in Implied Roles check API return code'
+    lp: 'https://bugs.launchpad.net/keystone/+bug/1660603'
+  - test: 'neutron.tests.tempest.scenario'
+    reason: 'Neutron tempest plugin scenario tests are unstable'
+    lp: 'https://launchpad.net/bugs/1737940'
