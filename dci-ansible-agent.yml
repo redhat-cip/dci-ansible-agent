@@ -61,6 +61,7 @@
   vars:
     dci_status: 'running'
     next_topic:
+      OSP8: 'OSP9'
       OSP9: 'OSP10'
       OSP10: 'OSP11'
       OSP11: 'OSP12'
