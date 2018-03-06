@@ -83,11 +83,11 @@
       - include: plays/run_tests.yml
         delegate_to: undercloud
 
-      - include: plays/collect_logs.yml
-      - include: plays/upload_logs.yml
-
       - name: Upgrade the deployment to the next release
         block:
+        - include: plays/collect_logs.yml
+        - include: plays/upload_logs.yml
+
         - dci_job:
             id: '{{ job_informations.job.id }}'
             upgrade: True
@@ -100,18 +100,22 @@
         - include: plays/run_tests.yml
           delegate_to: undercloud
 
-        - include: plays/collect_logs.yml
         when: upgrade_playbook_stat.stat.exists
+
+      always:
+      - include: plays/collect_logs.yml
+        ignore_errors: yes
+      - include: plays/upload_logs.yml
+        ignore_errors: yes
+
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
 
       rescue:
       # Included a second time in case of failure in hooks/running.yml,
       # this is required for collect-logs to work
       - include: plays/register_undercloud_host.yml
-
-      - include: plays/collect_logs.yml
-
-      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
       - include: plays/failure.yml
 
