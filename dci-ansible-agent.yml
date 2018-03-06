@@ -66,6 +66,7 @@
       OSP10: 'OSP11'
       OSP11: 'OSP12'
       OSP12: 'OSP13'
+      OSP13: 'OSP14'
   tasks:
     - block:
       - set_fact:

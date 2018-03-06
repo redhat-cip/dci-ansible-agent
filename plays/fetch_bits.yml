@@ -21,5 +21,5 @@
   with_items: '{{ job_informations["job"]["components"] }}'
 
 - include: plays/sync_registry.yaml
-  when: dci_topic in ['OSP12']
+  when: dci_topic in ['OSP12', 'OSP13']
 

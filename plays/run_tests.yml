@@ -11,6 +11,7 @@
       OSP10: 'newton'
       OSP11: 'ocata'
       OSP12: 'pike'
+      OSP13: 'queens'
       RDO-Newton: 'newton'
       RDO-Ocata: 'ocata'
       RDO-Pike: 'pike'
@@ -34,7 +35,7 @@
     name: python-tempestconf
     state: present
   become: true
-  when: dci_topic in ['OSP11', 'OSP12']
+  when: dci_topic in ['OSP11', 'OSP12', 'OSP13']
 
 - name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
   package:
@@ -68,6 +69,6 @@
 
 - include_role:
     name: "openstack-certification"
-  when: dci_topic in ['OSP10', 'OSP11', 'OSP12']
+  when: dci_topic in ['OSP10', 'OSP11', 'OSP12', 'OSP13']
   ignore_errors: True
 
