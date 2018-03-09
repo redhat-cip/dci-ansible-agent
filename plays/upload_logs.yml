@@ -3,6 +3,9 @@
   args:
     chdir: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
 
+- name: Ensure the files are not gzipped before their upload
+  command: "find {{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest -name '*.gz' -exec gunzip {} \\;"
+
 - name: Upload results
   dci_file:
     path: '{{ item.path }}'
