@@ -38,79 +38,68 @@ def login(username, password, registry):
     client.login(username=username, password=password, email='', registry=registry, reauth=True)
 
 
-def parse_image(image, private_registry):
-    image_with_project, tag = image['imagename'].split(':')
-    project, image_name = image_with_project.split('/')
-    repo = image['pull_source']
-    return {
-        'repo': repo,
-        'project': project,
-        'image_name': image_name,
-        'tag': tag,
-        'src': '%s/%s/%s' % (repo, project, image_name),
-        'local_name': '%s/%s:latest' % (project, image_name),
-        'dest': '%s/%s/%s' % (private_registry, project, image_name),
-        'dest_no_suffix': '%s/%s/%s' % (private_registry, project, image_name.replace('-docker', '')),
-    }
-
-
 def pull_image(image):
-    print('docker pull %s:%s' % (image['src'], image['tag']))
-    client.pull(image['src'], tag=image['tag'])
+    print('docker pull %s/%s/%s:%s' % (image['origin_registry'],
+                                       image['project'],
+                                       image['name'], image['tag']))
+    client.pull('%s/%s/%s' % (image['origin_registry'], image['project'],
+                              image['name']),
+                tag=image['tag'])
 
 
 def tag_image(image):
-    docker_image_id = client.inspect_image('%s:%s' % (image['src'], image['tag']))['Id']
-    print('docker %s %s:%s' % (docker_image_id, image['dest'], 'latest'))
-    client.tag(docker_image_id, repository=image['dest'], tag='latest')
-    print('docker %s %s:%s' % (docker_image_id, image['dest'], 'pcmklatest'))
-    client.tag(docker_image_id, repository=image['dest'], tag='pcmklatest')
-    print('docker %s %s:%s' % (docker_image_id, image['dest_no_suffix'], 'latest'))
-    client.tag(docker_image_id, repository=image['dest_no_suffix'], tag='latest')
-    # pcmklatest are needed for some cases
-    print('docker %s %s:%s' % (docker_image_id, image['dest_no_suffix'], 'pcmklatest'))
-    client.tag(docker_image_id, repository=image['dest_no_suffix'], tag='pcmklatest')
+    docker_image_id = \
+        client.inspect_image('%s/%s/%s:%s' % (image['origin_registry'],
+                                              image['project'],
+                                              image['name'],
+                                              image['tag']))['Id']
+
+    for tag in ['latest', 'pcmklatest']:
+        print('docker tag %s %s/%s/%s:%s' % (docker_image_id,
+                                             image['dest_registry'],
+                                             image['project'],
+                                             image['name'], tag))
+        client.tag(docker_image_id,
+                   repository='%s/%s/%s' % (image['dest_registry'],
+                                            image['project'], image['name']),
+                   tag=tag)
 
 
 def push_image(image):
-    print('docker push %s:%s' % (image['dest'], 'latest'))
-    client.push(image['dest'], tag='latest')
-    print('docker push %s:%s' % (image['dest'], 'pcmklatest'))
-    client.push(image['dest'], tag='pcmklatest')
-    print('docker push %s:%s' % (image['dest_no_suffix'], 'latest'))
-    client.push(image['dest_no_suffix'], tag='latest')
-    print('docker push %s:%s' % (image['dest_no_suffix'], 'pcmklatest'))
-    client.push(image['dest_no_suffix'], tag='pcmklatest')
+    for tag in ['latest', 'pcmklatest']:
+        print('docker push %s/%s/%s:%s' % (image['dest_registry'],
+                                           image['project'],
+                                           image['name'], tag))
+        client.push('%s/%s/%s' % (image['dest_registry'], image['project'],
+                                  image['name']),
+                    tag=tag)
 
 
 def main():
     if len(sys.argv) <= 1:
-        print('\nError: container_images.yaml path required\nusage: %s ./container_images.yaml' % sys.argv[0])
+        print('\nError: images_list.yaml path required\nusage: %s ./images_list.yaml' % sys.argv[0])
         sys.exit(1)
 
     login(DCI_REGISTRY_USER, DCI_REGISTRY_PASSWORD, DCI_REGISTRY)
 
     docker_distribution_config = yaml.load(open('/etc/docker-distribution/registry/config.yml', 'r'))
-    private_registry = docker_distribution_config['http']['addr']
 
-    final_container_images_yaml = {'container_images': []}
     with open(sys.argv[1], 'r') as stream:
         try:
-            images = yaml.load(stream)['container_images']
-            for image in images:
-                print('-----------------')
-                image = parse_image(image, private_registry)
-                pull_image(image)
-                tag_image(image)
-                push_image(image)
-                final_container_images_yaml['container_images'].append({
-                    'imagename': image['local_name'],
-                    'pull_source': private_registry})
-            print('-----------------')
+            images = yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-    with open(sys.argv[2], 'w') as fd:
-        yaml.dump(final_container_images_yaml, fd, default_flow_style=False)
+
+        for image in images:
+            image = {
+                'name': image.split('/')[2], 'project': image.split('/')[1],
+                'origin_registry': image.split('/')[0],
+                'dest_registry': docker_distribution_config['http']['addr'],
+                'tag': image.split(':')[-1]
+            }
+            pull_image(image)
+            tag_image(image)
+            push_image(image)
 
 
 if __name__ == '__main__':
