@@ -159,9 +159,11 @@ ${TEMPESTCONF} --out etc/tempest.conf \
   identity.admin_password $OS_PASSWORD \
   identity.admin_username $OS_USERNAME \
   compute.allow_tenant_isolation true \
+  scenario.img_file {{ tempest_test_image_name }} \
   {% else %}
   auth.use_dynamic_credentials true \
   auth.tempest_roles Member \
+  network-feature-enabled.port_security true \
   {% endif %}
   compute-feature-enabled.attach_encrypted_volume False \
   network.tenant_network_cidr {{ tenant_network_cidr }} \
@@ -180,7 +182,6 @@ ${TEMPESTCONF} --out etc/tempest.conf \
   {% endfor %}
   {% endif %}
   compute-feature-enabled.console_output true \
-  scenario.img_file {{ tempest_test_image_name }} \
   orchestration.stack_owner_role Member
 
 ### --stop_docs

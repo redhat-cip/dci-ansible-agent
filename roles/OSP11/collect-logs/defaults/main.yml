@@ -2,13 +2,14 @@
 
 artcl_collect: true
 artcl_collect_list:
-  - /var/log/
-  - /var/lib/pacemaker/cib/cib*
-  - /var/lib/heat-config/heat-config-puppet/
-  - /var/lib/heat-config/heat-config-script/
-  - /var/tmp/sosreport*
-  - /var/lib/oooq-images/*/*.sh
+  - /var/lib/heat-config/
+  - /var/lib/kolla/config_files
   - /var/lib/oooq-images/*/*.log
+  - /var/lib/oooq-images/*/*.sh
+  - /var/lib/pacemaker/cib/cib*
+  - /var/lib/pacemaker/pengine/pe-input*
+  - /var/log/
+  - /var/tmp/sosreport*
   - /etc/
   - /home/*/.instack/install-undercloud.log
   - /home/*/stackrc
@@ -126,3 +127,13 @@ ara_tasks_map:
   "overcloud-prep-images : Prepare the overcloud images for deploy": prepare_images.seconds
   "validate-simple : Validate the overcloud": overcloud.ping_test.seconds
   "validate-tempest : Execute tempest": overcloud.tempest.seconds
+# InfluxDB module settings
+influxdb_only_successful_tasks: true
+influxdb_measurement: test
+# influxdb_url:
+influxdb_port: 8086
+influxdb_user:
+influxdb_password:
+influxdb_dbname: testdb
+influxdb_data_file_path: "{{ lookup('env', 'LOCAL_WORKING_DIR')|default('/tmp', true) }}/influxdb_data"
+influxdb_create_data_file: true

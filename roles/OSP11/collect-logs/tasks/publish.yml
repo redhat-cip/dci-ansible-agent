@@ -14,24 +14,27 @@
     | gzip > {{ artcl_collect_dir }}/console.txt.gz
   when: lookup('env', 'BUILD_URL') != ""
 
-- name: Generate the README for the logs
-  template:
-    src: README-logs.html.j2
-    dest: "{{ artcl_readme_file }}"
-
-- name: Retrieve the ARA static playbook report
-  command: cp -a {{ local_working_dir }}/ara {{ artcl_collect_dir }}/ara
+- name: Generate and retrieve the ARA static playbook report
+  shell: >
+    {{ local_working_dir }}/bin/ara generate html {{ local_working_dir }}/ara_oooq;
+    {{ local_working_dir }}/bin/ara task list --all -f json > {{ artcl_collect_dir }}/ara.json;
+    cp -r {{ local_working_dir }}/ara_oooq {{ artcl_collect_dir }}/;
+    {% if artcl_gzip_only|bool %}gzip --best --recursive {{ artcl_collect_dir }}/ara_oooq;{% endif %}
   ignore_errors: yes
 
 - include: ara_graphite.yml
   when: ara_graphite_server is defined
   ignore_errors: yes
 
+- include: ara_influxdb.yml
+  when: influxdb_url is defined or influxdb_create_data_file|bool
+  ignore_errors: yes
+
 - name: fetch stackviz results to the root of the collect_dir
   shell: >
     if [ -d {{ artcl_collect_dir }}/undercloud/var/log/extra/stackviz/data ]; then
         cp -r {{ artcl_collect_dir }}/undercloud/var/log/extra/stackviz {{ artcl_collect_dir }};
-        gunzip -r {{ artcl_collect_dir }}/stackviz;
+        gunzip -fr {{ artcl_collect_dir }}/stackviz;
     fi;
 
 - name: fetch tempest results to the root of the collect_dir
@@ -59,7 +62,7 @@
 - name: Create the reproducer script
   include_role:
     name: create-reproducer-script
-  when: lookup('env', 'TOCI_JOBTYPE') != ''
+  when: ansible_env.TOCI_JOBTYPE is defined
 
 - name: upload to the artifact server using pubkey auth
   shell: rsync -av --quiet -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" {{ artcl_collect_dir }}/ {{ artcl_rsync_path }}/{{ lookup('env', 'BUILD_TAG') }}
