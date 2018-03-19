@@ -49,7 +49,8 @@
     src: tempest-overrides.conf
     dest: ~/tempest-deployer-input.conf
 
-- ini_file:
+- name: Apply tempest configuration sent by the server
+  ini_file:
     path: ~/tempest-deployer-input.conf
     section: '{{ item.section }}'
     option: '{{ item.option }}'
@@ -61,13 +62,16 @@
   command: 'yum install -y python-*-tests'
   become: true
 
-- include_role:
+- name: Start the valide-tempest role
+  include_role:
     name: "{{ hostvars.localhost.job_informations.job.topic.name }}/validate-tempest"
 
-- include_role:
+- name: Start the tripleo-inventory role
+  include_role:
     name: "{{ hostvars.localhost.job_informations.job.topic.name }}/tripleo-inventory"
 
-- include_role:
+- name: Run Red Hat OpenStack Certification test-suite
+  include_role:
     name: "openstack-certification"
   when: dci_topic in ['OSP10', 'OSP11', 'OSP12', 'OSP13']
   ignore_errors: True
