@@ -181,3 +181,36 @@ You may want to trace the agent execution to understand a problem. In this case,
     $ cd /usr/share/dci-ansible-agent
     $ source /etc/dci-ansible-agent/dcirc.sh
     $ /usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
+
+### Red Hat Certification test-suite
+
+DCI runs the Red Hat Certification test-suite at the end of a deployment. It's configuration is stored in the `/etc/redhat-certification-openstack` directory.
+`/etc/redhat-certification-openstack/tempest.conf` is the configuration file of tempest. You can manually re-run a certification test with the following command:
+
+    $ ssh stack@undercloud
+    # rhcert-ci run --test cinder_volumes
+
+In this example, `cinder_volumes` is the name of the test to re-run.
+
+rhcert stores the log of the run in a directory in `/var/log/rhcert/runs`. For instance `/var/log/rhcert/runs/1/openstack/` is the result of the first run.
+
+    # cd /var/log/rhcert/runs
+    # ls
+    1  2
+
+Here we have two directories, each of them are the results of a `rhcert` run. The first one was probably triggered by the agent automatically.
+
+    # cd 1
+    # ls
+    openstack  rhcert
+    # cd openstack/
+    # ls
+    cinder_volumes  director  sosreport  supportable
+    # ls cinder_volumes/
+    boot-tempest.log             clone-tempest.log             encryption-tempest.log
+    migrate-tempest.log             output.log         quota-validation_report.json
+    snapshot-validation_report.json  volume-validation_report.json boot-validation_report.json
+    clone-validation_report.json  encryption-validation_report.json  migrate-validation_report.json
+    quota-tempest.log  snapshot-tempest.log          volume-tempest.log
+
+Here we have the results of different sub-test run by `rhcert`. The most important file is output.log, it will give you a global overview of what have been run and the status of the different test.
