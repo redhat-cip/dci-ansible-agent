@@ -181,3 +181,13 @@ You may want to trace the agent execution to understand a problem. In this case,
     $ cd /usr/share/dci-ansible-agent
     $ source /etc/dci-ansible-agent/dcirc.sh
     $ /usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
+
+### Red Hat Certification test-suite
+
+DCI runs the Red Hat Certification test-suite at the end of a deployment. It's configuration is stored in the `/etc/redhat-certification-openstack` directory.
+`/etc/redhat-certification-openstack/tempest.conf` is the configuration file of tempest. You can manually re-run a certification test with the following command:
+
+    $ ssh stack@undercloud
+    # rhcert-ci run --test self_check --test cinder_volumes
+
+In this example, `cinder_volumes` is the name of the test to re-run.
