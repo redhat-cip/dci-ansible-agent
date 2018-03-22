@@ -78,6 +78,9 @@
         register: upgrade_playbook_stat
       - include: '{{ dci_config_dir }}/hooks/running.yml'
 
+      - include_role:
+          name: "{{ hostvars.localhost.job_informations.job.topic.name }}/common"
+
       - include: plays/register_undercloud_host.yml
 
       - include: plays/run_tests.yml
@@ -92,6 +95,9 @@
             id: '{{ job_informations.job.id }}'
             upgrade: True
           register: job_informations
+
+        - include_role:
+            name: "{{ hostvars.localhost.job_informations.job.topic.name }}/common"
 
         - set_fact:
             dci_status: 'running'
