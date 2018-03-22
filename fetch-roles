@@ -19,10 +19,7 @@ get_repo() {
         if [ ${repo} = 'tripleo-quickstart-extras' ]; then
             git remote show redhat_gerrit || git remote add redhat_gerrit ssh://code.engineering.redhat.com:22/tripleo-quickstart-extras.git
             [ ${topic} = "OSP13" ] && git review -x 551364
-            [ ${topic} = "OSP13" ] && git review -r redhat_gerrit -x 130686
-            [ ${topic} = "OSP12" ] && git review -r redhat_gerrit -x 130686
             [ ${topic} = "OSP12" ] && git review -x 551364
-            [ ${topic} = "OSP10" ] && git review -r redhat_gerrit -x 130688
             [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130689
             [ ${topic} = "OSP8" ] && git review -r redhat_gerrit -x 130690
             [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130692
@@ -42,3 +39,4 @@ mkdir -p ${TMPDIR}
 
 get_repo tripleo-quickstart "common tripleo-inventory"
 get_repo tripleo-quickstart-extras "collect-logs extras-common validate-tempest"
+git add -r roles
