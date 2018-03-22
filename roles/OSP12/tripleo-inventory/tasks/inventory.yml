@@ -34,7 +34,7 @@
         name: '{{ item.key }}'
         groups: "overcloud,{{ item.key | regex_replace('overcloud-(?:nova)?([a-zA-Z0-9_]+)-[0-9]+$', '\\1') }}"
         ansible_host: '{{ item.key }}'
-        ansible_fqdn: '{{ item.value }}'
+        inventory_ip: '{{ item.value }}'
         ansible_user: "{{ overcloud_user | default('heat-admin') }}"
         ansible_private_key_file: "{{ overcloud_key }}"
         ansible_ssh_extra_args: '-F "{{ local_working_dir }}/ssh.config.ansible"'
@@ -51,7 +51,7 @@
         name: 'subnode-{{ item.0 + 2 }}'
         groups: "overcloud"
         ansible_host: '{{ item.1 }}'
-        ansible_fqdn: '{{ item.1 }}'
+        inventory_ip: '{{ item.1 }}'
         ansible_user: "{{ lookup('env','USER') }}"
         ansible_private_key_file: "/etc/nodepool/id_rsa"
 
@@ -85,7 +85,6 @@
 - name: Add undercloud vm to inventory
   add_host:
     name: undercloud
-    groups: undercloud
     ansible_host: '{{ undercloud_ip }}'
     ansible_fqdn: undercloud
     ansible_user: '{{ undercloud_user }}'
@@ -97,7 +96,7 @@
 #required for regeneration of ssh.config.ansible
 - name: set undercloud ssh proxy command
   set_fact:
-    undercloud_ssh_proxy_command: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    undercloud_ssh_proxy_command: "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       -o ConnectTimeout=60 -i {{ hostvars[groups['virthost'][0]].ansible_private_key_file }}
       {{ ssh_user }}@{{ hostvars[groups['virthost'][0]].ansible_host }}
       -W {{ undercloud_ip }}:22"
@@ -107,7 +106,7 @@
 #required for regeneration of ssh.config.ansible
 - name: set undercloud ssh proxy command
   set_fact:
-    undercloud_ssh_proxy_command: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    undercloud_ssh_proxy_command: "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       -o ConnectTimeout=60 -i {{ local_working_dir }}/id_rsa_virt_power
       {{ ssh_user }}@{{ hostvars['localhost'].ansible_default_ipv4.address }}
       -W {{ undercloud_ip }}:22"
@@ -116,7 +115,7 @@
 
 - name: set supplemental ssh proxy command
   set_fact:
-    supplemental_ssh_proxy_command: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    supplemental_ssh_proxy_command: "ssh -q -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       -o ConnectTimeout=60 -i {{ local_working_dir }}/id_rsa_virt_power
       {{ ssh_user }}@{{ hostvars[groups['virthost'][0]].ansible_host }}
       -W {{ supplemental_node_ip }}:22"

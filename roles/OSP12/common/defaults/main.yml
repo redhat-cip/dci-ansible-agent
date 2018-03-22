@@ -185,7 +185,7 @@ enable_vnc_console: true
 #
 # TODO(trown): It would be better to write a release into the image itself
 # and set this variable from there.
-release: newton
+release: pike
 
 # This option controls whether or not to use the repo setup for TripleO
 # development. Since this requires some other options to be funtional,
@@ -229,3 +229,6 @@ exit_on_validations_failure: False
 # Update undercloud and overcloud images with the repos provided via the
 # release config.
 update_images: false
+
+# If running in chroot-like environments (containers)
+chrooted: false
