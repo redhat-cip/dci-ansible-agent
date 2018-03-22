@@ -73,6 +73,12 @@
           # job_informations may be redefined below. We need a set_fact here to
           # store a static result.
           upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic[job_informations.job.topic.name] }}.yml'
+          # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
+          # tripleo-inventory depends on the common role, however the role is not include
+          # has it should when we use the include_role directive.
+          # Here we manually declare the deploy_supplemental_node variable to avoid an
+          # undefined value during the role execution
+          deploy_supplemental_node: No
       - stat:
           path: '{{ upgrade_playbook }}'
         register: upgrade_playbook_stat

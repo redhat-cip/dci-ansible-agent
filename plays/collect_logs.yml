@@ -1,3 +1,8 @@
+# NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
+- set_fact:
+    local_working_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
+- set_fact:
+    artcl_collect_dir: "{{ local_working_dir }}/collected_files"
 - include_role:
     name: "OSP12/collect-logs"
   vars:
