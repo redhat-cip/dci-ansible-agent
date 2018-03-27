@@ -1,0 +1,8 @@
+Code-Review+2: Guillaume Vincent <gvincent@redhat.com>
+Workflow+1: Gonéri Le Bouder <goneri@lebouder.net>
+Verified+2: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-by: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-at: Tue, 27 Mar 2018 19:19:30 +0000
+Reviewed-on: https://softwarefactory-project.io/r/11612
+Project: dci-ansible-agent
+Branch: refs/heads/master
