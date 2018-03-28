@@ -101,7 +101,13 @@
         - dci_job:
             id: '{{ job_informations.job.id }}'
             update: True
-          register: job_informations
+          register: new_job_informations
+        # NOTE(Gonéri): avoid https://github.com/ansible/ansible/issues/4297
+        - set_fact:
+            job_informations: '{{ new_job_informations }}'
+          when: new_job_informations.skipped != True
+
+
 
         - include: '{{ update_playbook }}'
         - include: plays/run_tests.yml
@@ -115,8 +121,15 @@
 
         - dci_job:
             id: '{{ job_informations.job.id }}'
+            status: success
+
+        - dci_job:
+            id: '{{ job_informations.job.id }}'
             upgrade: True
-          register: job_informations
+          register: new_job_informations
+        - set_fact:
+            job_informations: '{{ new_job_informations }}'
+          when: new_job_informations.skipped != True
 
         - set_fact:
             dci_status: 'running'
