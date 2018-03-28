@@ -105,7 +105,7 @@
         # NOTE(Gonéri): avoid https://github.com/ansible/ansible/issues/4297
         - set_fact:
             job_informations: '{{ new_job_informations }}'
-          when: new_job_informations.skipped != True
+          when: new_job_informations.skipped is not defined
 
 
 
@@ -129,7 +129,7 @@
           register: new_job_informations
         - set_fact:
             job_informations: '{{ new_job_informations }}'
-          when: new_job_informations.skipped != True
+          when: new_job_informations.skipped is not defined
 
         - set_fact:
             dci_status: 'running'
