@@ -226,3 +226,29 @@ It may be useful to restart a failing test to troubleshoot the problem:
     $ ostestr --no-discover tempest.api.volume.admin.test_volume_retype_with_migration.VolumeRetypeWithMigrationTest
 
 The Certification test-suite uses it's own configuration located at `/etc/redhat-certification-openstack/tempest.conf`. Is a copy of `/home/stack/tempest/etc/tempest.conf`.
+
+### How to test several versions of OpenStack
+
+You can off course run different versions of OpenStack with the same jumpbox. To do so, you need first to adjust the way systemd call the agent:
+
+    # systemctl edit --full dci-ansible-agent
+
+```ini
+[Unit]
+Description=DCI Ansible Agent
+
+[Service]
+Type=oneshot
+WorkingDirectory=/usr/share/dci-ansible-agent
+EnvironmentFile=/etc/dci-ansible-agent/dcirc.sh
+ExecStart=-/usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml -e dci_topic=OSP10
+ExecStart=-/usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml -e dci_topic=OSP11
+ExecStart=-/usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml -e dci_topic=OSP12
+SuccessExitStatus=0
+User=dci-ansible-agent
+
+[Install]
+WantedBy=default.target
+```
+
+In this example, we do a run of OSP10, OSP11 and OSP12 everytime we start the agent.
