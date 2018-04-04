@@ -100,12 +100,7 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 ### How to use the images (OSP12)
 
-If you are use OSP12, you need to adjust your automation to fetch the images on the undercloud and make use of them during the deployment.
-
-You will have to adjust two extra keys in your `/etc/dci-ansible-agent/dcirc.sh` file:
-
-- DCI_REGISTRY_USER
-- DCI_REGISTRY_PASSWORD
+If you are use OSP12 and above, the DCI agent will set up an image registry and fetch the last OSP images on your jumpbox.
 
 Before you start the overcloud deploy with the `openstack overcloud deploy --templates [additional parameters]` command, you have to call the following command on the undercloud node.
 
