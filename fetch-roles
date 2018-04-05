@@ -3,16 +3,24 @@ set -eux
 TMPDIR='/tmp/dci-tmp-dir'
 BASEDIR=$(pwd)
 
+declare -A release
+release['OSP8']='liberty'
+release['OSP9']='mitaka'
+release['OSP10']='newton'
+release['OSP11']='ocata'
+release['OSP12']='pike'
+release['OSP13']='queens'
+
 get_repo() {
     repo=${1}
     roles=${2}
     cd ${TMPDIR}
     git clone https://code.engineering.redhat.com/gerrit/${repo}.git ${repo}
     cd ${repo}
-    for topic in OSP8 OSP9 OSP10 OSP11 OSP12 OSP13; do
+    for topic in "${!release[@]}"; do
         branch=$(echo ${topic}|sed 's,OSP,origin/stable/rhos-,')
 	[ "${branch}" = "origin/stable/rhos-13" ] && branch="origin/stable/rhos-12"
-        target=${BASEDIR}/roles/${topic}
+        target=${BASEDIR}/roles/${release[$topic]}
         mkdir -p ${target}
         git checkout -b ${topic} ${branch}
 

@@ -4,7 +4,7 @@
 - set_fact:
     artcl_collect_dir: "{{ local_working_dir }}/collected_files"
 - include_role:
-    name: "OSP12/collect-logs"
+    name: "pike/collect-logs"
   vars:
     inventory_hostname: undercloud
   delegate_to: undercloud
