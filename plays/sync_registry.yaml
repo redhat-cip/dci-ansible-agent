@@ -38,3 +38,7 @@
   environment:
     DCI_REGISTRY_PASSWORD: '{{ hostvars.localhost.job_informations.topic.data.registry.password | quote}}'
     DCI_REGISTRY_USER: '{{ hostvars.localhost.job_informations.topic.data.registry.login | quote}}'
+- name: Free the space used during the copy of the images
+  shell: |
+    docker rmi -f $(docker images -aq)
+    docker volume prune -f
