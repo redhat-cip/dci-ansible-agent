@@ -63,13 +63,18 @@
   tasks:
     - block:
       - dci_topic:
-          id: '{{ job_informations.topic.next_topic }}'
+          id: '{{ job_informations.job.topic.next_topic }}'
         register: next
+      - set_fact:
+          next_topic_name: 'none'
+      - set_fact:
+          next_topic_name: "{{ next.topic.name }}"
+        when: "'topic' in next"
       - set_fact:
           # job_informations may be redefined below. We need a set_fact here to
           # store a static result.
           update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
-          upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next.topic.name }}.yml'
+          upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic_name }}.yml'
           # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
           # tripleo-inventory depends on the common role, however the role is not include
           # has it should when we use the include_role directive.
