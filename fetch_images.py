@@ -54,6 +54,16 @@ def push_image(image, tag):
     client.push('{dest_registry}/{project}/{name}'.format(**image), tag=tag)
 
 
+def list_existing_tags(image):
+    r = requests.get('http://{dest_registry}/v2/{project}/{name}/tags/list'.format(**image))
+    if r.status_code == 404:
+        return []
+    elif r.status_code == 200 and r.json() and 'tags' in r.json():
+        return r.json()['tags']
+    else:
+        raise Exception(r.text)
+
+
 def main():
     if len(sys.argv) <= 1:
         print('\nError: images_list.yaml path required\nusage: %s ./images_list.yaml' % sys.argv[0])
@@ -79,11 +89,15 @@ def main():
                 'origin_registry': origin_registry,
                 'dest_registry': docker_distribution_config['http']['addr']
             }
-            pull_image(image)
+            existing_tags = list_existing_tags(image)
+            if image['tag'] in existing_tags:
+                continue
             tag_image(image, 'latest')
             tag_image(image, 'pcmklatest')
+            tag_image(image, image['tag'])
             push_image(image, 'latest')
             push_image(image, 'pcmklatest')
+            push_image(image, image['tag'])
 
 
 if __name__ == '__main__':
