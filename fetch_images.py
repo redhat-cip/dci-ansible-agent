@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2017 Red Hat, Inc.
+# Copyright 2017-2018 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -81,9 +81,7 @@ def main():
             }
             pull_image(image)
             tag_image(image, 'latest')
-            tag_image(image, 'pcmklatest')
             push_image(image, 'latest')
-            push_image(image, 'pcmklatest')
 
 
 if __name__ == '__main__':
