@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-# Copyright 2017 Red Hat, Inc.
+# Copyright 2017-2018 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -53,6 +53,14 @@ def push_image(image, tag):
     print('docker push {dest_registry}/{project}/{name} {}'.format(tag, **image))
     client.push('{dest_registry}/{project}/{name}'.format(**image), tag=tag)
 
+def list_existing_tags(image):
+    r = requests.get('http://{dest_registry}/v2/{project}/{name}/tags/list'.format(**image))
+    if r.status_code == 404:
+        return []
+    elif r.status_code == 200 and r.json() and 'tags' in r.json():
+        return r.json()['tags']
+    else:
+        raise Exception(r.text)
 
 def main():
     if len(sys.argv) <= 1:
@@ -79,6 +87,9 @@ def main():
                 'origin_registry': origin_registry,
                 'dest_registry': docker_distribution_config['http']['addr']
             }
+            existing_tags = list_existing_tags(image)
+            if image['tag'] in existing_tags:
+                continue
             pull_image(image)
             tag_image(image, 'latest')
             push_image(image, 'latest')
