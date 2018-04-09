@@ -131,6 +131,15 @@ And here is an example of an update playbook:
 
      /etc/dci-ansible-agent/hooks/update_OSP9.yml
 
+### How to run my own set of tests ?
+
+`dci-ansible-agent` ships with a pre-defined set of tests that will be run. It is however possible for anyone, in addition of the pre-defined tests, to run their own set of tests.
+
+In order to do so, a user needs to drop the tasks to run in `/etc/dci-ansible-agent/hooks/local_tests.yml`.
+
+**NOTE**: Tasks run in this playbook will be run from the undercloud node. To have an improved user-experience in the DCI web application, the suite should ideally returns JUnit formatted results. If not in JUnit, one will be able to download the results but not see them in the web interface directly.
+
+
 ### Start the service
 
 The agent comes with a systemd configuration that simplify its execution. You can just start the agent:
