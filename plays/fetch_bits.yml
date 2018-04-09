@@ -2,14 +2,14 @@
   dci_component:
     dest: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
     id: '{{ item["id"] }}'
-  with_items: "{{ components }}"
+  with_items: '{{ job_informations["job"]["components"] }}'
 
 - name: Unarchive component
   unarchive:
     src: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
     dest: '{{ dci_mirror_location }}/dci_repo'
     remote_src: True
-  with_items: "{{ components }}"
+  with_items: '{{ job_informations["job"]["components"] }}'
 
 - name: Prepare the YUM repo file
   yum_repository:
