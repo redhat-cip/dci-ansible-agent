@@ -3,6 +3,8 @@
     local_working_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
 - set_fact:
     artcl_collect_dir: "{{ local_working_dir }}/collected_files"
+    artcl_gzip_only: false
+    artcl_tar_gz: true
 - include_role:
     name: "OSP12/collect-logs"
   vars:
