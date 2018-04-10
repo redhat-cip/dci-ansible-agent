@@ -3,9 +3,6 @@
   args:
     chdir: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
 
-- name: Ensure the files are not gzipped before their upload
-  command: "find {{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest -name '*.gz' -exec gunzip {} \\;"
-
 - name: Upload results
   dci_file:
     path: '{{ item.path }}'
@@ -13,7 +10,7 @@
     job_id: '{{ hostvars.localhost.job_informations.job.id }}'
     mime: '{{ item.mime }}'
   with_items:
-    - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud/home/stack/tempest/tempest.xml", 'mime': 'application/junit'}
+    - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
     - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
     - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
     - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
