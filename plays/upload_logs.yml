@@ -8,7 +8,17 @@
     - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
     - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
     - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
-    - {'name': 'undercloud.tar.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/undercloud.tar.gz", 'mime': 'application/x-compressed'}
+  ignore_errors: yes
+
+- name: Upload logs
+  dci_file:
+    path: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/{{ item }}.tar.gz"
+    name: '{{ item }}.tar.gz'
+    job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+    mime: 'application/x-compressed'
+  with_items:
+    - 'undercloud'
+    - '{{ groups.overcloud }}'
   ignore_errors: yes
 
 - name: Clean result files

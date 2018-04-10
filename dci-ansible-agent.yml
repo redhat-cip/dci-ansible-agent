@@ -81,6 +81,8 @@
           # Here we manually declare the deploy_supplemental_node variable to avoid an
           # undefined value during the role execution
           deploy_supplemental_node: No
+          inventory: all
+          undercloud_type: baremetal
       - stat:
           path: '{{ update_playbook }}'
         register: update_playbook_stat
