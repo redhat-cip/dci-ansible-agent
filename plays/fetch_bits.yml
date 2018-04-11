@@ -9,6 +9,7 @@
     src: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
     dest: '{{ dci_mirror_location }}/dci_repo'
     remote_src: True
+    list_files: yes
   with_items: "{{ components }}"
 
 - name: Prepare the YUM repo file
