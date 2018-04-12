@@ -11,7 +11,7 @@
 - name: Prepare docker configuration
   copy:
     content: |
-      {"storage-driver": "overlay2", "insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:5000"] }
+      {"insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:5000"] }
     dest: /etc/docker/daemon.json
   become: True
 - service:
