@@ -11,15 +11,18 @@ get_repo() {
     cd ${repo}
     for topic in OSP8 OSP9 OSP10 OSP11 OSP12 OSP13; do
         branch=$(echo ${topic}|sed 's,OSP,origin/stable/rhos-,')
-	[ "${branch}" = "origin/stable/rhos-13" ] && branch="origin/stable/rhos-12"
+        [ "${branch}" = "origin/stable/rhos-13" ] && branch="origin/stable/master"
+        [ "${branch}" = "origin/stable/rhos-12" ] && branch="origin/stable/master"
+        [ "${branch}" = "origin/stable/rhos-11" ] && branch="origin/stable/master"
         target=${BASEDIR}/roles/${topic}
         mkdir -p ${target}
         git checkout -b ${topic} ${branch}
 
         if [ ${repo} = 'tripleo-quickstart-extras' ]; then
             git remote show redhat_gerrit || git remote add redhat_gerrit ssh://code.engineering.redhat.com:22/tripleo-quickstart-extras.git
-            [ ${topic} = "OSP13" ] && git review -x 551364
-            [ ${topic} = "OSP12" ] && git review -x 551364
+            [ ${topic} = "OSP13" ] && git review -x 560676
+            [ ${topic} = "OSP12" ] && git review -x 560676
+            [ ${topic} = "OSP10" ] && git review -r redhat_gerrit -x 135439
             [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130689
             [ ${topic} = "OSP8" ] && git review -r redhat_gerrit -x 130690
             [ ${topic} = "OSP9" ] && git review -r redhat_gerrit -x 130692
@@ -37,6 +40,7 @@ get_repo() {
 rm -Rf ${TMPDIR} ${BASEDIR}/roles
 mkdir -p ${TMPDIR}
 
+git rm -r roles
 get_repo tripleo-quickstart "common tripleo-inventory"
 get_repo tripleo-quickstart-extras "collect-logs extras-common validate-tempest"
-git add -r roles
+git add roles
