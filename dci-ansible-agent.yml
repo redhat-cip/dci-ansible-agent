@@ -159,6 +159,15 @@
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
 
+- name: 'Partner-specific tests'
+  hosts: undercloud
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - include: "{{ dci_config_dir }}/hooks/local_tests.yml"
+      ignore_errors: yes
+
+
 # Success state
 #
 # User is free to do whaterver she needs before entering pre-run state.
