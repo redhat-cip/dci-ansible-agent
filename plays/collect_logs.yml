@@ -6,7 +6,7 @@
     artcl_gzip_only: false
     artcl_tar_gz: true
 - include_role:
-    name: "OSP12/collect-logs"
+    name: "pike/collect-logs"
   vars:
     inventory_hostname: '{{ delegate_item }}'
   delegate_to: '{{ delegate_item }}'

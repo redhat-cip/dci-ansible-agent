@@ -5,18 +5,7 @@
 - set_fact:
     remoteci_data_tempest: "{{ remoteci_data['tempest']|default({}) }}"
 - set_fact:
-    rhos_release:
-      OSP8: 'liberty'
-      OSP9: 'mitaka'
-      OSP10: 'newton'
-      OSP11: 'ocata'
-      OSP12: 'pike'
-      OSP13: 'queens'
-      RDO-Newton: 'newton'
-      RDO-Ocata: 'ocata'
-      RDO-Pike: 'pike'
-- set_fact:
-    release: '{{ rhos_release[dci_topic] }}'
+    release: '{{ hostvars.localhost.job_informations.topic.data.releasename }}'
     dci_status: 'post-run'
     tempest_exit_on_failure: false
     run_tempest: true
@@ -30,19 +19,19 @@
     openstack_certification_tempest_conf_path_is_remote: Yes
     openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
 
-- name: default-overrides.conf is in python-tempestconf since OSP11
+- name: default-overrides.conf is in python-tempestconf since ocata
   package:
     name: python-tempestconf
     state: present
   become: true
-  when: dci_topic in ['OSP11', 'OSP12', 'OSP13']
+  when: release in ['ocata', 'pike', 'queens']
 
-- name: default-overrides.conf is in openstack-tempest on OSP9 and OSP10
+- name: default-overrides.conf is in openstack-tempest before ocata
   package:
     name: openstack-tempest
     state: present
   become: true
-  when: dci_topic in ['OSP9', 'OSP10', 'RDO-Newton', 'RDO-Ocata']
+  when: dci_topic in ['mitaka', 'newton']
 
 - name: Copy tempest config overrides
   copy:
@@ -64,11 +53,11 @@
 
 - name: Start the valide-tempest role
   include_role:
-    name: "{{ hostvars.localhost.job_informations.job.topic.name }}/validate-tempest"
+    name: "{{ release }}/validate-tempest"
 
 - name: Start the tripleo-inventory role
   include_role:
-    name: "{{ hostvars.localhost.job_informations.job.topic.name }}/tripleo-inventory"
+    name: "{{ release }}/tripleo-inventory"
 
 - name: Run Red Hat OpenStack Certification test-suite
   include_role:
