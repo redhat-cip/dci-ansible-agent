@@ -14,6 +14,12 @@
       {"insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:5000"] }
     dest: /etc/docker/daemon.json
   become: True
+- name: Enable overlay2 storage backend
+  lineinfile:
+     dest: /etc/sysconfig/docker-storage-setup
+     line: "STORAGE_DRIVER=overlay2"
+     regexp: '^STORAGE_DRIVER='
+  become: True
 - service:
     name: docker
     state: restarted
