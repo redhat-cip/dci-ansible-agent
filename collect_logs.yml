@@ -1,0 +1,21 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Restore the job
+      dci_job:
+        id: '{{ ansible_env.DCI_JOB_ID }}'
+        embed: 'remoteci,rconfiguration,topic,components'
+      register: job_informations
+ 
+    - include: plays/register_undercloud_host.yml
+    - name: Start the tripleo-inventory role
+      import_role:
+        name: "queens/tripleo-inventory"
+ 
+- hosts: all
+  roles:
+    - OSP12/collect-logs
+ 
+- hosts: localhost
+  roles:
+    - dci/upload_logs

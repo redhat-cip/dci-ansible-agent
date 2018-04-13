@@ -2,7 +2,7 @@
   dci_file:
     path: '{{ item.path }}'
     name: '{{ item.name }}'
-    job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+    job_id: '{{ job_id }}'
     mime: '{{ item.mime }}'
   with_items:
     - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
@@ -14,7 +14,7 @@
   dci_file:
     path: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/{{ item }}.tar.gz"
     name: '{{ item }}.tar.gz'
-    job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+    job_id: '{{ job_id }}'
     mime: 'application/x-compressed'
   with_items:
     - 'undercloud'
