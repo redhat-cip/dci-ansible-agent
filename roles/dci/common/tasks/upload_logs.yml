@@ -1,0 +1,26 @@
+- name: Upload results
+  dci_file:
+    path: '{{ item.path }}'
+    name: '{{ item.name }}'
+    job_id: '{{ job_id }}'
+    mime: '{{ item.mime }}'
+  with_items:
+    - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
+    - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
+    - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
+  ignore_errors: yes
+
+- name: Upload logs
+  dci_file:
+    path: "{{ item }}"
+    name: '{{ item|basename }}'
+    job_id: '{{ job_id }}'
+    mime: 'application/x-compressed'
+  with_fileglob:
+    - "{{ lookup('env', 'HOME') }}/.quickstart/collected_files/*.tar.gz"
+  ignore_errors: yes
+
+- name: Clean result files
+  file:
+    name: "{{ lookup('env', 'HOME') }}/.quickstart/collected_files"
+    state: absent
