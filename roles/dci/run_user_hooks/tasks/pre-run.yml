@@ -1,0 +1,4 @@
+- block:
+  - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
+  rescue:
+  - include: teardown.yml

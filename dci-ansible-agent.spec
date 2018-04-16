@@ -39,7 +39,6 @@ install -p -D -m 644 systemd/dci-update.timer %{buildroot}%{_unitdir}/dci-update
 install -p -D -m 644 ansible.cfg %{buildroot}%{_datadir}/dci-ansible-agent/ansible.cfg
 cp -r files %{buildroot}/%{_datadir}/dci-ansible-agent
 cp -r roles %{buildroot}/%{_datadir}/dci-ansible-agent
-cp -r plays %{buildroot}/%{_datadir}/dci-ansible-agent
 cp -r templates %{buildroot}/%{_datadir}/dci-ansible-agent
 install -p -D -m 644 dci-ansible-agent.yml %{buildroot}%{_datadir}/dci-ansible-agent/dci-ansible-agent.yml
 install -p -D -m 644 dcirc.sh %{buildroot}%{_sysconfdir}/dci-ansible-agent/dcirc.sh

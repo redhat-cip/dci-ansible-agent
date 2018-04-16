@@ -1,0 +1,14 @@
+- name: Schedule a new job
+  dci_job:
+    components: '{{ dci_components|default([]) }}'
+    topic: '{{ dci_topic }}'
+    # id: '88fbd033-07b5-4cce-bb71-f320276cb0d0'
+    # embed: 'remoteci,rconfiguration,topic,components'
+  register: job_informations
+
+- name: Set the metadata
+  dci_job:
+    id: "{{ job_informations.job.id }}"
+    metadata: '{{ dci_metadata }}'
+  when: dci_metadata is defined and dci_metadata
+

@@ -1,3 +1,4 @@
+---
 - name: Add undercloud to inventory
   add_host:
     name: "undercloud"
