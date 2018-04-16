@@ -12,7 +12,7 @@ additional_insecure_registry: false
 deployed_server: false
 overcloud_templates_path: /usr/share/openstack-tripleo-heat-templates
 enable_tls_everywhere: false
-undercloud_generate_service_certificate: false
+undercloud_generate_service_certificate: true
 undercloud_network_cidr: 192.168.24.0/24
 undercloud_undercloud_nameservers:
   - 8.8.8.8
@@ -28,3 +28,11 @@ upgrade_composable_scenario: ""
 artcl_collect_dir: "{{ local_working_dir }}/collected_files"
 undercloud_rpm_dependencies: >-
   python-tripleoclient
+
+# moved from overcloud-deploy
+# If `test_ping` is `true`, run a simple ping test to validate the
+# overcloud.
+test_ping: true
+
+# install and execute dstat across nodes
+validate_performance: true
