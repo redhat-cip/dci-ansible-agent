@@ -1,0 +1,10 @@
+- name: Request a new job to the DCI server
+  include: new_job.yml
+- name: Validate the sanity of the jumpbox
+  include: sanity_check.yml
+- name: Purge outdated file from the local cache
+  include: purge_cache.yml
+- name: Prepare the local mirror
+  include: prepare_local_mirror.yml
+- name: Download the last bits
+  include: fetch_bits.yml

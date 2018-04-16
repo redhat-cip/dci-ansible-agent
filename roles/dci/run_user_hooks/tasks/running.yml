@@ -1,0 +1,12 @@
+---
+- set_fact:
+    dci_status: 'running'
+- block:
+  - name: 'Include the hook: running.yml'
+    include: '{{ dci_config_dir }}/hooks/running.yml'
+  - name: Register the undercloud host
+    include_tasks: register_undercloud_host.yml
+  rescue:
+  - debug:
+      msg: The deployment has failed
+    notify: teardown.yml

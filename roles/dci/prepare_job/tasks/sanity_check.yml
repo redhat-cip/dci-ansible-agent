@@ -1,3 +1,4 @@
+---
 - name: Check the available space in /var/lib
   command: df -l --output=avail /var/lib
   register: df_l_result
@@ -21,6 +22,7 @@
   register: yum_check_update_result
   failed_when: False
   become: True
-- debug:
+- name: Show up a message if the system is not up to date
+  debug:
     msg: "Please update your system with: yum update -y"
   when: yum_check_update_result.rc != 0

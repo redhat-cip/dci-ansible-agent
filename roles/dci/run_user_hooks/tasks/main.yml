@@ -1,0 +1,8 @@
+---
+- name: Start pre-run.yml processing
+  include: pre-run.yml
+- name: Set the job to the "running" status
+  set_fact:
+    dci_status: 'running'
+- name: Start the running.yml processing
+  include: running.yml

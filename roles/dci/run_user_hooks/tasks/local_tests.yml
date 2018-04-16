@@ -1,0 +1,4 @@
+---
+- name: 'Include the hook: local_tests.yml'
+  include: "{{ dci_config_dir }}/hooks/local_tests.yml"
+  ignore_errors: yes

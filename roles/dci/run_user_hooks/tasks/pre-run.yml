@@ -1,0 +1,6 @@
+- name: Start the pre-run
+  block:
+  - name: 'Include the hook: pre-run.yml'
+    include: '{{ dci_config_dir }}/hooks/pre-run.yml'
+  rescue:
+  - include: teardown.yml
