@@ -1,3 +1,4 @@
+---
 - name: Check the available space in /var/lib
   command: df -l --output=avail /var/lib
   register: df_l_result

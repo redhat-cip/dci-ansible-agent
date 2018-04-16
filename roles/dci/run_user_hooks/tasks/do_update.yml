@@ -1,0 +1,14 @@
+- include: plays/collect_logs.yml
+- include: plays/upload_logs.yml
+
+- dci_job:
+    id: '{{ dci_job.id }}'
+    update: True
+  register: new_job_informations
+# NOTE(Gonéri): avoid https://github.com/ansible/ansible/issues/4297
+- set_fact:
+    job_informations: '{{ new_job_informations }}'
+  when: new_job_informations.skipped is not defined
+
+- include: '{{ update_playbook }}'
+

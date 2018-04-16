@@ -1,0 +1,12 @@
+---
+- set_fact:
+    dci_status: 'running'
+- block:
+  - include: '{{ dci_config_dir }}/hooks/running.yml'
+  - include: '{{ dci_config_dir }}/hooks/running.yml'
+  - include_tasks: register_undercloud_host.yml
+  - command: hostname
+  rescue:
+  - debug:
+      msg: 'Something'
+    notify: teardown.yml

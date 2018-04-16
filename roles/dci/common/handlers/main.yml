@@ -1,0 +1,6 @@
+- name: upload logs
+  include: upload_logs.yml
+- name: teardown
+  include: teardown.yml
+- name: failure
+  include: failure.yml
