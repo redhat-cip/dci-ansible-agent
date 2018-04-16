@@ -1,0 +1,5 @@
+- include: new_job.yml
+- include: sanity_check.yml
+- include: purge_cache.yml
+- include: prepare_local_mirror.yml
+- include: fetch_bits.yml

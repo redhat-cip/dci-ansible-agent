@@ -1,0 +1,8 @@
+---
+#- include_tasks: '{{ final_status }}.yml'
+#  tasks_from: dci/common
+# NOTE(Gonéri): the tasks_from seems t ob ignore with Ansible 2.5.0
+
+- debug:
+    var: job_id
+- include_tasks: 'roles/dci/common/tasks/{{ final_status }}.yml'

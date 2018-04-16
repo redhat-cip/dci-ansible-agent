@@ -1,0 +1,16 @@
+---
+dci_status: 'new'
+job_id: '{{ hostvars.localhost.job_informations.job.id }}'
+dci_job: '{{ hostvars.localhost.job_informations.job }}'
+components: '{{ hostvars.localhost.job_informations.job.components }}'
+dci_config_dir: '/etc/dci-ansible-agent'
+dci_teardown_on_failure: False
+next_topic: '{{ job_informations.job.topic.next_topic }}'
+
+# tripleo-inventory depends on the common role, however the role is not include
+# has it should when we use the include_role directive.
+# Here we manually declare the deploy_supplemental_node variable to avoid an
+# undefined value during the role execution
+deploy_supplemental_node: No
+inventory: all
+undercloud_type: baremetal
