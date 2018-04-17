@@ -1,4 +1,13 @@
 ---
+- name: Clean the know_hosts file of the current user
+  lineinfile:
+    path: "~/.ssh/known_hosts"
+    regexp: "^{{ item }}"
+    state: absent
+  with_items:
+    - "{{ undercloud_ip }}"
+    - undercloud
+
 - name: Add undercloud to inventory
   add_host:
     name: "undercloud"
