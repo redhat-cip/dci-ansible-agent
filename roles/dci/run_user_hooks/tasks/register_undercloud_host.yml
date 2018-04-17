@@ -1,4 +1,12 @@
 ---
+- name: Clean the know_hosts file of the current user
+  know_hosts:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ undercloud_ip }}"
+    - undercloud
+
 - name: Add undercloud to inventory
   add_host:
     name: "undercloud"
