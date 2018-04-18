@@ -18,7 +18,7 @@
     mime: 'application/x-compressed'
   with_items:
     - 'undercloud'
-    - '{{ groups.overcloud }}'
+    - '{{ groups.overcloud|default([]) }}'
   ignore_errors: yes
 
 - name: Clean result files

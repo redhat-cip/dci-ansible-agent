@@ -12,6 +12,6 @@
   delegate_to: '{{ delegate_item }}'
   with_items:
     - 'undercloud'
-    - '{{ groups.overcloud }}'
+    - '{{ groups.overcloud|default([]) }}'
   loop_control:
     loop_var: delegate_item
