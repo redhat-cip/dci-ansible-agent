@@ -15,7 +15,8 @@
     key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
   delegate_to: undercloud
 
-- slurp:
+- name: Fetch the stack public key
+  slurp:
     src: /home/stack/.ssh/id_rsa.pub
   register: id_rsa_pub
   delegate_to: undercloud

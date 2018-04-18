@@ -20,7 +20,8 @@
      line: "STORAGE_DRIVER=overlay2"
      regexp: '^STORAGE_DRIVER='
   become: True
-- service:
+- name: Ensure docker is restarted
+  service:
     name: docker
     state: restarted
   become: True
@@ -29,11 +30,13 @@
     src: docker_distribution.yml.j2
     dest: /etc/docker-distribution/registry/config.yml
   become: True
-- service:
+- name: Ensure docker-distribution is restarted
+  service:
     name: docker-distribution
     state: restarted
   become: True
-- shell: |
+- name: Download the Openstack container images
+  shell: |
     python /usr/share/dci-ansible-agent/fetch_images.py \
       {{ dci_mirror_location | quote }}/dci_repo/RH7-RHOS-{{ dci_topic | regex_replace('^OSP','') }}.0/images_list.yaml
   register: image_sync_result
