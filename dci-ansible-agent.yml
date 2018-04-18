@@ -42,9 +42,23 @@
       - name: Download and setup components
         include: plays/fetch_bits.yml
 
-      - set_fact:
-          dci_status: 'pre-run'
+      rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+      - include: plays/failure.yml
+
+# Pre-run state
+#
+# User is free to do whaterver she needs before entering pre-run state.
+# Usually this is used to boot (not provision) the undercloud
+#
+- name: 'Spawning the environment'
+  hosts: localhost
+  vars:
+    dci_status: 'pre-run'
+  tasks:
+    - block:
       - name: Run the pre-run process
         include: '{{ dci_config_dir }}/hooks/pre-run.yml'
 
@@ -55,7 +69,6 @@
 
       - name: Run the failure process
         include: plays/failure.yml
-
 
 # Run state
 #
