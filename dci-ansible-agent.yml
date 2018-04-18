@@ -30,31 +30,31 @@
     dci_status: 'new'
   tasks:
     - block:
-      - name: Check the jumpbox sanity
-        include: plays/sanity_check.yml
+        - name: Check the jumpbox sanity
+          include: plays/sanity_check.yml
 
-      - name: Purge old components
-        include: plays/purge_cache.yml
+        - name: Purge old components
+          include: plays/purge_cache.yml
 
-      - name: Setup the http mirror
-        include: plays/prepare_local_mirror.yml
+        - name: Setup the http mirror
+          include: plays/prepare_local_mirror.yml
 
-      - name: Download and setup components
-        include: plays/fetch_bits.yml
+        - name: Download and setup components
+          include: plays/fetch_bits.yml
 
-      - set_fact:
-          dci_status: 'pre-run'
+        - set_fact:
+            dci_status: 'pre-run'
 
-      - name: Run the pre-run process
-        include: '{{ dci_config_dir }}/hooks/pre-run.yml'
+        - name: Run the pre-run process
+          include: '{{ dci_config_dir }}/hooks/pre-run.yml'
 
       rescue:
-      - name: Run the teardown process
-        include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
-      - name: Run the failure process
-        include: plays/failure.yml
+        - name: Run the failure process
+          include: plays/failure.yml
 
 
 # Run state
@@ -68,52 +68,121 @@
     dci_status: 'running'
   tasks:
     - block:
-      - name: Retrieve information about the next topic
-        dci_topic:
-          id: '{{ job_informations.job.topic.next_topic }}'
-        register: next
-      - set_fact:
-          next_topic_name: 'none'
-      - set_fact:
-          next_topic_name: "{{ next.topic.name }}"
-        when: "'topic' in next"
-      - set_fact:
-          # job_informations may be redefined below. We need a set_fact here to
-          # store a static result.
-          update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
-          upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic_name }}.yml'
-          # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
-          # tripleo-inventory depends on the common role, however the role is not include
-          # has it should when we use the include_role directive.
-          # Here we manually declare the deploy_supplemental_node variable to avoid an
-          # undefined value during the role execution
-          deploy_supplemental_node: No
-      - name: Test update case
-        stat:
-          path: '{{ update_playbook }}'
-        register: update_playbook_stat
-      - name: Test upgrade case
-        stat:
-          path: '{{ upgrade_playbook }}'
-        register: upgrade_playbook_stat
+        - name: Retrieve information about the next topic
+          dci_topic:
+            id: '{{ job_informations.job.topic.next_topic }}'
+          register: next
+        - set_fact:
+            next_topic_name: 'none'
+        - set_fact:
+            next_topic_name: "{{ next.topic.name }}"
+          when: "'topic' in next"
+        - set_fact:
+            # job_informations may be redefined below. We need a set_fact here to
+            # store a static result.
+            update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
+            upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic_name }}.yml'
+            # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
+            # tripleo-inventory depends on the common role, however the role is not include
+            # has it should when we use the include_role directive.
+            # Here we manually declare the deploy_supplemental_node variable to avoid an
+            # undefined value during the role execution
+            deploy_supplemental_node: No
+        - name: Test update case
+          stat:
+            path: '{{ update_playbook }}'
+          register: update_playbook_stat
+        - name: Test upgrade case
+          stat:
+            path: '{{ upgrade_playbook }}'
+          register: upgrade_playbook_stat
 
-      - name: Run the running process
-        include: '{{ dci_config_dir }}/hooks/running.yml'
+        - name: Run the running process
+          include: '{{ dci_config_dir }}/hooks/running.yml'
 
-      - name: Add undercloud to inventory
-        include: plays/register_undercloud_host.yml
+        - name: Add undercloud to inventory
+          include: plays/register_undercloud_host.yml
 
-      - name: Run tests suite
-        include: plays/run_tests.yml
-        delegate_to: undercloud
-
-      - name: Update the deployment
-        block:
+      rescue:
+        # Included a second time in case of failure in hooks/running.yml,
+        # this is required for collect-logs to work
+        - name: Add undercloud to inventory
+          include: plays/register_undercloud_host.yml
         - name: Run the collect logs process
           include: plays/collect_logs.yml
         - name: Run the upload logs process
           include: plays/upload_logs.yml
 
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Run the failure process
+          include: plays/failure.yml
+
+
+# Post-run state
+#
+# User is free to do whaterver she needs before entering post-run state.
+# Usually this is used to run tests, certifications, etc...
+#
+- name: 'Openstack specific tests'
+  hosts: undercloud
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - block:
+        - name: Run tests suite
+          include: plays/run_tests.yml
+
+      rescue:
+        - name: Run the collect logs process
+          include: plays/collect_logs.yml
+        - name: Run the upload logs process
+          include: plays/upload_logs.yml
+          delegate_to: localhost
+
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Run the failure process
+          include: plays/failure.yml
+
+- name: 'Partner-specific tests'
+  hosts: undercloud
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - name: Run the local tests process
+      include: "{{ dci_config_dir }}/hooks/local_tests.yml"
+      ignore_errors: yes
+
+- name: 'Collect Openstack logs'
+  hosts: undercloud:overcloud
+  vars:
+    dci_status: 'post-run'
+    local_working_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
+    artcl_collect_dir: "{{ local_working_dir }}/collected_files"
+    artcl_gzip_only: false
+    artcl_tar_gz: true
+  roles:
+    - 'pike/collect-logs'
+
+- name: 'Upload results and logs'
+  hosts: localhost
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - name: Run the upload logs process
+      include: plays/upload_logs.yml
+
+- name: 'Update the deployment'
+  hosts: localhost
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - block:
         - name: Schedule an update job
           dci_job:
             id: '{{ job_informations.job.id }}'
@@ -124,22 +193,56 @@
             job_informations: '{{ new_job_informations }}'
           when: new_job_informations.skipped is not defined
 
-        - include: plays/fetch_bits.yml
+        - name: Download and setup components
+          include: plays/fetch_bits.yml
 
         - name: Run the update process
           include: '{{ update_playbook }}'
-        - name: Run tests suite
-          include: plays/run_tests.yml
-          delegate_to: undercloud
-        when: update_playbook_stat.stat.exists
+      when: update_playbook_stat.stat.exists
 
-      - name: Upgrade the deployment to the next release
-        block:
+      rescue:
         - name: Run the collect logs process
           include: plays/collect_logs.yml
         - name: Run the upload logs process
           include: plays/upload_logs.yml
 
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Run the failre process
+          include: plays/failure.yml
+
+- name: 'Openstack specific tests after an Update'
+  hosts: undercloud
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - block:
+        - name: Run tests suite
+          include: plays/run_tests.yml
+      when: hostvars.localhost.update_playbook_stat.stat.exists
+
+      rescue:
+        - name: Run the collect logs process
+          include: plays/collect_logs.yml
+        - name: Run the upload logs process
+          include: plays/upload_logs.yml
+          delegate_to: localhost
+
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Run the failre process
+          include: plays/failure.yml
+
+- name: 'Upgrade the deployment'
+  hosts: localhost
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - block:
         - name: Set the job status to success
           dci_job:
             id: '{{ job_informations.job.id }}'
@@ -154,48 +257,49 @@
             job_informations: '{{ new_job_informations }}'
           when: new_job_informations.skipped is not defined
 
-        - include: plays/fetch_bits.yml
-
-        - set_fact:
-            dci_status: 'running'
+        - name: Download and setup components
+          include: plays/fetch_bits.yml
 
         - name: Run the upgrade process
           include: '{{ upgrade_playbook }}'
-        - include: plays/run_tests.yml
-          delegate_to: undercloud
-
-        when: upgrade_playbook_stat.stat.exists
+      when: upgrade_playbook_stat.stat.exists
 
       rescue:
-      # Included a second time in case of failure in hooks/running.yml,
-      # this is required for collect-logs to work
-      - name: Add undercloud to inventory
-        include: plays/register_undercloud_host.yml
-      - name: Run the failre process
-        include: plays/failure.yml
+        - name: Run the collect logs process
+          include: plays/collect_logs.yml
+        - name: Run the upload logs process
+          include: plays/upload_logs.yml
 
-      always:
-      - name: Run the collect logs process
-        include: plays/collect_logs.yml
-        ignore_errors: yes
-      - name: Run the upload logs process
-        include: plays/upload_logs.yml
-        ignore_errors: yes
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
-      - name: Run the teardown process
-        include: "{{ dci_config_dir }}/hooks/teardown.yml"
-        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+        - name: Run the failre process
+          include: plays/failure.yml
 
-
-- name: 'Partner-specific tests'
+- name: 'Openstack specific tests after an Upgrade'
   hosts: undercloud
   vars:
     dci_status: 'post-run'
   tasks:
-    - name: Run the local tests process
-      include: "{{ dci_config_dir }}/hooks/local_tests.yml"
-      ignore_errors: yes
+    - block:
+        - name: Run tests suite
+          include: plays/run_tests.yml
+      when: hostvars.localhost.upgrade_playbook_stat.stat.exists
 
+      rescue:
+        - name: Run the collect logs process
+          include: plays/collect_logs.yml
+        - name: Run the upload logs process
+          include: plays/upload_logs.yml
+          delegate_to: localhost
+
+        - name: Run the teardown process
+          include: "{{ dci_config_dir }}/hooks/teardown.yml"
+          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Run the failre process
+          include: plays/failure.yml
 
 # Success state
 #

@@ -6,13 +6,8 @@
     artcl_gzip_only: false
     artcl_tar_gz: true
 - name: Collect Openstack logs
-  include_role:
+  import_role:
     name: "pike/collect-logs"
   vars:
-    inventory_hostname: '{{ delegate_item }}'
-  delegate_to: '{{ delegate_item }}'
-  with_items:
-    - 'undercloud'
-    - '{{ groups.overcloud|default([]) }}'
-  loop_control:
-    loop_var: delegate_item
+    inventory_hostname: undercloud
+  delegate_to: undercloud
