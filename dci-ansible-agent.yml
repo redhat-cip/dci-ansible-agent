@@ -150,14 +150,8 @@
       - include: plays/failure.yml
 
       always:
-      - include: plays/collect_logs.yml
-        ignore_errors: yes
-      - include: plays/upload_logs.yml
-        ignore_errors: yes
-
       - include: "{{ dci_config_dir }}/hooks/teardown.yml"
         when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-
 
 - name: 'Partner-specific tests'
   hosts: undercloud
@@ -167,6 +161,24 @@
     - include: "{{ dci_config_dir }}/hooks/local_tests.yml"
       ignore_errors: yes
 
+- name: 'Collect Openstack logs'
+  hosts: undercloud:overcloud
+  vars:
+    dci_status: 'post-run'
+    local_working_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
+    artcl_collect_dir: "{{ local_working_dir }}/collected_files"
+    artcl_gzip_only: false
+    artcl_tar_gz: true
+  roles:
+    - 'pike/collect-logs'
+
+- name: 'Upload results and logs'
+  hosts: localhost
+  vars:
+    dci_status: 'post-run'
+  tasks:
+    - include: plays/upload_logs.yml
+      ignore_errors: yes
 
 # Success state
 #

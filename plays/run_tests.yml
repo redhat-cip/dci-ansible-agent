@@ -52,15 +52,15 @@
   become: true
 
 - name: Start the valide-tempest role
-  include_role:
+  import_role:
     name: "{{ release }}/validate-tempest"
 
 - name: Start the tripleo-inventory role
-  include_role:
+  import_role:
     name: "{{ release }}/tripleo-inventory"
 
 - name: Run Red Hat OpenStack Certification test-suite
-  include_role:
+  import_role:
     name: "openstack-certification"
   when: dci_topic in ['OSP10', 'OSP11', 'OSP12', 'OSP13']
   ignore_errors: True
