@@ -5,8 +5,7 @@
 - set_fact:
     remoteci_data_tempest: "{{ remoteci_data['tempest']|default({}) }}"
 - set_fact:
-    release: '{{ hostvars.localhost.job_informations.topic.data.releasename }}'
-    dci_status: 'post-run'
+    release: '{{ hostvars.localhost.job_informations.job.topic.data.releasename }}'
     tempest_exit_on_failure: false
     run_tempest: true
     test_regex: ''
@@ -68,5 +67,3 @@
   when:
     - release in ['newton', 'ocata', 'pike', 'queens']
     - ansible_distribution == 'RedHat'
-  ignore_errors: True
-
