@@ -68,5 +68,3 @@
   when:
     - release in ['newton', 'ocata', 'pike', 'queens']
     - ansible_distribution == 'RedHat'
-  ignore_errors: True
-
