@@ -5,7 +5,8 @@
     artcl_collect_dir: "{{ local_working_dir }}/collected_files"
     artcl_gzip_only: false
     artcl_tar_gz: true
-- include_role:
+- name: Collect Openstack logs
+  include_role:
     name: "pike/collect-logs"
   vars:
     inventory_hostname: '{{ delegate_item }}'
