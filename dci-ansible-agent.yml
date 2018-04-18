@@ -39,9 +39,18 @@
 
       - include: plays/fetch_bits.yml
 
-      - set_fact:
-          dci_status: 'pre-run'
+      rescue:
+      - include: "{{ dci_config_dir }}/hooks/teardown.yml"
+        when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+      - include: plays/failure.yml
+
+- name: 'Spawning the environment'
+  hosts: localhost
+  vars:
+    dci_status: 'pre-run'
+  tasks:
+    - block:
       - include: '{{ dci_config_dir }}/hooks/pre-run.yml'
 
       rescue:
