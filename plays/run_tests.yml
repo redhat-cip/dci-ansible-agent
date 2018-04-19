@@ -58,6 +58,9 @@
 - name: Start the tripleo-inventory role
   include_role:
     name: "{{ release }}/tripleo-inventory"
+  vars:
+    inventory: all
+    undercloud_type: baremetal
 
 - name: Run Red Hat OpenStack Certification test-suite
   include_role:
