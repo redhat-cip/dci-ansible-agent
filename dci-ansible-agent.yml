@@ -124,7 +124,7 @@
             job_informations: '{{ new_job_informations }}'
           when: new_job_informations.skipped is not defined
 
-
+        - include: plays/fetch_bits.yml
 
         - name: Run the update process
           include: '{{ update_playbook }}'
@@ -153,6 +153,8 @@
         - set_fact:
             job_informations: '{{ new_job_informations }}'
           when: new_job_informations.skipped is not defined
+
+        - include: plays/fetch_bits.yml
 
         - set_fact:
             dci_status: 'running'
