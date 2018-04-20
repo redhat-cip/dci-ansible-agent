@@ -4,3 +4,4 @@
     state: absent
   delegate_to: '{{ undercloud_ip }}'
   become: True
+  when: ansible_distribution == 'RedHat'
