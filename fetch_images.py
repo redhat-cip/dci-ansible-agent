@@ -81,9 +81,7 @@ def main():
             }
             pull_image(image)
             tag_image(image, 'latest')
-            tag_image(image, 'pcmklatest')
             push_image(image, 'latest')
-            push_image(image, 'pcmklatest')
 
 
 if __name__ == '__main__':
