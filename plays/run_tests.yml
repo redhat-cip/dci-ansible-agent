@@ -31,7 +31,7 @@
     name: openstack-tempest
     state: present
   become: true
-  when: dci_topic in ['mitaka', 'newton']
+  when: release in ['mitaka', 'newton']
 
 - name: Copy tempest config overrides
   copy:
@@ -65,6 +65,8 @@
 - name: Run Red Hat OpenStack Certification test-suite
   include_role:
     name: "openstack-certification"
-  when: dci_topic in ['OSP10', 'OSP11', 'OSP12', 'OSP13']
+  when:
+    - release in ['newton', 'ocata', 'pike', 'queens']
+    - ansible_distribution == 'RedHat'
   ignore_errors: True
 
