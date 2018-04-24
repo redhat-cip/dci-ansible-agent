@@ -35,6 +35,15 @@
     name: docker-distribution
     state: restarted
   become: True
+- name: Open port 5000 on the firewall
+  firewalld:
+    zone: public
+    port: 5000/tcp
+    permanent: true
+    state: enabled
+  register: result
+  failed_when: false
+  become: true
 - name: Download the Openstack container images
   shell: |
     python /usr/share/dci-ansible-agent/fetch_images.py \
