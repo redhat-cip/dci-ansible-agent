@@ -61,6 +61,19 @@
     inventory: all
     undercloud_type: baremetal
 
+- name: Start the tripleo-validations role
+  include_role:
+    name: "{{ release }}/tripleo-validations"
+  vars:
+    run_tripleo_validations: true
+    run_tripleo_validations_setup: true
+    validations_group:
+      - prep
+      - pre-deployment
+      - pre-introspection
+      - post-deployment
+  when: release not in ['liberty', 'mitaka']
+
 - name: Run Red Hat OpenStack Certification test-suite
   include_role:
     name: "openstack-certification"
