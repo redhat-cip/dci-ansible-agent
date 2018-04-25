@@ -1,5 +1,30 @@
 # DCI Ansible Agent
 
+The "jumpbox" is the host where the agent is running. It can be a virtual machine.
+
+## Requirements
+
+- General:
+  - A valid RHSM account.
+  - Automation scripts for undercloud/overcloud deployment.
+
+- Jumpbox:
+  - Run the latest RHEL 7 release.
+  - Should be able to reach:
+    - https://api.distributed-ci.io (443).
+    - https://packages.distributed-ci.io (443).
+    - https://registry.distributed-ci.io (443).
+    - RedHat CDN.
+    - EPEL.
+    - The undercloud via ssh (22) for ansible.
+  - Have a static IPv4 address.
+  - Have 160GB of the free space in /var.
+
+- Undercloud/Overcloud:
+  - Should be able to reach:
+    - The jumpbox via http (80) for yum repositories.
+    - The jumpbox via http (5000) for docker registry.
+
 ## First steps
 
 ### Install the rpm
