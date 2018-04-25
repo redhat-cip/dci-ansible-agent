@@ -1,5 +1,28 @@
 # DCI Ansible Agent
 
+## Requirements
+
+- General:
+  - A valid RHSM account.
+  - Automation scripts for undercloud/overcloud deployment.
+
+- Agent (jumpbox):
+  - Run the latest RHEL 7 release.
+  - Reach:
+    - https://api.distributed-ci.io (443).
+    - https://packages.distributed-ci.io (443).
+    - https://registry.distributed-ci.io (443).
+    - RedHat CDN.
+    - EPEL.
+    - The undercloud via ssh (22) for ansible.
+  - Have a static IPv4 address.
+  - Have 160GB of the free space.
+
+- Undercloud/Overcloud:
+  - Reach:
+    - The agent via http (80) for yum repositories.
+    - The agent via http (5000) for docker registry.
+
 ## First steps
 
 ### Install the rpm
