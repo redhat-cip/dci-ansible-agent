@@ -35,7 +35,11 @@ get_repo() {
 	fi
 
         for i in ${roles}; do
-           cp -av roles/${i} ${target}/${i}
+           if [ "${i}" == "tripleo-validations" ] && ([ "${topic}" == "OSP8" ] || [ "${topic}" == "OSP9" ]); then
+               continue
+           else
+               cp -av roles/${i} ${target}/${i}
+           fi
         done
 	git reset --hard
 	git clean -ffdx
@@ -46,5 +50,5 @@ rm -Rf ${TMPDIR} ${BASEDIR}/roles
 mkdir -p ${TMPDIR}
 
 get_repo tripleo-quickstart "common tripleo-inventory"
-get_repo tripleo-quickstart-extras "collect-logs extras-common validate-tempest"
-git add -r roles
+get_repo tripleo-quickstart-extras "collect-logs extras-common tripleo-validations validate-tempest"
+git add roles

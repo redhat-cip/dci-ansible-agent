@@ -49,6 +49,19 @@
   with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
   when: "'tempest' in remoteci_data.keys()"
 
+- name: Start the tripleo-validations role
+  include_role:
+    name: "{{ release }}/tripleo-validations"
+  vars:
+    run_tripleo_validations: true
+    run_tripleo_validations_setup: true
+    validations_group:
+      - prep
+      - pre-deployment
+      - pre-introspection
+      - post-deployment
+  when: release not in ['liberty', 'mitaka']
+
 - name: Start the valide-tempest role
   include_role:
     name: "{{ release }}/validate-tempest"
