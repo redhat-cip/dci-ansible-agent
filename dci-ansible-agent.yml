@@ -43,10 +43,6 @@
           include: plays/fetch_bits.yml
 
       rescue:
-        - name: Run the teardown process
-          include: "{{ dci_config_dir }}/hooks/teardown.yml"
-          when: dci_teardown_on_failure is defined and dci_teardown_on_failure
-
         - name: Run the failure process
           include: plays/failure.yml
 
