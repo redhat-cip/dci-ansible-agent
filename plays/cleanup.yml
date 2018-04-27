@@ -1,0 +1,4 @@
+- name: Clean result files
+  file:
+    name: "{{ lookup('env', 'HOME') }}/.quickstart"
+    state: absent
