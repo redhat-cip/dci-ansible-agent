@@ -17,6 +17,9 @@
     openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
     openstack_certification_tempest_conf_path_is_remote: Yes
     openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
+- set_fact:
+    undercloud_ip: '{{ hostvars.localhost.undercloud_ip }}'
+  when: hostvars.localhost.undercloud_ip is defined
 
 - name: default-overrides.conf is in python-tempestconf since ocata
   package:
