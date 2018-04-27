@@ -46,13 +46,16 @@
   with_items: "{{ remoteci_data['tempest']['default_overrides']|default([]) }}"
   when: "'tempest' in remoteci_data.keys()"
 
-- name: Pull all tempest tests
-  command: 'yum install -y python-*-tests'
-  become: true
-
 - name: Start the valide-tempest role
   include_role:
     name: "{{ release }}/validate-tempest"
+  vars:
+    tempest_plugins: >-
+      {% if release in ['newton', 'ocata', 'pike', 'queens', 'rocky'] -%}
+      [ "openstack-tempest-all" ]
+      {%- else -%}
+      [ "python-neutron-tempest" ]
+      {%- endif -%}
 
 - name: Start the tripleo-inventory role
   include_role:
