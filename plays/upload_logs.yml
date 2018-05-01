@@ -20,8 +20,3 @@
     - 'undercloud'
     - '{{ groups.overcloud|default([]) }}'
   ignore_errors: yes
-
-- name: Clean result files
-  file:
-    name: "{{ lookup('env', 'HOME') }}/.quickstart"
-    state: absent

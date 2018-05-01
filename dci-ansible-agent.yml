@@ -132,6 +132,9 @@
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+        - name: Clean the files
+          include: plays/cleanup.yml
+
         - name: Run the failure process
           include: plays/failure.yml
 
@@ -160,6 +163,10 @@
         - name: Run the teardown process
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Clean the files
+          include: plays/cleanup.yml
+          delegate_to: localhost
 
         - name: Run the failure process
           include: plays/failure.yml
@@ -225,6 +232,9 @@
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+        - name: Clean the files
+          include: plays/cleanup.yml
+
         - name: Run the failre process
           include: plays/failure.yml
 
@@ -248,6 +258,10 @@
         - name: Run the teardown process
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
+
+        - name: Clean the files
+          include: plays/cleanup.yml
+          delegate_to: localhost
 
         - name: Run the failre process
           include: plays/failure.yml
@@ -289,6 +303,9 @@
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+        - name: Clean the files
+          include: plays/cleanup.yml
+
         - name: Run the failre process
           include: plays/failure.yml
 
@@ -313,6 +330,10 @@
           include: "{{ dci_config_dir }}/hooks/teardown.yml"
           when: dci_teardown_on_failure is defined and dci_teardown_on_failure
 
+        - name: Clean the files
+          include: plays/cleanup.yml
+          delegate_to: localhost
+
         - name: Run the failre process
           include: plays/failure.yml
 
@@ -331,3 +352,6 @@
 
     - name: Run the teardown process
       include: "{{ dci_config_dir }}/hooks/teardown.yml"
+
+    - name: Clean the files
+      include: plays/cleanup.yml
