@@ -23,5 +23,4 @@
 
 - name: Run the sync registry process
   include: plays/sync_registry.yaml
-  when: dci_topic in ['OSP12', 'OSP13']
-
+  when: job_informations.job.topic.data.releasename >= 'pike'

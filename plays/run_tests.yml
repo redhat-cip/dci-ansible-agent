@@ -26,7 +26,7 @@
     name: python-tempestconf
     state: present
   become: true
-  when: release in ['ocata', 'pike', 'queens']
+  when: release >= 'ocata'
 
 - name: default-overrides.conf is in openstack-tempest before ocata
   package:
@@ -67,7 +67,7 @@
     name: "{{ release }}/validate-tempest"
   vars:
     tempest_plugins: >-
-      {% if release in ['newton', 'ocata', 'pike', 'queens', 'rocky'] -%}
+      {% if release >= 'newton' -%}
       [ "openstack-tempest-all" ]
       {%- else -%}
       [ "python-neutron-tempest" ]
@@ -100,5 +100,5 @@
   vars:
     openstack_certification_overcloud_node_ip: '{% if groups["overcloud"] is defined %}{{hostvars[groups["overcloud"][0]].inventory_ip}}{% else %}{% endif %}'
   when:
-    - release in ['newton', 'ocata', 'pike', 'queens']
+    - release >= 'newton'
     - ansible_distribution == 'RedHat'
