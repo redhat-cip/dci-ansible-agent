@@ -67,9 +67,25 @@
     inventory: all
     undercloud_type: baremetal
 
+- name: Fetch the root pub key
+  slurp:
+    src: /root/.ssh/id_rsa.pub
+  register: id_rsa_pub
+  become: true
+
+- name: Set authorized_key of heat-admin@overcloud
+  authorized_key:
+    user: heat-admin
+    state: present
+    key: '{{ id_rsa_pub.content | b64decode }}'
+  delegate_to: '{{ groups["overcloud"][0] }}'
+  when: groups["overcloud"] is defined
+
 - name: Run Red Hat OpenStack Certification test-suite
   include_role:
     name: "openstack-certification"
+  vars:
+    openstack_certification_overcloud_node_ip: '{% if groups["overcloud"] is defined %}{{hostvars[groups["overcloud"][0]].inventory_ip}}{% else %}{% endif %}'
   when:
     - release in ['newton', 'ocata', 'pike', 'queens']
     - ansible_distribution == 'RedHat'
