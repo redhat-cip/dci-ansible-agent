@@ -30,6 +30,9 @@
     dci_status: 'new'
   tasks:
     - block:
+        - name: Clean the files
+          include: plays/cleanup.yml
+
         - name: Check the jumpbox sanity
           include: plays/sanity_check.yml
 
