@@ -86,6 +86,7 @@
           dci_topic:
             id: '{{ job_informations.job.topic.next_topic }}'
           register: next
+          ignore_errors: yes
         - set_fact:
             next_topic_name: 'none'
         - set_fact:
