@@ -123,7 +123,7 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 -   \`teardown.yml\`: this playbook clean the full playform.
 
-### How to use the images (OSP12)
+### How to fetch and use the images
 
 If you are use OSP12 and above, the DCI agent will set up an image registry and fetch the last OSP images on your jumpbox.
 
@@ -131,7 +131,7 @@ Before you start the overcloud deploy with the `openstack overcloud deploy --tem
 
     $ openstack overcloud container image prepare --namespace ${jump_box}:5000/rhosp12  --output-env-file ~/docker_registry.yaml
 
-:information_source: `${jump_box}` is the IP address of the Jumpbox machine.
+:information_source: `${jump_box}` is the IP address of the Jumpbox machine and in this example we assume you use OSP12.
 
 You don't have to do any additional `openstack overcloud container` call unless you want to rebuild or patch an image.
 
