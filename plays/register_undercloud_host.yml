@@ -63,5 +63,6 @@
     owner: root
     group: root
     mode: 0644
-  when: "[ hostvars['undercloud']['ansible_host'] ] | ipaddr | list"
+  when: ( [ hostvars['undercloud']['ansible_host'] ] | ipaddr | list |length > 0 and
+          not (ansible_virtualization_type == "docker" and ansible_virtualization_role == "guest"))
   become: True
