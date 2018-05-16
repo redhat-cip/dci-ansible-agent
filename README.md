@@ -123,7 +123,7 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 -   \`teardown.yml\`: this playbook clean the full playform.
 
-### How to use the images (OSP12)
+### How to fetch and use the images
 
 If you are use OSP12 and above, the DCI agent will set up an image registry and fetch the last OSP images on your jumpbox.
 
