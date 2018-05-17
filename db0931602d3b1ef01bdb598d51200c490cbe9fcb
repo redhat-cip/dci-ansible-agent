@@ -1,0 +1,8 @@
+Code-Review+2: Dimitri Savineau <dsavinea@redhat.com>
+Workflow+1: Dimitri Savineau <dsavinea@redhat.com>
+Verified+2: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-by: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-at: Thu, 17 May 2018 19:42:44 +0000
+Reviewed-on: https://softwarefactory-project.io/r/12236
+Project: dci-ansible-agent
+Branch: refs/heads/master
