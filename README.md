@@ -123,6 +123,66 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 -   \`teardown.yml\`: this playbook clean the full playform.
 
+### How to deal with multiple Openstack releases
+
+When testing multiple Openstack releases you probably have different steps (configuration, tasks, packages, etc...) according to the release.
+As an example you could:
+
+- have scripts per Openstack versions and file path based on the dci_topic variable (ie OSP10, OSP11, etc..):
+
+      - shell: |
+          /automation_path/{{ dci_topic }}/undercloud_installation.sh
+
+- have git branch per Openstack versions based on the dci_topic variable :
+
+      - git:
+          repo: https://repo_url/path/to/automation.git
+          dest: /automation_path
+          version: '{{ dci_topic }}'
+
+      - shell: /automation_path/undercloud_installation.sh
+
+- use ansible condition and jinja template with the dci_topic variable :
+
+      - shell: |
+          /automation_path/build_container.sh
+        when: dci_topic in ['OSP12', 'OSP13']
+
+      - shell: >
+          source /home/stack/stackrc &&
+          openstack overcloud deploy --templates
+          {% if dci_topic in ['OSP12', 'OSP13'] %}
+          -e /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
+          -e /usr/share/openstack-tripleo-heat-templates/environments/docker-ha.yaml
+          {% endif %}
+          -e /usr/share/openstack-tripleo-heat-templates/environments/disable-telemetry.yaml
+
+### How to retrieve the Openstack yum repository
+
+During the 'new' hook, the jumpbox will create a yum repository with latest bits available.
+This repository is located in the /var/www/html/dci_repo directory and accessible via HTTP at http://$jumpbox_ip/dci_repo/dci_repo.repo
+There's several ways to retrieve the yum repository from the undercloud:
+
+- Using the yum-config-manager command:
+
+      - shell: |
+          yum-config-manager --add-repo {{ dci_baseurl }}/dci_repo/dci_repo.repo
+        become: true
+
+- Using the http url:
+
+      - get_url:
+          url: '{{ dci_baseurl }}/dci_repo/dci_repo.repo'
+          dest: /etc/yum.repos.d/dci_repo.repo
+        become: true
+
+- Using the ansible copy module:
+
+      - copy:
+          src: /var/www/html/dci_repo/dci_repo.repo
+          dest: /etc/yum.repos.d/dci_repo.repo
+        become: true
+
 ### How to use the images (OSP12)
 
 If you are use OSP12 and above, the DCI agent will set up an image registry and fetch the last OSP images on your jumpbox.
