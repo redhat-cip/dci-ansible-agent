@@ -6,6 +6,11 @@ The "jumpbox" is the host where the agent is running. It can be a virtual machin
 
 - General:
   - A valid RHSM account.
+  - A RHSM pool with the following channels:
+    - rhel-7-server-rpms
+    - server-optional-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-cert-rpms
   - Automation scripts for undercloud/overcloud deployment.
 
 - Jumpbox:
