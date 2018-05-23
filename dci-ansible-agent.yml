@@ -6,6 +6,8 @@
 # we hence register those data for later consumptions
 #
 - hosts: localhost
+  tags:
+    - job
   tasks:
     - name: Schedule a new job
       dci_job:
@@ -26,6 +28,8 @@
 
 - name: 'Sanity check'
   hosts: localhost
+  tags:
+    - new
   vars:
     dci_status: 'new'
   tasks:
@@ -56,6 +60,8 @@
 #
 - name: 'Spawning the environment'
   hosts: localhost
+  tags:
+    - pre-run
   vars:
     dci_status: 'pre-run'
   tasks:
@@ -78,6 +84,8 @@
 #
 - name: 'Provision the undercloud and the overcloud'
   hosts: localhost
+  tags:
+    - running
   vars:
     dci_status: 'running'
   tasks:
@@ -146,6 +154,8 @@
 #
 - name: 'Openstack specific tests'
   hosts: undercloud
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -173,6 +183,8 @@
 
 - name: 'Partner-specific tests'
   hosts: undercloud
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -182,6 +194,8 @@
 
 - name: 'Collect Openstack logs'
   hosts: undercloud:overcloud
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
     local_working_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
@@ -193,6 +207,8 @@
 
 - name: 'Upload results and logs'
   hosts: localhost
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -201,6 +217,8 @@
 
 - name: 'Update the deployment'
   hosts: localhost
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -240,6 +258,8 @@
 
 - name: 'Openstack specific tests after an Update'
   hosts: undercloud
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -268,6 +288,8 @@
 
 - name: 'Upgrade the deployment'
   hosts: localhost
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -311,6 +333,8 @@
 
 - name: 'Openstack specific tests after an Upgrade'
   hosts: undercloud
+  tags:
+    - post-run
   vars:
     dci_status: 'post-run'
   tasks:
@@ -344,6 +368,8 @@
 #
 - name: 'Successful installation'
   hosts: localhost
+  tags:
+    - success
   vars:
     dci_status: 'success'
   tasks:
