@@ -5,7 +5,7 @@ Description=DCI Ansible Agent
 Type=oneshot
 WorkingDirectory=/usr/share/dci-ansible-agent
 EnvironmentFile=/etc/dci-ansible-agent/dcirc.sh
-ExecStart=/usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
+ExecStart=/usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml --skip-tags "run-stackviz"
 SuccessExitStatus=0
 User=dci-ansible-agent
 
