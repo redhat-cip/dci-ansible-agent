@@ -73,6 +73,22 @@
       [ "python-neutron-tempest" ]
       {%- endif -%}
 
+- name: stat /home/stack/tempest/etc/tempest.conf on the undercloud
+  stat:
+    path: /home/stack/tempest/etc/tempest.conf
+  register: etc_tempest_conf_stat
+  delegate_to: undercloud
+
+- name: Ensure the tempest configuration has been generated properly
+  assert:
+    that:
+      etc_tempest_conf_stat.stat.exists == True
+    msg:
+      - "The /home/stack/tempest/etc/tempest.conf file is missing."
+      - "You can check the /home/stack/tempest_output.log file on the "
+      - "undercloud to have more details. This file is also collected by the "
+      - "agent and is in the undercloud.tar.gz archive."
+
 - name: Start the tripleo-inventory role
   include_role:
     name: "{{ release }}/tripleo-inventory"
