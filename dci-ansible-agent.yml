@@ -294,11 +294,6 @@
     dci_status: 'post-run'
   tasks:
     - block:
-        - name: Set the job status to success
-          dci_job:
-            id: '{{ job_informations.job.id }}'
-            status: success
-
         - name: Schedule an upgrade job
           dci_job:
             id: '{{ job_informations.job.id }}'
