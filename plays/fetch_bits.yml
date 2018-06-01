@@ -19,8 +19,8 @@
     baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
     gpgcheck: no
     file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
-  with_items: '{{ job_informations["job"]["components"] }}'
+  with_items: '{{ components }}'
 
 - name: Run the sync registry process
   include: plays/sync_registry.yaml
-  when: job_informations.job.topic.data.releasename >= 'pike'
+  when: job_informations.topic.data.releasename >= 'pike'
