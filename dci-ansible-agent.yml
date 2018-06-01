@@ -18,11 +18,11 @@
       register: job_informations
 
     - set_fact:
-        job_id: '{{ hostvars.localhost.job_informations.job.id }}'
-        components: '{{ hostvars.localhost.job_informations.job.components }}'
+        job_id: '{{ hostvars.localhost.job_informations.id }}'
+        components: '{{ hostvars.localhost.job_informations.components }}'
     - name: Set the metadata
       dci_job:
-        id: "{{ job_informations.job.id }}"
+        id: "{{ job_informations.id }}"
         metadata: '{{ dci_metadata }}'
       when: dci_metadata is defined and dci_metadata
 
@@ -92,7 +92,7 @@
     - block:
         - name: Retrieve information about the next topic
           dci_topic:
-            id: '{{ job_informations.job.topic.next_topic }}'
+            id: '{{ job_informations.topic.next_topic }}'
           register: next
           ignore_errors: yes
         - set_fact:
@@ -103,8 +103,8 @@
         - set_fact:
             # job_informations may be redefined below. We need a set_fact here to
             # store a static result.
-            update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.job.topic.name }}.yml'
-            upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.job.topic.name }}_to_{{ next_topic_name }}.yml'
+            update_playbook: '{{ dci_config_dir }}/hooks/update_{{ job_informations.topic.name }}.yml'
+            upgrade_playbook: '{{ dci_config_dir }}/hooks/upgrade_from_{{ job_informations.topic.name }}_to_{{ next_topic_name }}.yml'
             # NOTE(Gonéri): Workaround for https://github.com/ansible/ansible/issues/23733
             # tripleo-inventory depends on the common role, however the role is not include
             # has it should when we use the include_role directive.
@@ -225,7 +225,7 @@
     - block:
         - name: Schedule an update job
           dci_job:
-            id: '{{ job_informations.job.id }}'
+            id: '{{ job_informations.id }}'
             update: True
           register: new_job_informations
         # NOTE(Gonéri): avoid https://github.com/ansible/ansible/issues/4297
@@ -296,7 +296,7 @@
     - block:
         - name: Schedule an upgrade job
           dci_job:
-            id: '{{ job_informations.job.id }}'
+            id: '{{ job_informations.id }}'
             upgrade: True
           register: new_job_informations
         - set_fact:

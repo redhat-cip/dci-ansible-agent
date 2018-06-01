@@ -1,11 +1,11 @@
 - set_fact:
-    remoteci_data: "{{ hostvars['localhost'].job_informations['job']['remoteci']['data']|default({}) }}"
+    remoteci_data: "{{ hostvars['localhost'].job_informations['remoteci']['data']|default({}) }}"
 - set_fact:
     remoteci_data_rhcert: "{{ remoteci_data['rhcert']|default({}) }}"
 - set_fact:
     remoteci_data_tempest: "{{ remoteci_data['tempest']|default({}) }}"
 - set_fact:
-    release: '{{ hostvars.localhost.job_informations.job.topic.data.releasename }}'
+    release: '{{ hostvars.localhost.job_informations.topic.data.releasename }}'
     tempest_exit_on_failure: false
     run_tempest: true
     test_regex: ''
