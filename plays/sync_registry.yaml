@@ -11,7 +11,7 @@
 - name: Prepare docker configuration
   copy:
     content: |
-      {"insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:5000"] }
+      {"insecure-registries":["{{ dci_base_ip|default(ansible_default_ipv4.address) }}:{{ dci_registry_port|default(5000) }}"] }
     dest: /etc/docker/daemon.json
   become: True
 - name: Enable overlay2 storage backend
