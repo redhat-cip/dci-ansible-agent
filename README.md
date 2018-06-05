@@ -314,6 +314,20 @@ Here we have two directories, each of them are the results of a `rhcert` run. Th
 
 Here we have the results of different sub-test run by `rhcert`. The most important file is output.log, it will give you a global overview of what have been run and the status of the different test.
 
+### Red Hat Certification: How to skip the role
+
+Some users might want to not run the certification tests suite.
+
+This can be done:
+
+- via the command line with ansible extra vars:
+
+      $ ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml -e skip_certification=true
+
+- via the settings file:
+
+      $ Add 'skip_certification: true' to the settings.yml file.
+
 ### Tempest: Run a given test manually
 
 It may be useful to restart a failing test to troubleshoot the problem:
