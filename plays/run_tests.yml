@@ -17,6 +17,7 @@
     openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
     openstack_certification_tempest_conf_path_is_remote: Yes
     openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
+    skip_certification_role: '{{ skip_certification|default(false) }}'
 - set_fact:
     undercloud_ip: '{{ hostvars.localhost.undercloud_ip }}'
   when: hostvars.localhost.undercloud_ip is defined
@@ -100,5 +101,6 @@
   vars:
     openstack_certification_overcloud_node_ip: '{% if groups["overcloud"] is defined %}{{hostvars[groups["overcloud"][0]].inventory_ip}}{% else %}{% endif %}'
   when:
+    - not skip_certification_role|bool
     - release >= 'newton'
     - ansible_distribution == 'RedHat'
