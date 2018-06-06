@@ -1,0 +1,11 @@
+---
+- name: Unregister the nodes from the RHSM
+  shell: |
+    source /home/stack/stackrc
+    sudo subscription-manager unregister
+    for i in $(openstack server list --format json|jq -r '.[].Networks'); do
+      eval $i
+      ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no heat-admin@${ctlplane} sudo subscription-manager unregister
+    done
+  delegate_to: undercloud
+  ignore_errors: True
