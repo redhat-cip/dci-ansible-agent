@@ -197,3 +197,32 @@
         - heat_stack_owner
         - swiftoperator
       ignore_errors: true
+
+
+
+# You may want to collect some log files only available on a given host.
+# If the host is in the Ansible inventory, you can interact with it to
+# fetch the files. For instance:
+- find:
+    paths: "/home/stack"
+    patterns: "*.log"
+  register: find_result
+  delegate_to: "undercloud"
+  ignore_errors: True
+
+- fetch:
+    src : "{{ item.path }}"
+    dest: "/tmp/dci/"
+    flat: True
+  with_items: "{{ find_result.files }}"
+  delegate_to: "undercloud"
+  ignore_errors: True
+
+- name: Upload logs
+  dci_file:
+    path: "{{ item }}"
+    name: "{{ item | basename }}"
+    job_id: "{{ job_id }}"
+    mime: "text/plain"
+  with_fileglob:
+    - '/tmp/dci/*'
