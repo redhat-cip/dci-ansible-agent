@@ -1,13 +1,12 @@
 ---
 - block:
+  # All these actions will be run on the undercloud node.
+  delegate_to: undercloud
+    # In the case you jump better different version of OpenStack, you may want
+    # to store the release name in a local fact.
     - name: Set the openstack release name
       set_fact:
         release: '{{ hostvars.localhost.job_informations.job.topic.data.releasename }}'
-
-    - name: Set the hostname
-      hostname:
-        name: undercloud.openstacklocal
-      become: true
 
     - name: Create directories for installation
       file:
@@ -17,6 +16,8 @@
         - images
         - templates
 
+    # If you need new configuration keys, you can them in your settings.yml.
+    # They will be available in the playbook as regular Ansible variables.
     - name: Register the undercloud
       redhat_subscription:
         username: '{{ rhsm_username }}'
@@ -40,6 +41,10 @@
       delay: 10
       become: true
 
+    # DCI dynamically generates a repo file at the beginning of a new run.
+    # You have to copy it in in the Undercloud Yum configuration, otherwise
+    # the packages coming from DCI won't be used.
+    # In this example we fetch it from the jumpbox.
     - name: Enable DCI Openstack repository
       get_url:
         url: '{{ dci_baseurl }}/dci_repo/dci_repo.repo'
@@ -60,7 +65,7 @@
       async: 1
       poll: 0
 
-    - name: Wait for ssh
+    - name: Wait for the undercloud node to be back online
       wait_for:
         host: '{{ hostvars.localhost.undercloud_ip }}'
         port: 22
@@ -183,6 +188,7 @@
         -e /home/stack/templates/tripleo.yaml
         -t 120
 
+    # Those extra roles will be used during the tempest run.
     - name: Create extra openstack roles
       shell: |
         source /home/stack/overcloudrc
@@ -191,5 +197,3 @@
         - heat_stack_owner
         - swiftoperator
       ignore_errors: true
-
-  delegate_to: undercloud
