@@ -1,0 +1,195 @@
+---
+- block:
+    - name: Set the openstack release name
+      set_fact:
+        release: '{{ hostvars.localhost.job_informations.job.topic.data.releasename }}'
+
+    - name: Set the hostname
+      hostname:
+        name: undercloud.openstacklocal
+      become: true
+
+    - name: Create directories for installation
+      file:
+        path: '/home/stack/{{ item }}'
+        state: directory
+      with_items:
+        - images
+        - templates
+
+    - name: Register the undercloud
+      redhat_subscription:
+        username: '{{ rhsm_username }}'
+        password: '{{ rhsm_password }}'
+        pool_ids: '{{ rhsm_pool_ids }}'
+      become: true
+
+    - name: Enable RHEL repositories
+      shell: >
+        subscription-manager repos
+        --disable=*
+        --enable=rhel-7-server-rpms
+        --enable=rhel-7-server-extras-rpms
+        --enable=rhel-7-server-rh-common-rpms
+        {% if release >= 'newton' %}
+        --enable=rhel-ha-for-rhel-7-server-rpms
+        {% endif %}
+      register: rhsm
+      until: rhsm.rc == 0
+      retries: 5
+      delay: 10
+      become: true
+
+    - name: Enable DCI Openstack repository
+      get_url:
+        url: '{{ dci_baseurl }}/dci_repo/dci_repo.repo'
+        dest: /etc/yum.repos.d/dci_repo.repo
+      become: true
+
+    - name: Ensure packages are updated
+      yum:
+        name: '*'
+        state: latest
+      become: true
+
+    - name: Reboot the undercloud
+      shell: |
+        sleep 3
+        reboot
+      become: true
+      async: 1
+      poll: 0
+
+    - name: Wait for ssh
+      wait_for:
+        host: '{{ hostvars.localhost.undercloud_ip }}'
+        port: 22
+        search_regex: OpenSSH
+        delay: 30
+      delegate_to: localhost
+
+    - name: Install python-tripleoclient
+      yum:
+        name: python-tripleoclient
+      become: true
+
+    - name: Install ceph-ansible
+      yum:
+        name: ceph-ansible
+      become: true
+      when: release >= 'pike'
+
+    - name: Copy undercloud config template
+      copy:
+        src: /usr/share/instack-undercloud/undercloud.conf.sample
+        dest: /home/stack/undercloud.conf
+        remote_src: yes
+
+    - name: Customize the undercloud config
+      ini_file:
+        path: /home/stack/undercloud.conf
+        section: '{{ item.section }}'
+        option: '{{ item.option }}'
+        value: '{{ item.value }}'
+      with_items:
+        - "{{ undercloud_config_override|default([]) }}"
+
+    - name: Install the undercloud
+      shell: |
+        openstack undercloud install
+
+    - name: Download Overcloud images
+      yum:
+        name: '{{ item }}'
+      become: true
+      with_items:
+        - rhosp-director-images
+        - rhosp-director-images-ipa
+
+    - name: Extract the archives
+      unarchive:
+        src: '/usr/share/rhosp-director-images/{{ item }}.tar'
+        dest: /home/stack/images/
+        remote_src: true
+      with_items:
+        - ironic-python-agent
+        - overcloud-full
+
+    - name: Upload images to glance
+      shell: |
+        source /home/stack/stackrc
+        openstack overcloud image upload --image-path /home/stack/images/
+      args:
+        chdir: /home/stack/images/
+
+    - name: Generating the container images environment file
+      shell: >
+        openstack overcloud container image prepare
+        --namespace {{ dci_base_ip }}:5000/rhosp{{ dci_topic | regex_replace('^OSP','') }}
+        --prefix=openstack-
+        --tag latest
+        -e /usr/share/openstack-tripleo-heat-templates/environments/ceph-ansible/ceph-ansible.yaml
+        --set ceph_namespace={{ dci_base_ip }}:5000/rhosp{{ dci_topic | regex_replace('^OSP','') }}
+        --set ceph_image=rhceph
+        --set ceph_tag=latest
+        --output-env-file /home/stack/templates/docker_registry.yaml
+      when: release >= 'pike'
+
+    - name: Configure the nameserver for the overcloud
+      shell: |
+        source /home/stack/stackrc
+        openstack subnet set {% for dns in openstack_dnsservers %}--dns-nameserver {{ dns }} {% endfor %} ctlplane-subnet
+
+    - name: Copy the baremetal inventory file
+      template:
+        src: instackenv.j2
+        dest: /home/stack/templates/instackenv.json
+
+    - name: Import the overcloud nodes
+      shell: |
+        source /home/stack/stackrc
+        openstack overcloud node import /home/stack/templates/instackenv.json
+
+    - name: Run the introspection
+      shell: |
+        source /home/stack/stackrc
+        openstack overcloud node introspect --all-manageable --provide
+
+    - name: Copy the tripleo config files
+      template:
+        src: '{{ item }}.j2'
+        dest: '/home/stack/templates/{{ item }}.yaml'
+      with_items:
+        - ceph-storage
+        - compute
+        - controller
+        - tripleo
+
+    - name: Run the overcloud deployment
+      shell: >
+        source /home/stack/stackrc &&
+        openstack overcloud deploy --templates
+        {% if release >= 'pike' %}
+        -e /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
+        -e /usr/share/openstack-tripleo-heat-templates/environments/docker-ha.yaml
+        -e /home/stack/templates/docker_registry.yaml
+        -e /usr/share/openstack-tripleo-heat-templates/environments/ceph-ansible/ceph-ansible.yaml
+        -e /usr/share/openstack-tripleo-heat-templates/environments/ceph-ansible/ceph-rgw.yaml
+        {% else %}
+        -e /usr/share/openstack-tripleo-heat-templates/environments/storage-environment.yaml
+        -e /usr/share/openstack-tripleo-heat-templates/environments/ceph-radosgw.yaml
+        {% endif %}
+        -e /usr/share/openstack-tripleo-heat-templates/environments/disable-telemetry.yaml
+        -e /home/stack/templates/tripleo.yaml
+        -t 120
+
+    - name: Create extra openstack roles
+      shell: |
+        source /home/stack/overcloudrc
+        openstack role create {{ item }}
+      with_items:
+        - heat_stack_owner
+        - swiftoperator
+      ignore_errors: true
+
+  delegate_to: undercloud
