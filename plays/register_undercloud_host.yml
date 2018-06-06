@@ -1,3 +1,14 @@
+---
+- name: Ensure the undercloud_ip is set
+  fail:
+    msg: |
+      The undercloud_ip variable must be set at this point
+      in the deployment. If the undercloud IP address is
+      static, you can should set it in your settings.yml file.
+      Otherwise, you can use a set_fact action to set it
+      before the end of the running.yml hook.
+  when: not (undercloud_ip is defined and undercloud_ip)
+
 - name: Add undercloud to inventory
   add_host:
     name: "undercloud"
@@ -6,7 +17,6 @@
     ansible_user: "stack"
     ansible_host: "{{ undercloud_ip }}"
     ansible_password: "{{ undercloud_password| default(None) }}"
-  when: undercloud_ip is defined and undercloud_ip
 
 - name: Set authorized key of stack@undercloud (1/2)
   authorized_key:
