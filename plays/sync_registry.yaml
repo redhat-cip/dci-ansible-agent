@@ -47,7 +47,7 @@
 - name: Download the Openstack container images
   shell: |
     python /usr/share/dci-ansible-agent/fetch_images.py \
-      {{ dci_mirror_location | quote }}/dci_repo/RH7-RHOS-{{ dci_topic | regex_replace('^OSP','') }}.0/images_list.yaml
+      {{ dci_mirror_location | quote }}/dci_repo/{{ components[0].canonical_project_name }}/images_list.yaml
   register: image_sync_result
   until: image_sync_result.rc == 0
   retries: 3
