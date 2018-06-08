@@ -70,3 +70,5 @@ tempest_extra_config:
   heat_plugin.tenant_name: demo
   heat_plugin.password: secrete
   heat_plugin.auth_url: $OS_AUTH_URL
+  heat_plugin.user_domain_name : Default
+  heat_plugin.project_domain_name : Default
