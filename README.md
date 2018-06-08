@@ -13,7 +13,10 @@ The "jumpbox" is the host where the agent is running. It can be a virtual machin
     - rhel-7-server-optional-rpms (jumpbox)
     - rhel-7-server-rh-common-rpms (undercloud)
     - rhel-ha-for-rhel-7-server-rpms (undercloud)
-  - Automation scripts for undercloud/overcloud deployment.
+  - Automation scripts for undercloud/overcloud deployment. The user must be able to automatically:
+    - redeploy the undercloud machine from scratch
+    - install the undercloud
+    - deploy the overcloud on the node of the lab
 
 - Jumpbox:
   - Run the latest RHEL 7 release.
@@ -22,7 +25,7 @@ The "jumpbox" is the host where the agent is running. It can be a virtual machin
     - https://packages.distributed-ci.io (443).
     - https://registry.distributed-ci.io (443).
     - RedHat CDN.
-    - EPEL.
+    - EPEL repository.
     - The undercloud via ssh (22) for ansible.
   - Have a static IPv4 address.
   - Have 160GB of the free space in /var.
