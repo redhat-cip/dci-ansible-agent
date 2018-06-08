@@ -19,7 +19,6 @@
 
     - set_fact:
         job_id: '{{ hostvars.localhost.job_informations.job.id }}'
-        components: '{{ hostvars.localhost.job_informations.job.components }}'
     - name: Set the metadata
       dci_job:
         id: "{{ job_informations.job.id }}"
