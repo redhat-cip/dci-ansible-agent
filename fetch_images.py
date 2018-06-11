@@ -57,10 +57,20 @@ def list_existing_tags(image):
     r = requests.get('http://{dest_registry}/v2/{project}/{name}/tags/list'.format(**image))
     if r.status_code == 404:
         return []
-    elif r.status_code == 200 and r.json() and 'tags' in r.json():
-        return r.json()['tags']
+    elif r.status_code == 200 and r.json():
+        return r.json().get('tags') or []
     else:
         raise Exception(r.text)
+
+def sync_image(image):
+    pull_image(image)
+    for tag in ('latest', image['tag']):
+        tag_image(image, tag)
+        push_image(image, tag)
+
+def purge_image_from_local_docker(image):
+    for image in client.images('{origin_registry}/{project}/{name}'.format(**image)):
+        client.remove_image(image['Id'], force=True)
 
 def main():
     if len(sys.argv) <= 1:
@@ -89,10 +99,10 @@ def main():
             }
             existing_tags = list_existing_tags(image)
             if image['tag'] in existing_tags:
-                continue
-            pull_image(image)
-            tag_image(image, 'latest')
-            push_image(image, 'latest')
+                print('Image {}:{} is already on the registry'.format(name, tag))
+            else:
+                sync_image(image)
+            purge_image_from_local_docker(image)
 
 
 if __name__ == '__main__':
