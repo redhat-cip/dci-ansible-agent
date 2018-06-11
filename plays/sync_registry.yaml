@@ -54,5 +54,5 @@
   delay: 60
   become: True
   environment:
-    DCI_REGISTRY_PASSWORD: '{{ hostvars.localhost.job_informations.topic.data.registry.password | quote}}'
-    DCI_REGISTRY_USER: '{{ hostvars.localhost.job_informations.topic.data.registry.login | quote}}'
+    DCI_REGISTRY_PASSWORD: '{{ hostvars.localhost.job_informations.job.topic.data.registry.password | quote}}'
+    DCI_REGISTRY_USER: '{{ hostvars.localhost.job_informations.job.topic.data.registry.login | quote}}'
