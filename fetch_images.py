@@ -20,6 +20,7 @@ import sys
 
 import docker
 import requests
+import subprocess
 import yaml
 
 client = docker.from_env()
@@ -62,15 +63,46 @@ def list_existing_tags(image):
     else:
         raise Exception(r.text)
 
+# If we remove all the tag of the existing image, we won't be able to actuallly
+# delete it from the registry. As a result, the registry size will grow up indefinitely.
+# Any tag can potentially be already used by an image and by the last "string"
+# attached to it. So before we apply a tag, we delete any potential existing tag.
+# See: https://github.com/docker/distribution/issues/1844
+def delete_existing_tag_from_registry(image, tag):
+    api_base = 'http://{dest_registry}/v2/{project}/{name}'.format(**image)
+
+    url = api_base + '/manifests/' + tag
+    r = requests.get(url, headers={'Accept': 'application/vnd.docker.distribution.manifest.v2+json'})
+    if r.status_code == 404:
+        return
+    refhash = r.headers['docker-content-digest']
+    if not refhash:
+        return
+    print(api_base + '/manifests/' + refhash)
+    r = requests.delete(api_base + '/manifests/' + refhash)
+    if r.status_code != 202:
+        # 405 code probably means storage.delete.enabled is False.
+        raise Exception(r.text)
+
 def sync_image(image):
     pull_image(image)
     for tag in ('latest', image['tag']):
         tag_image(image, tag)
+        delete_existing_tag_from_registry(image, tag)
         push_image(image, tag)
 
 def purge_image_from_local_docker(image):
     for image in client.images('{origin_registry}/{project}/{name}'.format(**image)):
         client.remove_image(image['Id'], force=True)
+
+
+def call_registry_gc():
+    print('Calling the registry garbage collector')
+    subprocess.check_call([
+        '/usr/bin/registry',
+        'garbage-collect',
+        '/etc/docker-distribution/registry/config.yml'])
+
 
 def main():
     if len(sys.argv) <= 1:
@@ -103,7 +135,7 @@ def main():
             else:
                 sync_image(image)
             purge_image_from_local_docker(image)
-
+    call_registry_gc()
 
 if __name__ == '__main__':
     main()
