@@ -129,7 +129,8 @@ You need adjust the following Ansible playbook to describe how you want to provi
 
 -   \`running.yml\`: this playbook will be trigger to deploy the undercloud and the overcloud. It should also add <http://$jumpbox_ip/dci_repo/dci_repo.repo> to the repository list (/etc/yum/yum.repo.d/dci\_repo.repo).
 
-    > At the end of the this hook run, an undercloud host should be available in Ansible inventory. It will be used later to run the test. The operation is done automatically for you if the undercloud\_ip variable has been set in the configuration. If this is not the case, you have to call add\_host by yourself at the end of the hook execution.
+    > At the end of the this hook run, the Overcloud should be running.
+    > If your undercloud has a dynamic IP, you must use a set_fact action to set the undercloud_ip variable. The agent needs to know its IP to run the tests.
 
 -   \`teardown.yml\`: this playbook clean the full playform.
 

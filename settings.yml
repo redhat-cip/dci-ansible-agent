@@ -4,6 +4,7 @@ dci_topic: "OSP10"
 dci_base_ip: "{{ ansible_default_ipv4.address }}"
 # The location of the HTT mirror
 dci_baseurl: "http://{{ dci_base_ip }}"
+# The IP address of the undercloud host. You cannot use hostname in this field.
 #undercloud_ip: "fooo"
 dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
