@@ -37,6 +37,12 @@ The "jumpbox" is the host where the agent is running. It can be a virtual machin
 
 ## First steps
 
+### Create your DCI account on distributed-ci.io
+
+You need to create your user account in the system. Please connect to https://www.distributed-ci.io with your redhat.com SSO account. Your user account will be created in our database the first time you connect.
+
+There is no reliable way to automatically know your team. So please contact us back when you reach this step, we will manually move your user in the correct organisation.
+
 ### Install the rpm
 
 You be able to install the rpm of DCI Ansible Agent, you will need to activate some extra repositories.
@@ -68,6 +74,15 @@ You can valide the server clock is synchronized with the following command:
     0 sources with unknown address
 
 If Chrony is not running, you can follow [the official documentation](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sect-using_chrony) to set it up.
+
+### Create the 'remoteci'
+
+You need to create your remoteci (on our interface)[http://www.distributed-ci.io].
+
+1. Click on the "Remote CIs" entry from the left menu
+2. Use the "Create new remoteci" to add the remoteci
+
+Once the remoteci is ready, you can download its authentication file on the "Download rc file" column. The file is called remotecirc.sh, please rename it to dcirc.sh for the next step.
 
 ### Configuration
 
