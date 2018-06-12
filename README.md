@@ -213,6 +213,18 @@ The Overcloud deployment is standard, you just have to include the two following
 
 See the upstream documentation if you need more details: [Deploying the containerized Overcloud](https://docs.openstack.org/tripleo-docs/latest/install/containers_deployment/overcloud.html#deploying-the-containerized-overcloud)
 
+### How to skip downloading some container images
+
+Each Openstack release comes with +100 container images.
+In most of the cases you don't need all the images to do the deployment because some are specific to extra services (barbican, manila, sahara, etc...)
+If you want to skip downloading some images, you need to add the list of the associated openstack services in the settings.yaml file.
+
+    skip_container_images:
+      - barbican
+      - manila
+      - sahara
+      - swift
+
 ### How to run the Update and Upgrade
 
 After the deployment of the OpenStack, the agent will look for an update or an upgrade playbook.

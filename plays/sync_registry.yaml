@@ -44,6 +44,14 @@
   register: result
   failed_when: false
   become: true
+
+- name: Skip container images from list
+  lineinfile:
+    path: '{{ dci_mirror_location }}/dci_repo/{{ components[0].canonical_project_name }}/images_list.yaml'
+    regexp: '.*-{{ item }}.*'
+    state: absent
+  with_items: '{{ skip_container_images|default([]) }}'
+
 - name: Download the Openstack container images
   shell: |
     python /usr/share/dci-ansible-agent/fetch_images.py \
