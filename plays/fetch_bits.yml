@@ -1,3 +1,6 @@
+- set_fact:
+    components: '{{ hostvars.localhost.job_informations.job.components }}'
+
 - name: Retrieve component
   dci_component:
     dest: '{{ dci_cache_dir }}/{{ item["id"] }}.tar'
@@ -19,7 +22,7 @@
     baseurl: '{{ dci_baseurl }}/dci_repo/{{ item["canonical_project_name"] }}/'
     gpgcheck: no
     file: '{{ dci_mirror_location }}/dci_repo/dci_repo'
-  with_items: '{{ job_informations["job"]["components"] }}'
+  with_items: "{{ components }}"
 
 - name: Run the sync registry process
   include: plays/sync_registry.yaml
