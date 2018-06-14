@@ -7,7 +7,7 @@
       static, you can should set it in your settings.yml file.
       Otherwise, you can use a set_fact action to set it
       before the end of the running.yml hook.
-  when: not (undercloud_ip is defined and undercloud_ip|ipaddr)
+  when: not (undercloud_ip is defined and undercloud_ip)
 
 - name: Add undercloud to inventory
   add_host:
