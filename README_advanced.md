@@ -174,6 +174,21 @@ This can be done via the settings file:
 
     $ Add 'skip_certification: true' to the settings.yml file.
 
+### Tempest: How to disable services
+
+The agent installs by default the meta tempest package openstack-tempest-all which contains all the tempest plugin tests.
+If you run tempest with the default configuration, you will execute tests on services that you probably don't want because the service isn't install.
+In the tempest configuration you can disable tests per service. Each service has a boolean entry under [the service_available section](https://github.com/openstack/tempest/blob/master/tempest/config.py#L975-L994).
+You can use the tempest_extra_config variable in the settings.yml file to add some services to disable:
+
+    $ vim /etc/dci-ansible-agent/settings.yml
+
+    tempest_extra_config:
+      (...)
+      service_available.designate: False
+      service_available.ironic: False
+      service_available.sahara: False
+
 ### Tempest: Run a given test manually
 
 It may be useful to restart a failing test to troubleshoot the problem:
