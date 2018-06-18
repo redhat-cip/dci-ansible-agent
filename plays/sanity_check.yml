@@ -1,3 +1,10 @@
+- name: Check the version of Ansible
+  fail:
+    msg: |
+      You are running an unsupported version of Ansible {{ ansible_version["full"] }}.
+      Please upgrade to the last version of the 2.5 branch.
+    when: not (ansible_version["major"] == 2 and ansible_version["minor"] >= 4)
+
 - name: Check the available space in /var/lib
   command: df -l --output=avail /var/lib
   register: df_l_result
