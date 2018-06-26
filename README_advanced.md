@@ -174,6 +174,22 @@ This can be done via the settings file:
 
     $ Add 'skip_certification: true' to the settings.yml file.
 
+### Red Hat Certification: How to add certification tests
+
+By default, the agent will only run three rhcert tests: 'self_check', 'supportable' and 'director'.
+If you want to test a cinder/manila/neutron driver you will have to update the tests list and add the associated tests.
+For instance, if you want to run the cinder volumes certification tests:
+
+    $ vim /etc/dci-ansible-agent/settings.yml
+    (...)
+    openstack_certification_tests:
+      - self_check
+      - supportable
+      - director
+      - cinder_volumes
+
+You can find the list of the OpenStack tests available on the [Openstack Certification ansible role page](https://github.com/redhat-cip/ansible-role-openstack-certification/blob/master/defaults/main.yml#L35-L79)
+
 ### Tempest: How to disable services
 
 The agent installs by default the meta tempest package openstack-tempest-all which contains all the tempest plugin tests.
