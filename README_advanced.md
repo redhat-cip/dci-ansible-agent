@@ -189,6 +189,22 @@ You can use the tempest_extra_config variable in the settings.yml file to add so
       service_available.ironic: False
       service_available.sahara: False
 
+### Tempest: How to customize services
+
+Depending on the drivers (cinder, manila, neutron, etc...) you are using, you will probably need to adapt the tempest configuration for specific tests.
+For instance, the cinder volume type tests are using the storage_protocol ('iSCSI') and vendor_name ('Open Source') fields that are configured by the storage driver.
+The default values in tempest don't match those in all storage drivers that's why you need to adapt the tempest configuration per services if you don't want some false positive.
+As an example, if you're using Ceph as a cinder backend you will need to update those values like:
+
+    $ vim /etc/dci-ansible-agent/settings.yml
+
+    tempest_extra_config:
+      (...)
+      volume.storage_protocol: 'ceph'
+
+For neutron, you will have some k/v with the 'network' prefix, 'compute' prefix for nova, etc...
+You can find most of the tempest config items in [the tempest project config](https://github.com/openstack/tempest/blob/master/tempest/config.py)
+
 ### Tempest: Run a given test manually
 
 It may be useful to restart a failing test to troubleshoot the problem:
