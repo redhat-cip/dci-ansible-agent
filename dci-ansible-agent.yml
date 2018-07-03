@@ -91,7 +91,7 @@
     - block:
         - name: Retrieve information about the next topic
           dci_topic:
-            id: '{{ job_informations.job.topic.next_topic }}'
+            id: '{{ job_informations.job.topic.next_topic_id }}'
           register: next
           ignore_errors: yes
         - set_fact:
