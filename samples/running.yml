@@ -1,3 +1,11 @@
+#
+# DISCLAIMER:
+# This is a sample file and it shouldn't be used as is. This
+# hook doesn't work out of the box because you need to adapt your
+# configuration to be able to execute it (like ansible variables,
+# templates, etc...).
+# The DCI team doesn't provide support on this file.
+#
 ---
 - block:
   # All these actions will be run on the undercloud node.
