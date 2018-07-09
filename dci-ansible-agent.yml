@@ -9,6 +9,13 @@
   tags:
     - job
   tasks:
+    - name: Display env
+      shell: env
+      register: myenv
+
+    - debug:
+        msg: '{{myenv.stdout}}'
+
     - name: Schedule a new job
       dci_job:
         components: '{{ dci_components|default([]) }}'
