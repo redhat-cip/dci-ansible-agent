@@ -1,250 +1,327 @@
 # DCI Ansible Agent Advanced
 
-### How to deal with multiple OpenStack releases
+## How to deal with multiple OpenStack releases
 
-When testing multiple OpenStack releases you probably have different steps (configuration, tasks, packages, etc...) according to the release.
-As an example you could:
+When testing multiple OpenStack releases you probably have different steps
+(configuration, tasks, packages, etc...) according to the release. As an example
+ you could:
 
-- have scripts per OpenStack versions and file path based on the dci_topic variable (ie OSP10, OSP11, etc..):
+- have scripts per OpenStack versions and file path based on the dci_topic
+ variable (ie OSP10, OSP11, etc..):
 
-      - shell: |
-          /automation_path/{{ dci_topic }}/undercloud_installation.sh
+```yaml
+- shell: |
+    /automation_path/{{ dci_topic }}/undercloud_installation.sh
+```
 
 - have git branch per OpenStack versions based on the dci_topic variable :
 
-      - git:
-          repo: https://repo_url/path/to/automation.git
-          dest: /automation_path
-          version: '{{ dci_topic }}'
+```yaml
+- git:
+    repo: https://repo_url/path/to/automation.git
+    dest: /automation_path
+    version: '{{ dci_topic }}'
 
-      - shell: /automation_path/undercloud_installation.sh
+- shell: /automation_path/undercloud_installation.sh
+```
 
 - use ansible condition and jinja template with the dci_topic variable :
 
-      - shell: |
-          /automation_path/build_container.sh
-        when: dci_topic in ['OSP12', 'OSP13']
+```yaml
+- shell: |
+    /automation_path/build_container.sh
+  when: dci_topic in ['OSP12', 'OSP13']
 
-      - shell: >
-          source /home/stack/stackrc &&
-          openstack overcloud deploy --templates
-          {% if dci_topic in ['OSP12', 'OSP13'] %}
-          -e /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
-          -e /usr/share/openstack-tripleo-heat-templates/environments/docker-ha.yaml
-          {% endif %}
-          -e /usr/share/openstack-tripleo-heat-templates/environments/disable-telemetry.yaml
+- shell: >
+    source /home/stack/stackrc &&
+    openstack overcloud deploy --templates
+    {% if dci_topic in ['OSP12', 'OSP13'] %}
+    -e /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
+    -e /usr/share/openstack-tripleo-heat-templates/environments/docker-ha.yaml
+    {% endif %}
+    -e /usr/share/openstack-tripleo-heat-templates/environments/disable-telemetry.yaml
+```
 
-### How to retrieve the OpenStack yum repository
+## How to retrieve the OpenStack yum repository
 
-During the 'new' hook, the jumpbox will create a yum repository with latest bits available.
-This repository is located in the /var/www/html/dci_repo directory and accessible via HTTP at http://$jumpbox_ip/dci_repo/dci_repo.repo
+During the 'new' hook, the jumpbox will create a yum repository with latest bits
+ available. This repository is located in the `/var/www/html/dci_repo` directory
+ and accessible via HTTP at `http://$jumpbox_ip/dci_repo/dci_repo.repo`.
+
 There's several ways to retrieve the yum repository from the undercloud:
 
 - Using the yum-config-manager command:
 
-      - shell: |
-          yum-config-manager --add-repo {{ dci_baseurl }}/dci_repo/dci_repo.repo
-        become: true
+```yaml
+- shell: |
+    yum-config-manager --add-repo {{ dci_baseurl }}/dci_repo/dci_repo.repo
+  become: true
+```
 
 - Using the http url:
 
-      - get_url:
-          url: '{{ dci_baseurl }}/dci_repo/dci_repo.repo'
-          dest: /etc/yum.repos.d/dci_repo.repo
-        become: true
+```yaml
+- get_url:
+    url: '{{ dci_baseurl }}/dci_repo/dci_repo.repo'
+    dest: /etc/yum.repos.d/dci_repo.repo
+  become: true
+```
 
 - Using the ansible copy module:
 
-      - copy:
-          src: /var/www/html/dci_repo/dci_repo.repo
-          dest: /etc/yum.repos.d/dci_repo.repo
-        become: true
+```yaml
+- copy:
+    src: /var/www/html/dci_repo/dci_repo.repo
+    dest: /etc/yum.repos.d/dci_repo.repo
+  become: true
+```
 
-### How to fetch and use the images
+## How to fetch and use the images
 
-If you are use OSP12 and above, the DCI agent will set up an image registry and fetch the last OSP images on your jumpbox.
+If you are use OSP12 and above, the DCI agent will set up an image registry and
+ fetch the last OSP images on your jumpbox.
 
-Before you start the overcloud deploy with the `openstack overcloud deploy --templates [additional parameters]` command, you have to call the following command on the undercloud node.
+Before you start the overcloud deploy with the `openstack overcloud deploy
+ --templates [additional parameters]` command, you have to call the following
+ command on the undercloud node:
 
-    $ openstack overcloud container image prepare --namespace ${jump_box}:5000/rhosp12  --output-env-file ~/docker_registry.yaml
+```console
+$ openstack overcloud container image prepare --namespace ${jump_box}:5000/rhosp12 --output-env-file ~/docker_registry.yaml
+```
 
-:information_source: `${jump_box}` is the IP address of the Jumpbox machine and in this example we assume you use OSP12.
+:information_source: `${jump_box}` is the IP address of the Jumpbox machine and
+ in this example we assume you use OSP12.
 
-You don't have to do any additional `openstack overcloud container` call unless you want to rebuild or patch an image.
+You don't have to do any additional `openstack overcloud container` call unless
+ you want to rebuild or patch an image.
 
-The Overcloud deployment is standard, you just have to include the two following extra Heat template:
+The Overcloud deployment is standard, you just have to include the two following
+ extra Heat template:
 
-- /usr/share/openstack-tripleo-heat-templates/environments/docker.yaml
-- ~/docker_registry.yaml
+- `/usr/share/openstack-tripleo-heat-templates/environments/docker.yaml`
+- `~/docker_registry.yaml`
 
 See the upstream documentation if you need more details: [Deploying the containerized Overcloud](https://docs.openstack.org/tripleo-docs/latest/install/containers_deployment/overcloud.html#deploying-the-containerized-overcloud)
 
-### How to skip downloading some container images
+## How to skip downloading some container images
 
 Each Openstack release comes with +100 container images.
-In most of the cases you don't need all the images to do the deployment because some are specific to extra services (barbican, manila, sahara, etc...)
-If you want to skip downloading some images, you need to add the list of the associated openstack services in the settings.yaml file.
+In most of the cases you don't need all the images to do the deployment because
+ some are specific to extra services (barbican, manila, sahara, etc...)
+If you want to skip downloading some images, you need to add the list of the
+ associated openstack services in the settings.yaml file.
 
-    skip_container_images:
-      - barbican
-      - manila
-      - sahara
-      - swift
+```yaml
+skip_container_images:
+  - barbican
+  - manila
+  - sahara
+  - swift
+```
 
-### How to run the Update and Upgrade
+## How to run the Update and Upgrade
 
-After the deployment of the OpenStack, the agent will look for an update or an upgrade playbook.
-If the playbook exists it will run it in order to upgrade the installation.
+After the deployment of the OpenStack, the agent will look for an update or an
+ upgrade playbook. If the playbook exists it will run it in order to upgrade the
+ installation.
 
 The agent expects the upgrade playbook to have the following naming convention:
 
-     /etc/dci-ansible-agent/hooks/upgrade_from_OSP9_to_OSP10.yml
+`/etc/dci-ansible-agent/hooks/upgrade_from_OSP9_to_OSP10.yml`
 
-In this example, `OSP9` is the current version and `OSP10` is the version to upgrade to.
-And here is an example of an update playbook:
+In this example, `OSP9` is the current version and `OSP10` is the version to
+ upgrade to. Here is an example of an update playbook:
 
-     /etc/dci-ansible-agent/hooks/update_OSP9.yml
+`/etc/dci-ansible-agent/hooks/update_OSP9.yml`
 
-### How to run my own set of tests ?
+## How to run my own set of tests ?
 
-`dci-ansible-agent` ships with a pre-defined set of tests that will be run. It is however possible for anyone, in addition of the pre-defined tests, to run their own set of tests.
+`dci-ansible-agent` ships with a pre-defined set of tests that will be run. It
+ is however possible for anyone, in addition of the pre-defined tests, to run
+ their own set of tests.
 
 In order to do so, a user needs to drop the tasks to run in `/etc/dci-ansible-agent/hooks/local_tests.yml`.
 
-**NOTE**: Tasks run in this playbook will be run from the undercloud node. To have an improved user-experience in the DCI web application, the suite should ideally returns JUnit formatted results. If not in JUnit, one will be able to download the results but not see them in the web interface directly.
+**NOTE**: Tasks run in this playbook will be run from the undercloud node. To
+ have an improved user-experience in the DCI web application, the suite should
+ ideally returns `JUnit` formatted results. If not in JUnit, one will be able to
+ download the results but not see them in the web interface directly.
 
-#### How to adjust the timer configuration
+## How to adjust the timer configuration
 
-    # systemctl edit --full dci-ansible-agent.timer
+```console
+# systemctl edit --full dci-ansible-agent.timer
+```
 
-You have to edit the value of the `OnUnitActiveSec` key. According to systemd documentation:
+You have to edit the value of the `OnUnitActiveSec` key. According to systemd
+ documentation:
 
-> OnUnitActiveSec= defines a timer relative to when the unit the timer is activating was last activated.
-> OnUnitInactiveSec= defines a timer relative to when the unit the timer is activating was last deactivated.
+```
+OnUnitActiveSec= defines a timer relative to when the unit the timer is activating was last activated.
+OnUnitInactiveSec= defines a timer relative to when the unit the timer is activating was last deactivated.
+```
 
 DCI comes with a default value of 1h, you can increase to 12h for example.
 
-### Debug: How to manually run the agent
+## Debug: How to manually run the agent
 
-You may want to trace the agent execution to understand a problem. In this case, you can call it manually:
+You may want to trace the agent execution to understand a problem. In this case,
+ you can call it manually:
 
-    # su - dci-ansible-agent -s /bin/bash
-    $ cd /usr/share/dci-ansible-agent
-    $ source /etc/dci-ansible-agent/dcirc.sh
-    $ /usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
+```console
+# su - dci-ansible-agent -s /bin/bash
+$ cd /usr/share/dci-ansible-agent
+$ source /etc/dci-ansible-agent/dcirc.sh
+$ /usr/bin/ansible-playbook -vv /usr/share/dci-ansible-agent/dci-ansible-agent.yml -e @/etc/dci-ansible-agent/settings.yml
+```
 
-### Red Hat Certification:  Manually restart the certification test-suite
+## Red Hat Certification:  Manually restart the certification test-suite
 
-DCI runs the Red Hat Certification test-suite at the end of a deployment. It's configuration is stored in the `/etc/redhat-certification-openstack` directory.
-`/etc/redhat-certification-openstack/tempest.conf` is the configuration file of tempest. You can manually re-run a certification test with the following command:
+DCI runs the Red Hat Certification test-suite at the end of a deployment. It's
+ configuration is stored in the `/etc/redhat-certification-openstack` directory.
+`/etc/redhat-certification-openstack/tempest.conf` is the configuration file of
+ tempest. You can manually re-run a certification test with the following
+ command:
 
-    $ ssh stack@undercloud
-    # rhcert-ci run --test cinder_volumes
+```console
+$ ssh stack@undercloud
+# rhcert-ci run --test cinder_volumes
+```
 
 In this example, `cinder_volumes` is the name of the test to re-run.
 
-rhcert stores the log of the run in a directory in `/var/log/rhcert/runs`. For instance `/var/log/rhcert/runs/1/openstack/` is the result of the first run.
+`rhcert` stores the log of the run in a directory in `/var/log/rhcert/runs`.
+For instance `/var/log/rhcert/runs/1/openstack/` is the result of the first run.
 
-    # cd /var/log/rhcert/runs
-    # ls
-    1  2
+```console
+# cd /var/log/rhcert/runs
+# ls
+1  2
+```
 
-Here we have two directories, each of them are the results of a `rhcert` run. The first one was probably triggered by the agent automatically.
+Here we have two directories, each of them are the results of a `rhcert` run.
+The first one was probably triggered by the agent automatically.
 
-    # cd 1
-    # ls
-    openstack  rhcert
-    # cd openstack/
-    # ls
-    cinder_volumes  director  sosreport  supportable
-    # ls cinder_volumes/
-    boot-tempest.log             clone-tempest.log             encryption-tempest.log
-    migrate-tempest.log             output.log         quota-validation_report.json
-    snapshot-validation_report.json  volume-validation_report.json boot-validation_report.json
-    clone-validation_report.json  encryption-validation_report.json  migrate-validation_report.json
-    quota-tempest.log  snapshot-tempest.log          volume-tempest.log
+```console
+# cd 1
+# ls
+openstack  rhcert
+
+# cd openstack/
+# ls
+cinder_volumes  director  sosreport  supportable
+
+# ls cinder_volumes/
+boot-tempest.log clone-tempest.log encryption-tempest.log migrate-tempest.log output.log quota-validation_report.json snapshot-validation_report.json volume-validation_report.json boot-validation_report.json clone-validation_report.json encryption-validation_report.json migrate-validation_report.json quota-tempest.log snapshot-tempest.log volume-tempest.log
+```
 
 Here we have the results of different sub-test run by `rhcert`. The most important file is output.log, it will give you a global overview of what have been run and the status of the different test.
 
-### Red Hat Certification: How to skip its execution
+## Red Hat Certification: How to skip its execution
 
-Some users might want to skip the certification tests suite.
+Some users might want to skip the certification tests suite. This can be done via the settings file by adding `skip_certification: true` to `settings.yml` file.
 
-This can be done via the settings file:
+## Red Hat Certification: How to add certification tests
 
-    $ Add 'skip_certification: true' to the settings.yml file.
+By default, the agent will only run three rhcert tests: 'self_check',
+ 'supportable' and 'director'.
+If you want to test a cinder/manila/neutron driver you will have to update the
+ tests list and add the associated tests. For instance, if you want to run the
+ cinder volumes certification tests:
 
-### Red Hat Certification: How to add certification tests
+```console
+$ vim /etc/dci-ansible-agent/settings.yml
+(...)
+openstack_certification_tests:
+  - self_check
+  - supportable
+  - director
+  - cinder_volumes
+```
 
-By default, the agent will only run three rhcert tests: 'self_check', 'supportable' and 'director'.
-If you want to test a cinder/manila/neutron driver you will have to update the tests list and add the associated tests.
-For instance, if you want to run the cinder volumes certification tests:
+You can find the list of the OpenStack tests available on the
+ [Openstack Certification ansible role page](https://github.com/redhat-cip/ansible-role-openstack-certification/blob/master/defaults/main.yml#L35-L79)
 
-    $ vim /etc/dci-ansible-agent/settings.yml
-    (...)
-    openstack_certification_tests:
-      - self_check
-      - supportable
-      - director
-      - cinder_volumes
+## Tempest: How to disable services
 
-You can find the list of the OpenStack tests available on the [Openstack Certification ansible role page](https://github.com/redhat-cip/ansible-role-openstack-certification/blob/master/defaults/main.yml#L35-L79)
+The agent installs by default the meta tempest package openstack-tempest-all
+ which contains all the tempest plugin tests. If you run tempest with the
+ default configuration, you will execute tests on services that you probably
+ don't want because the service isn't install.
 
-### Tempest: How to disable services
+In the tempest configuration you can disable tests per service. Each service has
+ a boolean entry under [the service_available section](https://github.com/openstack/tempest/blob/master/tempest/config.py#L975-L994).
 
-The agent installs by default the meta tempest package openstack-tempest-all which contains all the tempest plugin tests.
-If you run tempest with the default configuration, you will execute tests on services that you probably don't want because the service isn't install.
-In the tempest configuration you can disable tests per service. Each service has a boolean entry under [the service_available section](https://github.com/openstack/tempest/blob/master/tempest/config.py#L975-L994).
-You can use the tempest_extra_config variable in the settings.yml file to add some services to disable:
+You can use the tempest_extra_config variable in the settings.yml file to add
+ some services to disable:
 
-    $ vim /etc/dci-ansible-agent/settings.yml
+```console
+$ vim /etc/dci-ansible-agent/settings.yml
 
-    tempest_extra_config:
-      (...)
-      service_available.designate: False
-      service_available.ironic: False
-      service_available.sahara: False
+tempest_extra_config:
+(...)
+  service_available.designate: False
+  service_available.ironic: False
+  service_available.sahara: False
+```
 
-### Tempest: How to customize services
+## Tempest: How to customize services
 
-Depending on the drivers (cinder, manila, neutron, etc...) you are using, you will probably need to adapt the tempest configuration for specific tests.
-You can enable/disable features per OpenStack services. Every service has a section with the suffix '-feature-enabled' that allows to enable or disable features.
-If your cinder driver doesn't support cinder backup and you don't deploy the service, then you can disable the feature to avoid tempest failures.
+Depending on the drivers (cinder, manila, neutron, etc...) you are using, you
+ will probably need to adapt the tempest configuration for specific tests. You
+ can enable/disable features per OpenStack services. Every service has a section
+ with the suffix '-feature-enabled' that allows to enable or disable features.
+ If your cinder driver doesn't support cinder backup and you don't deploy the
+ service, then you can disable the feature to avoid tempest failures.
 
-    $ vim /etc/dci-ansible-agent/settings.yml
+```console
+$ vim /etc/dci-ansible-agent/settings.yml
 
-    tempest_extra_config:
-      (...)
-      volume-feature-enabled.backup: False
+tempest_extra_config:
+(...)
+  volume-feature-enabled.backup: False
+```
 
 You can also do specific configuration per OpenStack services.
-For instance, the cinder volume type tests are using the storage_protocol ('iSCSI') and vendor_name ('Open Source') fields that are configured by the storage driver.
-The default values in tempest don't match those in all storage drivers that's why you need to adapt the tempest configuration per services if you don't want some false positive.
-As an example, if you're using Ceph as a cinder backend you will need to update those values like:
+For instance, the cinder volume type tests are using the storage_protocol
+ ('iSCSI') and vendor_name ('Open Source') fields that are configured by the
+ storage driver. The default values in tempest don't match those in all storage
+ drivers that's why you need to adapt the tempest configuration per services if
+ you don't want some false positive. As an example, if you're using Ceph as a
+ cinder backend you will need to update those values like:
 
-    $ vim /etc/dci-ansible-agent/settings.yml
+```console
+$ vim /etc/dci-ansible-agent/settings.yml
 
-    tempest_extra_config:
-      (...)
-      volume.storage_protocol: 'ceph'
+tempest_extra_config:
+(...)
+  volume.storage_protocol: 'ceph'
+```
 
-You will have some k/v with the 'network' prefix for neutron, 'compute' prefix for nova, etc...
-You can find most of the tempest config items in [the tempest project config](https://github.com/openstack/tempest/blob/master/tempest/config.py)
+You will have some k/v with the 'network' prefix for neutron, 'compute' prefix
+ for nova, etc... You can find most of the tempest config items in [the tempest project config](https://github.com/openstack/tempest/blob/master/tempest/config.py)
 
-### Tempest: Run a given test manually
+## Tempest: Run a given test manually
 
 It may be useful to restart a failing test to troubleshoot the problem:
 
-    $ /home/stack/tempest
-    $ ostestr --no-discover tempest.api.volume.admin.test_volume_retype_with_migration.VolumeRetypeWithMigrationTest
+```console
+$ /home/stack/tempest
+$ ostestr --no-discover tempest.api.volume.admin.test_volume_retype_with_migration.VolumeRetypeWithMigrationTest
+```
 
 The Certification test-suite uses it's own configuration located at `/etc/redhat-certification-openstack/tempest.conf`. Is a copy of `/home/stack/tempest/etc/tempest.conf`.
 
-### How to test several versions of OpenStack
+## How to test several versions of OpenStack
 
-You can off course run different versions of OpenStack with the same jumpbox. To do so, you need first to adjust the way systemd call the agent:
+You can off course run different versions of OpenStack with the same jumpbox.
+ To do so, you need first to adjust the way systemd call the agent:
 
-    # systemctl edit --full dci-ansible-agent
+```console
+# systemctl edit --full dci-ansible-agent
+```
+
+Content :
 
 ```ini
 [Unit]
@@ -264,4 +341,5 @@ User=dci-ansible-agent
 WantedBy=default.target
 ```
 
-In this example, we do a run of OSP10, OSP11 and OSP12 everytime we start the agent.
+In this example, we do a run of OSP10, OSP11 and OSP12 everytime we start the
+ agent.
