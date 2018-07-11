@@ -7,9 +7,9 @@
 # The DCI team doesn't provide support on this file.
 #
 ---
-- block:
   # All these actions will be run on the undercloud node.
-  delegate_to: undercloud
+- delegate_to: undercloud
+  block:
     # In the case you jump better different version of OpenStack, you may want
     # to store the release name in a local fact.
     - name: Set the openstack release name
