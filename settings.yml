@@ -9,7 +9,9 @@ dci_baseurl: "http://{{ dci_base_ip }}"
 dci_mirror_location: "/var/www/html"
 dci_config_dir: "/etc/dci-ansible-agent"
 dci_cache_dir: "/var/lib/dci-ansible-agent"
-dci_teardown_on_failure: True
+# If you don't want to free the resources on failure set the
+# dci_teardown_on_failure variable to false (default: true).
+#dci_teardown_on_failure: false
 
 #
 # dci_metadata: Metadata to attach to a job [optional]
