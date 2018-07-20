@@ -25,5 +25,5 @@
   with_items: "{{ components }}"
 
 - name: Run the sync registry process
-  include: plays/sync_registry.yaml
+  include_tasks: plays/sync_registry.yaml
   when: job_informations.job.topic.data.releasename >= 'pike'
