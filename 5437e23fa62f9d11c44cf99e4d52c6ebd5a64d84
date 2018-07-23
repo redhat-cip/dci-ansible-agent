@@ -1,0 +1,8 @@
+Code-Review+2: Yanis Guenane <yguenane@gmail.com>
+Workflow+1: Yanis Guenane <yguenane@gmail.com>
+Verified+2: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-by: Zuul CI <zuul@softwarefactory-project.io>
+Submitted-at: Mon, 23 Jul 2018 12:56:08 +0000
+Reviewed-on: https://softwarefactory-project.io/r/13138
+Project: dci-ansible-agent
+Branch: refs/heads/master
