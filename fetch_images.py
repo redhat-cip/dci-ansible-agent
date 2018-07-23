@@ -26,12 +26,8 @@ import yaml
 client = docker.from_env()
 
 DCI_REGISTRY = os.getenv('DCI_REGISTRY', 'registry.distributed-ci.io')
-DCI_REGISTRY_USER = os.getenv('DCI_REGISTRY_USER', 'unused')
+DCI_REGISTRY_USER = os.getenv('DCI_REGISTRY_USER')
 DCI_REGISTRY_PASSWORD = os.getenv('DCI_REGISTRY_PASSWORD')
-
-if DCI_REGISTRY_PASSWORD is None:
-    print('DCI_REGISTRY_PASSWORD env variables are required')
-    sys.exit(1)
 
 
 def login(username, password, registry):
@@ -109,7 +105,8 @@ def main():
         print('\nError: images_list.yaml path required\nusage: %s ./images_list.yaml' % sys.argv[0])
         sys.exit(1)
 
-    login(DCI_REGISTRY_USER, DCI_REGISTRY_PASSWORD, DCI_REGISTRY)
+    if DCI_REGISTRY_USER and DCI_REGISTRY_PASSWORD:
+        login(DCI_REGISTRY_USER, DCI_REGISTRY_PASSWORD, DCI_REGISTRY)
 
     docker_distribution_config = yaml.load(open('/etc/docker-distribution/registry/config.yml', 'r'))
 
