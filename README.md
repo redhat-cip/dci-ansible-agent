@@ -36,6 +36,9 @@ The "jumpbox" is the host where the agent is running. It can be a virtual
   - Should be able to reach:
     - The jumpbox via `http` (80) for yum repositories.
     - The jumpbox via `http` (5000) for docker registry.
+  - the Undercloud should be able to reach the floating-IP network. During
+    its run, Tempest will try to reach the VM IP on this range. If you don't
+    use the feature, the tests can be disabled.
 
 ## First steps
 
