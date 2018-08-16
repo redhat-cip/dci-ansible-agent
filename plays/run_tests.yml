@@ -6,17 +6,6 @@
     remoteci_data_tempest: "{{ remoteci_data['tempest']|default({}) }}"
 - set_fact:
     release: '{{ hostvars.localhost.job_informations.job.topic.data.releasename }}'
-    tempest_exit_on_failure: false
-    run_tempest: true
-    test_regex: ''
-    skip_file_src: "{{ remoteci_data_tempest['skip_file_src'] | default('') }}"
-    openstack_certification_output_format: junit
-    openstack_certification_output_filename: cert.junit
-    openstack_certification_dest_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
-    openstack_certification_results_download: true
-    openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
-    openstack_certification_tempest_conf_path_is_remote: Yes
-    openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
     skip_certification_role: '{{ skip_certification|default(false) }}'
 - set_fact:
     undercloud_ip: '{{ hostvars.localhost.undercloud_ip }}'
@@ -76,6 +65,10 @@
   include_role:
     name: "{{ release }}/validate-tempest"
   vars:
+    tempest_exit_on_failure: false
+    run_tempest: true
+    test_regex: ''
+    skip_file_src: "{{ remoteci_data_tempest['skip_file_src'] | default('') }}"
     tempest_plugins: >-
       {% if release >= 'newton' -%}
       [ "openstack-tempest-all" ]
@@ -111,6 +104,13 @@
         name: "openstack-certification"
       vars:
         openstack_certification_overcloud_node_ip: '{% if groups["overcloud"] is defined %}{{hostvars[groups["overcloud"][0]].inventory_ip}}{% else %}{% endif %}'
+        openstack_certification_output_format: junit
+        openstack_certification_output_filename: cert.junit
+        openstack_certification_dest_dir: "{{ lookup('env', 'HOME') }}/.quickstart"
+        openstack_certification_results_download: true
+        openstack_certification_tempest_conf_path: /home/stack/tempest/etc/tempest.conf
+        openstack_certification_tempest_conf_path_is_remote: Yes
+        openstack_certification_tests: "{{ remoteci_data_rhcert['tests']|default(['self_check', 'supportable', 'director']) }}"
   when:
     - not skip_certification_role|bool
     - release >= 'newton'
