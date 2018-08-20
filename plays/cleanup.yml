@@ -2,3 +2,4 @@
   file:
     name: "{{ lookup('env', 'HOME') }}/.quickstart"
     state: absent
+  delegate_to: undercloud
