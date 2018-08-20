@@ -167,7 +167,6 @@
           include_tasks: plays/collect_logs.yml
         - name: Run the upload logs process
           include_tasks: plays/upload_logs.yml
-          delegate_to: localhost
 
         - name: Run the teardown process
           include_tasks: "{{ dci_config_dir }}/hooks/teardown.yml"
@@ -175,7 +174,6 @@
 
         - name: Clean the files
           include_tasks: plays/cleanup.yml
-          delegate_to: localhost
 
         - name: Run the failure process
           include_tasks: plays/failure.yml
