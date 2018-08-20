@@ -8,6 +8,7 @@
     - {'name': 'Tempest', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/nosetests.xml", 'mime': 'application/junit'}
     - {'name': 'Certification', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/cert.junit", 'mime': 'application/junit'}
     - {'name': 'certification.xml.gz', 'path': "{{ lookup('env', 'HOME') }}/.quickstart/certification.xml.gz", 'mime': 'application/x-compressed'}
+  delegate_to: localhost
   ignore_errors: yes
 
 - name: Upload logs
@@ -19,4 +20,5 @@
   with_items:
     - 'undercloud'
     - '{{ groups.overcloud|default([]) }}'
+  delegate_to: localhost
   ignore_errors: yes
