@@ -3,9 +3,9 @@ Version:        0.0.VERS
 Release:        1%{?dist}
 Summary:        DCI Ansible Agent for DCI control server
 License:        ASL 2.0
-URL:            https://github.com/redhat-openstack/dci-ansible-agent
+URL:            https://github.com/redhat-openstack/dci-openstack-agent
 BuildArch:      noarch
-Source0:        dci-ansible-agent-%{version}.tar.gz
+Source0:        dci-openstack-agent-%{version}.tar.gz
 
 BuildRequires:  dci-ansible
 BuildRequires:  ansible

@@ -1,4 +1,4 @@
-# DCI Ansible Agent
+# DCI OpenStack Agent
 
 The "jumpbox" is the host where the agent is running. It can be a virtual
  machine.
